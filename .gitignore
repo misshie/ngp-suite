@@ -92,6 +92,7 @@ coverage.xml
 # ===================================================================
 backend/data/*
 backend/saved_models/*
+repomix-output.md
 
 # Allow tracking of the empty directories via .gitkeep
 !backend/data/.gitkeep

@@ -78,6 +78,7 @@
     "submit": "Submit",
     "save": "Save Changes",
     "clear": "Clear Result",
+    "reset": "Reset to Defaults",
     "ok": "OK"
   }
 }

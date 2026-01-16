@@ -165,5 +165,19 @@ export const useStore = defineStore('app', {
         password: newSettings.password,
       })
     },
+
+    resetSettings () {
+      // Clear localStorage
+      try {
+        localStorage.removeItem(SETTINGS_STORAGE_KEY)
+      } catch (error) {
+        console.warn('Failed to clear settings from localStorage:', error)
+      }
+      // Reset to default values
+      this.host = defaultSettings.host
+      this.port = defaultSettings.port
+      this.user = defaultSettings.user
+      this.password = defaultSettings.password
+    },
   },
 })

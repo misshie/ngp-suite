@@ -78,12 +78,50 @@ export interface AppSettings {
   password: string
 }
 
+// LocalStorage key for settings
+const SETTINGS_STORAGE_KEY = 'ngpsuite_settings'
+
+// Default settings
+const defaultSettings: AppSettings = {
+  host: 'https://localhost/',
+  port: '443',
+  user: 'your_username',
+  password: 'your_password',
+}
+
+// Load settings from localStorage
+function loadSettingsFromStorage (): AppSettings {
+  try {
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Merge with defaults to handle missing fields
+      return { ...defaultSettings, ...parsed }
+    }
+  } catch (error) {
+    console.warn('Failed to load settings from localStorage:', error)
+  }
+  return defaultSettings
+}
+
+// Save settings to localStorage
+function saveSettingsToStorage (settings: AppSettings): void {
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings))
+  } catch (error) {
+    console.warn('Failed to save settings to localStorage:', error)
+  }
+}
+
+// Load initial settings
+const initialSettings = loadSettingsFromStorage()
+
 export const useStore = defineStore('app', {
   state: () => ({
-    host: 'https://localhost/',
-    port: '443',
-    user: 'your_username',
-    password: 'your_password',
+    host: initialSettings.host,
+    port: initialSettings.port,
+    user: initialSettings.user,
+    password: initialSettings.password,
     locale: 'en-US',
     analysisResult: null as AnalysisResult | null,
     uploadedImage: null as string | null,
@@ -119,6 +157,13 @@ export const useStore = defineStore('app', {
       this.port = newSettings.port
       this.user = newSettings.user
       this.password = newSettings.password
+      // Save to localStorage
+      saveSettingsToStorage({
+        host: newSettings.host,
+        port: newSettings.port,
+        user: newSettings.user,
+        password: newSettings.password,
+      })
     },
   },
 })

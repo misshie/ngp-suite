@@ -42,7 +42,7 @@
     "title": "Paramètres",
     "subtitle": "Configurer les détails de connexion au serveur API.",
     "apiServer": "Serveur API",
-    "host": "URI de l'hôte",
+    "host": "URL de l'hôte",
     "port": "Port",
     "auth": "Authentification",
     "user": "Nom d'utilisateur",

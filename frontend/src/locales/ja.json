@@ -42,7 +42,7 @@
     "title": "設定",
     "subtitle": "APIサーバーの接続詳細を設定します。",
     "apiServer": "APIサーバー",
-    "host": "ホストURI",
+    "host": "ホストURL",
     "port": "ポート",
     "auth": "認証",
     "user": "ユーザー名",

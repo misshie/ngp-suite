@@ -42,7 +42,7 @@
     "title": "설정",
     "subtitle": "API 서버 연결 세부 정보 구성",
     "apiServer": "API 서버",
-    "host": "호스트 URI",
+    "host": "호스트 URL",
     "port": "포트",
     "auth": "인증",
     "user": "사용자 이름",

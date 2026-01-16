@@ -42,7 +42,7 @@
     "title": "Settings",
     "subtitle": "Configure API server connection details.",
     "apiServer": "API Server",
-    "host": "Host URI",
+    "host": "Host URL",
     "port": "Port",
     "auth": "Authentication",
     "user": "Username",

@@ -42,7 +42,7 @@
     "title": "Paramètres",
     "subtitle": "Configurer les détails de connexion au serveur API.",
     "apiServer": "Serveur API",
-    "host": "URI de l'hôte",
+    "host": "URL de l'hôte",
     "port": "Port",
     "auth": "Authentification",
     "user": "Nom d'utilisateur",
@@ -77,6 +77,7 @@
     "submit": "Envoyer",
     "save": "Enregistrer les modifications",
     "clear": "Effacer le résultat",
+    "reset": "Réinitialiser aux valeurs par défaut",
     "ok": "OK"
   }
 }

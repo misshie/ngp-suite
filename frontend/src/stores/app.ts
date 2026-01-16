@@ -76,15 +76,55 @@ export interface AppSettings {
   port: string
   user: string
   password: string
+  locale: string
 }
+
+// LocalStorage key for settings
+const SETTINGS_STORAGE_KEY = 'ngpsuite_settings'
+
+// Default settings
+const defaultSettings: AppSettings = {
+  host: 'https://localhost/',
+  port: '443',
+  user: 'your_username',
+  password: 'your_password',
+  locale: 'en-US',
+}
+
+// Load settings from localStorage
+function loadSettingsFromStorage (): AppSettings {
+  try {
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Merge with defaults to handle missing fields
+      return { ...defaultSettings, ...parsed }
+    }
+  } catch (error) {
+    console.warn('Failed to load settings from localStorage:', error)
+  }
+  return defaultSettings
+}
+
+// Save settings to localStorage
+function saveSettingsToStorage (settings: AppSettings): void {
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings))
+  } catch (error) {
+    console.warn('Failed to save settings to localStorage:', error)
+  }
+}
+
+// Load initial settings
+const initialSettings = loadSettingsFromStorage()
 
 export const useStore = defineStore('app', {
   state: () => ({
-    host: 'https://localhost/',
-    port: '443',
-    user: 'your_username',
-    password: 'your_password',
-    locale: 'en-US',
+    host: initialSettings.host,
+    port: initialSettings.port,
+    user: initialSettings.user,
+    password: initialSettings.password,
+    locale: initialSettings.locale,
     analysisResult: null as AnalysisResult | null,
     uploadedImage: null as string | null,
   }),
@@ -99,6 +139,12 @@ export const useStore = defineStore('app', {
   actions: {
     setLocale (newLocale: string) {
       this.locale = newLocale
+      // Save to localStorage (preserve other settings)
+      const currentSettings = loadSettingsFromStorage()
+      saveSettingsToStorage({
+        ...currentSettings,
+        locale: newLocale,
+      })
     },
 
     setUploadedImage (imageDataUrl: string) {
@@ -114,11 +160,35 @@ export const useStore = defineStore('app', {
       this.uploadedImage = null
     },
 
-    updateSettings (newSettings: AppSettings) {
+    updateSettings (newSettings: Omit<AppSettings, 'locale'>) {
       this.host = newSettings.host
       this.port = newSettings.port
       this.user = newSettings.user
       this.password = newSettings.password
+      // Save to localStorage (preserve locale setting)
+      const currentSettings = loadSettingsFromStorage()
+      saveSettingsToStorage({
+        host: newSettings.host,
+        port: newSettings.port,
+        user: newSettings.user,
+        password: newSettings.password,
+        locale: currentSettings.locale,
+      })
+    },
+
+    resetSettings () {
+      // Clear localStorage
+      try {
+        localStorage.removeItem(SETTINGS_STORAGE_KEY)
+      } catch (error) {
+        console.warn('Failed to clear settings from localStorage:', error)
+      }
+      // Reset to default values
+      this.host = defaultSettings.host
+      this.port = defaultSettings.port
+      this.user = defaultSettings.user
+      this.password = defaultSettings.password
+      this.locale = defaultSettings.locale
     },
   },
 })

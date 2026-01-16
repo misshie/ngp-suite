@@ -42,7 +42,7 @@
     "title": "設定",
     "subtitle": "設定API伺服器連線詳細資料。",
     "apiServer": "API伺服器",
-    "host": "主機URI",
+    "host": "主機URL",
     "port": "連接埠",
     "auth": "驗證",
     "user": "使用者名稱",
@@ -77,6 +77,7 @@
     "submit": "提交",
     "save": "儲存變更",
     "clear": "清除結果",
+    "reset": "重設為預設值",
     "ok": "確定"
   }
 }

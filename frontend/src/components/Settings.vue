@@ -45,6 +45,17 @@
     // Close the dialog after saving
     emit('update:modelValue', false)
   }
+
+  // This function is called when the "Reset" button is clicked.
+  // It resets settings to default values and clears localStorage.
+  function handleResetSettings () {
+    store.resetSettings()
+    // Update local refs to reflect the reset values
+    localHost.value = store.host
+    localPort.value = store.port
+    localUser.value = store.user
+    localPassword.value = store.password
+  }
 </script>
 
 <template>
@@ -102,6 +113,12 @@
       </v-card-text>
 
       <v-card-actions>
+        <v-btn
+          color="error"
+          :text="t('common.reset')"
+          variant="text"
+          @click="handleResetSettings"
+        />
         <v-spacer />
         <v-btn
           :text="t('common.cancel')"

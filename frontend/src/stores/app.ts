@@ -160,7 +160,7 @@ export const useStore = defineStore('app', {
       this.uploadedImage = null
     },
 
-    updateSettings (newSettings: AppSettings) {
+    updateSettings (newSettings: Omit<AppSettings, 'locale'>) {
       this.host = newSettings.host
       this.port = newSettings.port
       this.user = newSettings.user

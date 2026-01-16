@@ -76,6 +76,7 @@ export interface AppSettings {
   port: string
   user: string
   password: string
+  locale: string
 }
 
 // LocalStorage key for settings
@@ -87,6 +88,7 @@ const defaultSettings: AppSettings = {
   port: '443',
   user: 'your_username',
   password: 'your_password',
+  locale: 'en-US',
 }
 
 // Load settings from localStorage
@@ -122,7 +124,7 @@ export const useStore = defineStore('app', {
     port: initialSettings.port,
     user: initialSettings.user,
     password: initialSettings.password,
-    locale: 'en-US',
+    locale: initialSettings.locale,
     analysisResult: null as AnalysisResult | null,
     uploadedImage: null as string | null,
   }),
@@ -137,6 +139,12 @@ export const useStore = defineStore('app', {
   actions: {
     setLocale (newLocale: string) {
       this.locale = newLocale
+      // Save to localStorage (preserve other settings)
+      const currentSettings = loadSettingsFromStorage()
+      saveSettingsToStorage({
+        ...currentSettings,
+        locale: newLocale,
+      })
     },
 
     setUploadedImage (imageDataUrl: string) {
@@ -157,12 +165,14 @@ export const useStore = defineStore('app', {
       this.port = newSettings.port
       this.user = newSettings.user
       this.password = newSettings.password
-      // Save to localStorage
+      // Save to localStorage (preserve locale setting)
+      const currentSettings = loadSettingsFromStorage()
       saveSettingsToStorage({
         host: newSettings.host,
         port: newSettings.port,
         user: newSettings.user,
         password: newSettings.password,
+        locale: currentSettings.locale,
       })
     },
 
@@ -178,6 +188,7 @@ export const useStore = defineStore('app', {
       this.port = defaultSettings.port
       this.user = defaultSettings.user
       this.password = defaultSettings.password
+      this.locale = defaultSettings.locale
     },
   },
 })

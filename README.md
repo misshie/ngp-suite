@@ -8,10 +8,9 @@
 
 1. [Introduction](#introduction)
 2. [For End-Users (Installation & Usage)](#for-end-users-installation--usage)  
-3. [For Developers](#for-end-users-installation--usage)
-4. [Technology Stack](#for-end-users-installation--usage)
-5. [License](#for-end-users-installation--usage)
-6. [Technology Stack](#technology-stack)
+3. [For Developers](#for-developers)
+4. [Technology Stack](#technology-stack)
+5. [License](#license)
 7. [Acknowledgements](#acknowledgements)  
 8. [Author](#author)
 9. [References](#references)
@@ -61,7 +60,7 @@ Place the following files in the `backend/data/` directory:
 * `s1_glint360k_r50_512d_gmdb__v1.1.0_bs64_size112_channels3_last_model.pth` (model a)
 * `s2_glint360k_r100_512d_gmdb__v1.1.0_bs128_size112_channels3_last_model.pth` (model b)
 
-3. Anotations for the Gallery Encodings
+3. Annotations for the Gallery Encodings
 Place the following file in the `backend/data/gallery_encodings/` directory:
 * `GMDB_gallery_encodings_20082024_v1.1.0_service.pkl`
 
@@ -163,7 +162,7 @@ See the [LICENSE.md](LICENSE.md) file for full details.
 
 The backend service of this project is based on the work of
 [GestaltMatcher](https://www.gestaltmatcher.org/) with their [repository](https://github.com/igsb/GestaltMatcher-Arc/).
-The backend service utilizes the API of PubCaseFinder; see [detailed description](https://pubcasefinder.dbcls.jp/api). The authoe is grateful for their foundational contributions to the field.
+The backend service utilizes the API of PubCaseFinder; see [detailed description](https://pubcasefinder.dbcls.jp/api). The author is grateful for their foundational contributions to the field.
 
 We would like to thank all participants and organizers of the [DBCLS BioHackathon 2025](https://2025.biohackathon.org/) (September 14-20, 2025, Mie, Japan) for their valuable discussions and support, which contributed significantly to the development of this project.
 

@@ -1,0 +1,102 @@
+# ===================================================================
+# Cursor AI Allowlist Configuration
+# Files and directories listed here will be excluded from AI context
+# ===================================================================
+
+# ===================================================================
+# Backend Data and Models (Large files, user-provided content)
+# ===================================================================
+backend/data/*
+backend/saved_models/*
+
+# ===================================================================
+# Build Artifacts and Static Files
+# ===================================================================
+backend/static/*
+# Allow .gitkeep files if they exist
+!backend/static/.gitkeep
+
+# ===================================================================
+# Dependencies and Package Management
+# ===================================================================
+**/node_modules/
+frontend/node_modules/
+backend/.venv
+backend/venv
+backend/env
+backend/gm_env
+
+# ===================================================================
+# Build Output Directories
+# ===================================================================
+frontend/dist/
+frontend/build/
+backend/build/
+backend/dist/
+
+# ===================================================================
+# Cache and Temporary Files
+# ===================================================================
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.tsbuildinfo
+.cache/
+.pytest_cache/
+.mypy_cache/
+**/.coverage
+**/coverage.xml
+**/htmlcov/
+
+# ===================================================================
+# Git and Version Control
+# ===================================================================
+.git/
+.gitignore
+
+# ===================================================================
+# Log Files
+# ===================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===================================================================
+# Large Binary Files (Images, Archives, etc.)
+# These are already in gitignore, but also exclude from AI context
+# ===================================================================
+*.tar.gz
+*.zip
+*.tar
+
+# ===================================================================
+# Environment and Configuration Files (may contain secrets)
+# ===================================================================
+.env
+.env.local
+.env.*.local
+**/.env*
+
+# ===================================================================
+# Editor and IDE Files
+# ===================================================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===================================================================
+# OS Files
+# ===================================================================
+.DS_Store
+Thumbs.db
+
+# ===================================================================
+# Project-Specific Output
+# ===================================================================
+repomix-output.md

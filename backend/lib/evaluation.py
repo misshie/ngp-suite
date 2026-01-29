@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import math
 import torch
 import random
 import numpy as np
@@ -206,19 +207,74 @@ def print_format_output(results):
     print(f"Subject ids: {list(subject_ids)}")
 
 
-def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id=''):
+def get_pp4(synd, score):
+    output = ''
+    support = 'Not available yet'
+    for level in ['very_strong', 'strong', 'moderate', 'supporting']:
+        if level not in synd:
+            continue
+        else:
+            support = 'Yes'
+            if score >= synd[level]:
+                output = level
+                break
+    return (output, support)
+
+
+def safe_float(x):
+    if isinstance(x, float):
+        if math.isfinite(x):  # excludes inf and nan
+            return round(x, 6)
+        else:
+            return None
+    return x
+
+
+def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id='', synds_probabilities_dict=None):
     synd_ids = results[0][0]
     dists = results[1][0]
     img_ids = results[2][0]
 
     output_list = []
     for synd_id, dist, image_id in zip(synd_ids, dists, img_ids):
-        output = {'syndrome_name': synds_metadata_dict[int(synd_id)]['disorder_name'],
+        pp4_level, pp4_support = get_pp4(synds_metadata_dict[int(synd_id)], 1.3 - float(dist))
+        name = synds_metadata_dict[int(synd_id)]['disorder_name']
+        output = {'syndrome_name': name,
                   'omim_id': synds_metadata_dict[int(synd_id)]['omim_id'],
                   'distance': round(float(dist), 3),
-                  'gestalt_score': round(float(dist), 3),
+                  'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
+                  'ACMG_PP4': pp4_level,
+                  'ACMG_PP4_support': pp4_support,
                   'subject_id': str(images_dict[int(image_id)]['patient_id'])}
+
+        if synds_probabilities_dict is not None and name in synds_probabilities_dict and False:
+            params = synds_probabilities_dict[name]
+            intercept = float(params["(Intercept)"])
+            syn_score = float(params["syn_scores"])
+            v_00 = float(params["v_00"])
+            v_10 = float(params["v_10"])
+            v_11 = float(params["v_11"])
+            dist_f = float(dist)
+            pred = intercept + syn_score * dist_f
+            se = v_00 + 2 * v_10 * dist_f + v_11 * dist_f ** 2
+            prob = np.exp(pred) / (1 + np.exp(pred))
+            ci_lower_pred = pred - 1.96 * se
+            ci_upper_pred = pred + 1.96 * se
+            ci_lower = np.exp(ci_lower_pred) / (1 + np.exp(ci_lower_pred))
+            ci_upper = np.exp(ci_upper_pred) / (1 + np.exp(ci_upper_pred))
+            output.update({
+                "probability": safe_float(prob),
+                "ci_lower": safe_float(ci_lower),
+                "ci_upper": safe_float(ci_upper)
+            })
+        else:
+            output.update({
+                "probability": None,
+                "ci_lower": None,
+                "ci_upper": None
+            })
+
         output_list.append(output)
 
     return output_list
@@ -234,7 +290,7 @@ def format_gene_json(results, genes_metadata_dict, images_dict, case_id=''):
         output = {'gene_name': genes_metadata_dict[int(gene)]['gene_name'],
                   'gene_entrez_id': genes_metadata_dict[int(gene)]['gene_entrez_id'],
                   'distance': round(float(dist), 3),
-                  'gestalt_score': round(float(dist), 3),
+                  'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
                   'subject_id': str(images_dict[int(image_id)][0]['patient_id'])}
         output_list.append(output)
@@ -253,7 +309,7 @@ def format_subject_json(results, synds_metadata_dict, images_dict, case_id=''):
                   'gene_name': images_dict[int(image_id)][0]['gene_name'],
                   'gene_entrez_id': images_dict[int(image_id)][0]['gene_entrez_id'],
                   'distance': round(float(dist), 3),
-                  'gestalt_score': round(float(dist), 3),
+                  'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
                   'syndrome_name': images_dict[int(image_id)][0]['disorder_names'],
                   'omim_id': images_dict[int(image_id)][0]['omim_ids']
@@ -279,7 +335,7 @@ def get_gallery_encodings_set(images_synds_dict):
     return gallery_df
 
 
-def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_metadata, synds_metadata):
+def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_metadata, synds_metadata, synds_probabilities_dict=None):
     start_time = time.time()
     # Seed everything
     np.random.seed(1000)
@@ -298,9 +354,8 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
     else:
         n = int(args.top_n)
 
-    all_ranks = evaluate(_gallery_df, case_df, "all", threshold=0.4)
-    # do we need np array?
-    #all_ranks = np.array(all_ranks)
+    all_ranks = evaluate(_gallery_df, case_df, "all", threshold=0.3)
+    all_ranks = np.array(all_ranks)
 
     evaluate_finished_time = time.time()
 
@@ -321,7 +376,7 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
 
     case_id = 1
 
-    synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id)
+    synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id, synds_probabilities_dict)
     gene_output_list = format_gene_json(first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
     subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
 

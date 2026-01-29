@@ -1,4 +1,5 @@
 import base64
+import csv
 import pickle
 import secrets
 import time
@@ -24,6 +25,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 security = HTTPBasic()
+
+# Loaded at startup: syndrome name -> {"(Intercept)": str, "syn_scores": str}
+_synds_probabilities_dict = {}
 
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
@@ -54,6 +58,24 @@ def get_current_username(
     return credentials.username
 
 
+def _load_synds_probabilities_dict():
+    path = os.path.join("data", "transformation_probabilities_07052025.csv")
+    if not os.path.isfile(path):
+        return {}
+    out = {}
+    with open(path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            name = row.get("name") or row.get("disorder_id")
+            if name is None and row:
+                name = list(row.keys())[0]
+                name = row.get(name)
+            if not name:
+                continue
+            out[name] = {k: v for k, v in row.items() if k != "name" and k != "disorder_id" and v != ""}
+    return out
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _models
@@ -64,10 +86,12 @@ async def lifespan(app: FastAPI):
     global _images_genes_dict
     global _genes_metadata_dict
     global _synds_metadata_dict
+    global _synds_probabilities_dict
     _models = get_models()
     _cropper_model, _device = load_cropper_model()
-    # Load synd dict
-    with open(os.path.join("data", "image_gene_and_syndrome_metadata_20082024.p"), "rb") as f:
+    _synds_probabilities_dict = _load_synds_probabilities_dict()
+    # Load synd dict (v1.1.2 metadata)
+    with open(os.path.join("data", "image_gene_and_syndrome_metadata_pp4_19112025_v112.p"), "rb") as f:
         data = pickle.load(f)
     _images_synds_dict = data["disorder_level_metadata"]
     _images_genes_dict = data["gene_level_metadata"]
@@ -132,7 +156,8 @@ async def predict_endpoint(username: Annotated[str, Depends(get_current_username
                                       _images_synds_dict,
                                       _images_genes_dict,
                                       _genes_metadata_dict,
-                                      _synds_metadata_dict)
+                                      _synds_metadata_dict,
+                                      _synds_probabilities_dict)
 
         # Step 2: If HPO IDs are provided, query PubCaseFinder
         if hpo_ids:

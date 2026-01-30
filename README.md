@@ -22,6 +22,7 @@
   <img src="./assets/ngpsuite-ss2.png" width="30%" alt="NGPsuite screenshot 2" />
   <img src="./assets/ngpsuite-ss3.png" width="30%" alt="NGPsuite screenshot 3" />
 </p>
+<p align="center"><em>Reference: Cuscó et al., BMC Med Genet 2008, doi:10.1186/1471-2350-9-27, licensed under CC BY 2.0</em></p>
 
 ----
 ## **Introduction**

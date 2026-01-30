@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref, shallowRef } from 'vue'
+  import { provide, ref, shallowRef } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { useRouter } from 'vue-router'
   import { useStore } from '@/stores/app'
@@ -40,6 +40,11 @@
     // 2. Update the Pinia store for reactive computations (like in Results.vue)
     store.setLocale(newLocaleCode)
   }
+
+  function openAnalysis () {
+    isAnalysisOpen.value = true
+  }
+  provide('openAnalysis', openAnalysis)
 
 </script>
 

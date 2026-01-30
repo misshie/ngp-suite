@@ -1,4 +1,5 @@
 # Developer documentation
 
 Design and implementation notes for NGPsuite.  
-Currently written in Japanese. English translations may be added when needed.
+We actively add memos and notes in Japanese under `docs/`.  
+English translations may be added when needed.

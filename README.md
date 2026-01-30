@@ -16,6 +16,14 @@
 9. [References](#references)
 
 ----
+
+<p align="center">
+  <img src="./assets/ngpsuite-ss1.png" width="30%" alt="NGPsuite screenshot 1" />
+  <img src="./assets/ngpsuite-ss2.png" width="30%" alt="NGPsuite screenshot 2" />
+  <img src="./assets/ngpsuite-ss3.png" width="30%" alt="NGPsuite screenshot 3" />
+</p>
+
+----
 ## **Introduction**
 
 **NGPsuite** is a web-based application designed to support the diagnosis of rare diseases.

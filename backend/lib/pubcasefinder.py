@@ -13,14 +13,14 @@ def _fetch_ranked_list(hpo_ids: List[str]) -> List[Dict[str, Any]]:
         'format': 'json',
         'hpo_id': ','.join(hpo_ids)
     }
-    response = requests.get(PCF_RANKED_LIST_API_URL, params=params, timeout=30)
+    response = requests.get(PCF_RANKED_LIST_API_URL, params=params, timeout=90)
     response.raise_for_status()
     return response.json()
 
 def _fetch_hpo_names(hpo_ids: List[str]) -> Dict[str, Any]:
     """Fetches HPO term names from PubCaseFinder."""
     params = {'hpo_id': ','.join(hpo_ids)}
-    response = requests.get(PCF_HPO_DATA_API_URL, params=params, timeout=30)
+    response = requests.get(PCF_HPO_DATA_API_URL, params=params, timeout=90)
     response.raise_for_status()
     return response.json()
 

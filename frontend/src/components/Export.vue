@@ -128,6 +128,26 @@
     emit('update:modelValue', false)
   }
 
+  /**
+   * Exports the full analysis result as a JSON file.
+   */
+  function exportAsJSON () {
+    if (!store.analysisResult) return
+
+    const jsonString = JSON.stringify(store.analysisResult, null, 2)
+    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', 'ngpsuite_analysis_result.json')
+    link.style.visibility = 'hidden'
+    document.body.append(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+    emit('update:modelValue', false)
+  }
+
 </script>
 
 <template>
@@ -181,6 +201,20 @@
           @click="exportAsTSV"
         >
           {{ t('exportDialog.tsv.button') }}
+        </v-btn>
+
+        <v-divider class="my-6" />
+
+        <!-- JSON Export Section -->
+        <p class="text-overline">{{ t('exportDialog.json.title') }}</p>
+        <p class="text-body-2 mb-4">{{ t('exportDialog.json.description') }}</p>
+        <v-btn
+          block
+          color="primary"
+          prepend-icon="mdi-code-json"
+          @click="exportAsJSON"
+        >
+          {{ t('exportDialog.json.button') }}
         </v-btn>
 
       </v-card-text>

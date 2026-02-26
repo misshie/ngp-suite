@@ -62,6 +62,11 @@
       "description": "Esporta una singola tabella di risultati come file .tsv.",
       "label": "Seleziona il set di dati da esportare",
       "button": "Esporta Selezionato come TSV"
+    },
+    "json": {
+      "title": "Formato JSON",
+      "description": "Esporta il risultato completo dell'analisi come file .json.",
+      "button": "Esporta come JSON"
     }
   },
   "aboutDialog": {

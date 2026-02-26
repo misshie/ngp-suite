@@ -62,6 +62,11 @@
       "description": "単一の結果テーブルを.tsvファイルとしてエクスポートします。",
       "label": "エクスポートするデータセットを選択",
       "button": "選択した項目をTSVとしてエクスポート"
+    },
+    "json": {
+      "title": "JSON形式",
+      "description": "解析結果全体を.jsonファイルとしてエクスポートします。",
+      "button": "JSONとしてエクスポート"
     }
   },
   "aboutDialog": {

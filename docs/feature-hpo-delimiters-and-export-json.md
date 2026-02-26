@@ -55,7 +55,22 @@ Upload Analysis File ダイアログの「Input comma-separated HPO IDs」で、
 
 ---
 
-## 2. Export JSON（別節で記載予定）
+## 2. Export JSON（実装済み）
 
-- Export Results で JSON 形式の出力を追加する。
-- 詳細は後で追記。
+### 目的
+Export Results ダイアログで **JSON 形式**の出力をサポートする。
+
+### 実装内容
+
+- **Export.vue**
+  - `exportAsJSON()`: `store.analysisResult` を `JSON.stringify(..., null, 2)` で整形し、`ngpsuite_analysis_result.json` としてダウンロード。
+  - ダイアログに「JSON Format」セクションを追加（タイトル・説明・ボタン）。
+- **ロケール（全 10 言語）**
+  - `exportDialog.json.title` / `exportDialog.json.description` / `exportDialog.json.button` を追加。
+
+### 変更ファイル
+
+| ファイル | 内容 |
+|----------|------|
+| `frontend/src/components/Export.vue` | `exportAsJSON()`、JSON セクション UI |
+| `frontend/src/locales/*.json`（10 ファイル） | `exportDialog.json` ブロック |

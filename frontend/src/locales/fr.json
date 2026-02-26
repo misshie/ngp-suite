@@ -62,6 +62,11 @@
       "description": "Exporter une seule table de résultats en tant que fichier .tsv.",
       "label": "Sélectionner le jeu de données à exporter",
       "button": "Exporter la sélection en TSV"
+    },
+    "json": {
+      "title": "Format JSON",
+      "description": "Exporter le résultat complet de l'analyse en fichier .json.",
+      "button": "Exporter en JSON"
     }
   },
   "aboutDialog": {

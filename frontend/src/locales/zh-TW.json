@@ -62,6 +62,11 @@
       "description": "將單一結果表匯出為.tsv檔案。",
       "label": "選擇要匯出的資料集",
       "button": "將所選項目匯出為TSV"
+    },
+    "json": {
+      "title": "JSON 格式",
+      "description": "將完整分析結果匯出為 .json 檔案。",
+      "button": "匯出為 JSON"
     }
   },
   "aboutDialog": {

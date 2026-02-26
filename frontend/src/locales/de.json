@@ -13,6 +13,8 @@
   },
   "analysisDialog": {
     "title": "Analysedatei hochladen",
+    "inputHpoIdsLabel": "HPO-IDs eingeben (durch Komma/Leerzeichen getrennt)",
+    "inputHpoIdsHint": "Sie können außerdem Semikolons, Tabs und Zeilenumbrüche als Trennzeichen verwenden.",
     "labelIdle": "Datei hierher ziehen oder <span class='filepond--label-action'> durchsuchen </span>",
     "status": {
       "noFile": "Keine Datei ausgewählt.",
@@ -61,6 +63,11 @@
       "description": "Eine einzelne Ergebnistabelle als .tsv-Datei exportieren.",
       "label": "Zu exportierenden Datensatz auswählen",
       "button": "Auswahl als TSV exportieren"
+    },
+    "json": {
+      "title": "JSON-Format",
+      "description": "Das vollständige Analyseergebnis als .json-Datei exportieren.",
+      "button": "Als JSON exportieren"
     }
   },
   "aboutDialog": {

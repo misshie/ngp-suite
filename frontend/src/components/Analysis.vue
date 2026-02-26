@@ -104,9 +104,9 @@
       }
 
       if (useHpo.value && hpoIds.value) {
-        // Split by comma, trim whitespace, and filter out empty strings
+        // Split by comma, semicolon, tab, or space (including newline), trim, filter empty
         payload.hpo_ids = hpoIds.value
-          .split(',')
+          .split(/[,;\s]+/)
           .map(id => id.trim())
           .filter(Boolean)
       }
@@ -176,13 +176,16 @@
               v-model="hpoIds"
               auto-grow
               clearable
-              label="Input comma-separated HPO IDs"
+              :label="t('analysisDialog.inputHpoIdsLabel')"
               rows="2"
             >
               <template #append-inner>
                 <v-btn size="small" variant="tonal" @click="setExampleHpos"> Example </v-btn>
               </template>
             </v-textarea>
+            <p class="text-caption text-medium-emphasis mt-1">
+              {{ t('analysisDialog.inputHpoIdsHint') }}
+            </p>
           </div>
         </v-expand-transition>
       </v-card-text>

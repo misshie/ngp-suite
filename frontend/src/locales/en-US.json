@@ -13,6 +13,8 @@
   },
   "analysisDialog": {
     "title": "Upload Analysis File",
+    "inputHpoIdsLabel": "Input HPO IDs (comma/space separated)",
+    "inputHpoIdsHint": "You can also use semicolons, tabs, and newlines as separators.",
     "labelIdle": "Drag & Drop your file here or <span class='filepond--label-action'> Browse </span>",
     "status": {
       "noFile": "No file selected.",
@@ -61,6 +63,11 @@
       "description": "Export a single result table as a .tsv file.",
       "label": "Select dataset to export",
       "button": "Export Selected as TSV"
+    },
+    "json": {
+      "title": "JSON Format",
+      "description": "Export the full analysis result as a .json file.",
+      "button": "Export as JSON"
     }
   },
   "aboutDialog": {

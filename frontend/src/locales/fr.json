@@ -13,6 +13,8 @@
   },
   "analysisDialog": {
     "title": "Télécharger le fichier d'analyse",
+    "inputHpoIdsLabel": "Saisir les ID HPO (séparés par virgule/espace)",
+    "inputHpoIdsHint": "Vous pouvez aussi utiliser des points-virgules, des tabulations et des retours à la ligne comme séparateurs.",
     "labelIdle": "Glissez-déposez votre fichier ici ou <span class='filepond--label-action'> Parcourir </span>",
     "status": {
       "noFile": "Aucun fichier sélectionné.",
@@ -61,6 +63,11 @@
       "description": "Exporter une seule table de résultats en tant que fichier .tsv.",
       "label": "Sélectionner le jeu de données à exporter",
       "button": "Exporter la sélection en TSV"
+    },
+    "json": {
+      "title": "Format JSON",
+      "description": "Exporter le résultat complet de l'analyse en fichier .json.",
+      "button": "Exporter en JSON"
     }
   },
   "aboutDialog": {

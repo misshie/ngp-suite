@@ -13,6 +13,8 @@
   },
   "analysisDialog": {
     "title": "解析ファイルをアップロード",
+    "inputHpoIdsLabel": "HPO ID を入力（カンマ・空白区切り）",
+    "inputHpoIdsHint": "セミコロン、タブ、改行も区切りとして使用できます。",
     "labelIdle": "ここにファイルをドラッグ＆ドロップするか、<span class='filepond--label-action'>参照</span>してください",
     "status": {
       "noFile": "ファイルが選択されていません。",
@@ -61,6 +63,11 @@
       "description": "単一の結果テーブルを.tsvファイルとしてエクスポートします。",
       "label": "エクスポートするデータセットを選択",
       "button": "選択した項目をTSVとしてエクスポート"
+    },
+    "json": {
+      "title": "JSON形式",
+      "description": "解析結果全体を.jsonファイルとしてエクスポートします。",
+      "button": "JSONとしてエクスポート"
     }
   },
   "aboutDialog": {

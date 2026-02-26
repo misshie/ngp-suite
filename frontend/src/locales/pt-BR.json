@@ -13,6 +13,8 @@
   },
   "analysisDialog": {
     "title": "Carregar Arquivo de Análise",
+    "inputHpoIdsLabel": "Digite os IDs HPO (separados por vírgula/espaço)",
+    "inputHpoIdsHint": "Você também pode usar ponto e vírgula, tabulações e quebras de linha como separadores.",
     "labelIdle": "Arraste e solte seu arquivo aqui ou <span class='filepond--label-action'> Navegue </span>",
     "status": {
       "noFile": "Nenhum arquivo selecionado.",
@@ -61,6 +63,11 @@
       "description": "Exporte uma única tabela de resultados como um arquivo .tsv.",
       "label": "Selecione o conjunto de dados para exportar",
       "button": "Exportar Selecionado como TSV"
+    },
+    "json": {
+      "title": "Formato JSON",
+      "description": "Exporte o resultado completo da análise como um arquivo .json.",
+      "button": "Exportar como JSON"
     }
   },
   "aboutDialog": {

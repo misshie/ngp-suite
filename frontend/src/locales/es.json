@@ -13,6 +13,8 @@
   },
   "analysisDialog": {
     "title": "Subir archivo de análisis",
+    "inputHpoIdsLabel": "Introduzca los ID de HPO (separados por coma/espacio)",
+    "inputHpoIdsHint": "También puede usar punto y coma, tabuladores y saltos de línea como separadores.",
     "labelIdle": "Arrastre y suelte su archivo aquí o <span class='filepond--label-action'> busque </span>",
     "status": {
       "noFile": "No se ha seleccionado ningún archivo.",
@@ -61,6 +63,11 @@
       "description": "Exporte una única tabla de resultados como un archivo .tsv.",
       "label": "Seleccione el conjunto de datos a exportar",
       "button": "Exportar selección como TSV"
+    },
+    "json": {
+      "title": "Formato JSON",
+      "description": "Exportar el resultado completo del análisis como archivo .json.",
+      "button": "Exportar como JSON"
     }
   },
   "aboutDialog": {

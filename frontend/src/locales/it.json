@@ -13,6 +13,7 @@
   },
   "analysisDialog": {
     "title": "Carica File di Analisi",
+    "inputHpoIdsLabel": "Inserisci gli ID HPO (separati da virgola, punto e virgola, tabulazione o spazio)",
     "labelIdle": "Trascina e rilascia il tuo file qui o <span class='filepond--label-action'> Sfoglia </span>",
     "status": {
       "noFile": "Nessun file selezionato.",

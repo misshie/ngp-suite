@@ -13,6 +13,7 @@
   },
   "analysisDialog": {
     "title": "Upload Analysis File",
+    "inputHpoIdsLabel": "Input HPO IDs (comma, semicolon, tab, or space separated)",
     "labelIdle": "Drag & Drop your file here or <span class='filepond--label-action'> Browse </span>",
     "status": {
       "noFile": "No file selected.",

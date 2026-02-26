@@ -13,6 +13,7 @@
   },
   "analysisDialog": {
     "title": "Analysedatei hochladen",
+    "inputHpoIdsLabel": "HPO-IDs eingeben (durch Komma, Semikolon, Tab oder Leerzeichen getrennt)",
     "labelIdle": "Datei hierher ziehen oder <span class='filepond--label-action'> durchsuchen </span>",
     "status": {
       "noFile": "Keine Datei ausgewählt.",

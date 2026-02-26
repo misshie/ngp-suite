@@ -13,6 +13,7 @@
   },
   "analysisDialog": {
     "title": "Subir archivo de análisis",
+    "inputHpoIdsLabel": "Introduzca los ID de HPO (separados por coma, punto y coma, tabulador o espacio)",
     "labelIdle": "Arrastre y suelte su archivo aquí o <span class='filepond--label-action'> busque </span>",
     "status": {
       "noFile": "No se ha seleccionado ningún archivo.",

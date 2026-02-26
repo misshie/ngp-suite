@@ -13,7 +13,8 @@
   },
   "analysisDialog": {
     "title": "Télécharger le fichier d'analyse",
-    "inputHpoIdsLabel": "Saisir les ID HPO (séparés par une virgule, un point-virgule, une tabulation ou un espace)",
+    "inputHpoIdsLabel": "Saisir les ID HPO (séparés par virgule/espace)",
+    "inputHpoIdsHint": "Vous pouvez aussi utiliser des points-virgules, des tabulations et des retours à la ligne comme séparateurs.",
     "labelIdle": "Glissez-déposez votre fichier ici ou <span class='filepond--label-action'> Parcourir </span>",
     "status": {
       "noFile": "Aucun fichier sélectionné.",

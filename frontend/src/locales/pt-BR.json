@@ -13,7 +13,8 @@
   },
   "analysisDialog": {
     "title": "Carregar Arquivo de Análise",
-    "inputHpoIdsLabel": "Digite os IDs HPO (separados por vírgula, ponto e vírgula, tabulação ou espaço)",
+    "inputHpoIdsLabel": "Digite os IDs HPO (separados por vírgula/espaço)",
+    "inputHpoIdsHint": "Você também pode usar ponto e vírgula, tabulações e quebras de linha como separadores.",
     "labelIdle": "Arraste e solte seu arquivo aqui ou <span class='filepond--label-action'> Navegue </span>",
     "status": {
       "noFile": "Nenhum arquivo selecionado.",

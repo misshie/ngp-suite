@@ -13,7 +13,8 @@
   },
   "analysisDialog": {
     "title": "Upload Analysis File",
-    "inputHpoIdsLabel": "Input HPO IDs (comma, semicolon, tab, or space separated)",
+    "inputHpoIdsLabel": "Input HPO IDs (comma/space separated)",
+    "inputHpoIdsHint": "You can also use semicolons, tabs, and newlines as separators.",
     "labelIdle": "Drag & Drop your file here or <span class='filepond--label-action'> Browse </span>",
     "status": {
       "noFile": "No file selected.",

@@ -183,6 +183,9 @@
                 <v-btn size="small" variant="tonal" @click="setExampleHpos"> Example </v-btn>
               </template>
             </v-textarea>
+            <p class="text-caption text-medium-emphasis mt-1">
+              {{ t('analysisDialog.inputHpoIdsHint') }}
+            </p>
           </div>
         </v-expand-transition>
       </v-card-text>

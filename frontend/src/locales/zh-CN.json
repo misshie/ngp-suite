@@ -13,7 +13,8 @@
   },
   "analysisDialog": {
     "title": "上传分析文件",
-    "inputHpoIdsLabel": "输入 HPO ID（用逗号、分号、制表符或空格分隔）",
+    "inputHpoIdsLabel": "输入 HPO ID（以逗号/空格分隔）",
+    "inputHpoIdsHint": "还可以使用分号、制表符和换行符作为分隔符。",
     "labelIdle": "将文件拖放到此处或 <span class='filepond--label-action'> 浏览 </span>",
     "status": {
       "noFile": "未选择文件。",

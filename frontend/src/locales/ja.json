@@ -13,7 +13,8 @@
   },
   "analysisDialog": {
     "title": "解析ファイルをアップロード",
-    "inputHpoIdsLabel": "HPO ID を入力（カンマ・セミコロン・タブ・スペースのいずれかで区切り）",
+    "inputHpoIdsLabel": "HPO ID を入力（カンマ・空白区切り）",
+    "inputHpoIdsHint": "セミコロン、タブ、改行も区切りとして使用できます。",
     "labelIdle": "ここにファイルをドラッグ＆ドロップするか、<span class='filepond--label-action'>参照</span>してください",
     "status": {
       "noFile": "ファイルが選択されていません。",

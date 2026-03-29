@@ -4,7 +4,7 @@ services:
     build:
       context: . # Use the Dockerfile in the project root
     container_name: ngpsuite-api
-    expose
+    expose:
       - "5000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
@@ -13,3 +13,22 @@ services:
       retries: 3
       start_period: 90s
 
+  # 2. Nginx reverse proxy service
+  nginx:
+    build:
+      context: ./nginx
+    container_name: ngpsuite-proxy
+    ports:
+      - "443:443"
+    volumes:
+      - nginx_certs:/etc/ssl
+    depends_on:
+      api:
+        condition: service_healthy
+    # --- Add the following command to explicitly run the script and then nginx ---
+    command: >
+      sh -c "/docker-entrypoint.d/confirm-startup.sh && nginx -g 'daemon off;'"
+
+# Define the named volume for persisting certificates
+volumes:
+  nginx_certs:

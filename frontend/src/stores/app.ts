@@ -19,6 +19,8 @@ interface SyndromeEntry {
   image_id: string
   subject_id: string
   score: number | null
+  ACMG_PP4?: string
+  ACMG_PP4_support?: string
   gm_rank?: number
   pubcasefinder_rank?: number
   pubcasefinder_score?: number

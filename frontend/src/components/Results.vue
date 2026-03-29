@@ -47,6 +47,8 @@
     { title: 'PCF Rank', key: 'pubcasefinder_rank', align: 'end' },
     { title: 'Syndrome Name', key: 'syndrome_name', align: 'start' },
     { title: 'OMIM ID', key: 'omim_id', align: 'start' },
+    { title: 'GM Score', key: 'gm_score', align: 'end' },
+    { title: 'ACMG PP4', key: 'ACMG_PP4', align: 'start' },
     { title: 'GM Distance', key: 'distance', align: 'end' },
     { title: 'GM Match', key: 'score', align: 'center', sortable: false },
     { title: 'PCF Score', key: 'pubcasefinder_score', align: 'end' },
@@ -85,8 +87,16 @@
     })
   })
 
+  const GM_SCORE_OFFSET = 1.3
+
   const geneItems = computed(() => store.analysisResult?.suggested_genes_list || [])
   const syndromeItems = computed(() => store.analysisResult?.suggested_syndromes_list || [])
+  const syndromeTableItems = computed(() =>
+    syndromeItems.value.map(item => ({
+      ...item,
+      gm_score: typeof item.distance === 'number' ? GM_SCORE_OFFSET - item.distance : undefined,
+    })),
+  )
   const patientItems = computed(() => store.analysisResult?.suggested_patients_list || [])
 
   watch(
@@ -119,6 +129,7 @@
     meta_rank: rankSort,
     gm_rank: rankSort,
     pubcasefinder_rank: rankSort,
+    gm_score: rankSort,
   }
 </script>
 
@@ -192,10 +203,12 @@
               density="compact"
               :headers="syndromeHeaders"
               item-value="syndrome_name"
-              :items="syndromeItems"
+              :items="syndromeTableItems"
               :search="syndromeSearch"
               :sort-by="[{ key: 'gm_rank', order: 'asc' }]"
             >
+              <template #item.gm_score="{ item }">{{ formatScore(item.gm_score) }}</template>
+              <template #item.ACMG_PP4="{ item }">{{ item.ACMG_PP4 ?? '-' }}</template>
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
               <template #item.omim_id="{ item }"><a

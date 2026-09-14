@@ -3,6 +3,9 @@ services:
   api:
     build:
       context: . # Use the Dockerfile in the project root
+      args:
+        # Default 0 = CPU-only PyTorch. Set USE_CUDA=1 for CUDA-enabled wheels.
+        USE_CUDA: ${USE_CUDA:-0}
     container_name: ngpsuite-api
     expose:
       - "5000"

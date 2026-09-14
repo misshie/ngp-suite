@@ -109,6 +109,37 @@ sudo docker compose up -d     # without `-d`, you can watch logs on console.
 
 The initial startup may take about 90 seconds as the API service loads the models.
 
+#### **GPU / CUDA note**
+
+The Docker deployment of NGPsuite (Web API) runs on **CPU**. It does **not** use a GPU for inference, even if one is present on the host. End users do not need CUDA, NVIDIA drivers, or any GPU-related setup.
+
+<details>
+<summary><strong>For developers: optional CUDA-enabled image build</strong></summary>
+
+By default, the API image installs **CPU-only** PyTorch (smaller image, no NVIDIA package dependencies).
+
+If you intentionally want a CUDA-enabled PyTorch install inside the image (for experiments or future GPU work), build with:
+
+```
+cd backend
+sudo docker compose build --build-arg USE_CUDA=1
+# or:
+# USE_CUDA=1 sudo docker compose build
+```
+
+Notes:
+
+* This only changes which PyTorch wheels are installed. The current Web API still runs inference on CPU unless the application code is changed to use CUDA.
+* The CUDA build is larger, slower, and needs more disk space during `pip install`.
+* Using a GPU at runtime additionally requires NVIDIA drivers and the NVIDIA Container Toolkit on the host; that is separate from this build flag.
+
+Requirements files:
+
+* `backend/requirements_docker.txt` — shared deps for the default (CPU) build; PyTorch is installed from the official CPU wheel index in the Dockerfile
+* `backend/requirements_docker_cuda.txt` — same deps plus `torch` for the CUDA opt-in build
+
+</details>
+
 ### **4. Access the Application**
 
 Once the startup process is complete, open your web browser and navigate to:  

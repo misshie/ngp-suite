@@ -2,9 +2,20 @@ FROM python:3.10
 
 WORKDIR /app
 
-COPY requirements_docker.txt .
+# Default: CPU-only PyTorch. Set USE_CUDA=1 to install CUDA-enabled PyTorch instead.
+ARG USE_CUDA=0
 
-RUN pip install -r requirements_docker.txt
+COPY requirements_docker.txt requirements_docker_cuda.txt ./
+
+RUN if [ "$USE_CUDA" = "1" ]; then \
+      echo "Installing CUDA-enabled PyTorch and dependencies..."; \
+      pip install --no-cache-dir -r requirements_docker_cuda.txt; \
+    else \
+      echo "Installing CPU-only PyTorch and dependencies..."; \
+      pip install --no-cache-dir torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu; \
+      pip install --no-cache-dir -r requirements_docker.txt; \
+    fi
+
 COPY saved_models/Resnet50_Final.pth ./saved_models/Resnet50_Final.pth
 COPY saved_models/glint360k_r100.onnx ./saved_models/glint360k_r100.onnx
 COPY saved_models/s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth ./saved_models/s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth

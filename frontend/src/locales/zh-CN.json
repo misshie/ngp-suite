@@ -2,7 +2,7 @@
   "appTitle": "NGPsuite",
   "nav": {
     "analysis": "分析",
-    "export": "导出结果",
+    "export": "导出",
     "settings": "设置",
     "about": "关于"
   },
@@ -51,7 +51,7 @@
     "password": "密码"
   },
   "exportDialog": {
-    "title": "导出结果",
+    "title": "导出",
     "subtitle": "选择您喜欢的导出格式。",
     "excel": {
       "title": "Excel格式",

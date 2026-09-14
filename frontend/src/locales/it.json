@@ -2,7 +2,7 @@
   "appTitle": "NGPsuite",
   "nav": {
     "analysis": "Analisi",
-    "export": "Esporta Risultati",
+    "export": "Esporta",
     "settings": "Impostazioni",
     "about": "Informazioni"
   },
@@ -51,7 +51,7 @@
     "password": "Password"
   },
   "exportDialog": {
-    "title": "Esporta Risultati",
+    "title": "Esporta",
     "subtitle": "Scegli il tuo formato di esportazione preferito.",
     "excel": {
       "title": "Formato Excel",

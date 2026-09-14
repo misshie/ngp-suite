@@ -123,8 +123,8 @@ If you intentionally want a CUDA-enabled PyTorch install inside the image (for e
 ```
 cd backend
 sudo docker compose build --build-arg USE_CUDA=1
-# or:
-# USE_CUDA=1 sudo docker compose build
+# optional: also rebuild without cache
+# sudo docker compose build --no-cache --build-arg USE_CUDA=1
 ```
 
 Notes:

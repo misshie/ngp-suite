@@ -135,8 +135,10 @@ Notes:
 
 Requirements files:
 
-* `backend/requirements_docker.txt` — shared deps for the default (CPU) build; PyTorch is installed from the official CPU wheel index in the Dockerfile
+* `backend/requirements_docker.txt` — shared deps for the default (CPU) build; PyTorch / torchvision are installed from the official CPU wheel index in the Dockerfile
 * `backend/requirements_docker_cuda.txt` — same deps plus `torch` for the CUDA opt-in build
+
+The Dockerfile pins `torch==2.3.1` and `torchvision==0.18.1` with a pip constraints file so other packages cannot upgrade them to a CUDA build from PyPI.
 
 </details>
 

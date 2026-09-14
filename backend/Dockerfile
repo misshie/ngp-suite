@@ -7,13 +7,21 @@ ARG USE_CUDA=0
 
 COPY requirements_docker.txt requirements_docker_cuda.txt ./
 
-RUN if [ "$USE_CUDA" = "1" ]; then \
+# Pin torch/torchvision so later deps (e.g. onnx2torch -> torchvision) cannot
+# replace a CPU wheel with a newer CUDA build from PyPI.
+RUN printf 'torch==2.3.1\ntorchvision==0.18.1\n' > /tmp/torch-constraints.txt; \
+    if [ "$USE_CUDA" = "1" ]; then \
       echo "Installing CUDA-enabled PyTorch and dependencies..."; \
-      pip install --no-cache-dir -r requirements_docker_cuda.txt; \
+      pip install --no-cache-dir torch==2.3.1 torchvision==0.18.1; \
+      pip install --no-cache-dir -r requirements_docker_cuda.txt \
+        -c /tmp/torch-constraints.txt; \
     else \
       echo "Installing CPU-only PyTorch and dependencies..."; \
-      pip install --no-cache-dir torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu; \
-      pip install --no-cache-dir -r requirements_docker.txt; \
+      pip install --no-cache-dir torch==2.3.1 torchvision==0.18.1 \
+        --index-url https://download.pytorch.org/whl/cpu; \
+      pip install --no-cache-dir -r requirements_docker.txt \
+        -c /tmp/torch-constraints.txt \
+        --extra-index-url https://download.pytorch.org/whl/cpu; \
     fi
 
 COPY saved_models/Resnet50_Final.pth ./saved_models/Resnet50_Final.pth

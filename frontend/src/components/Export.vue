@@ -196,7 +196,7 @@
         <v-btn
           block
           class="mt-2"
-          color="secondary"
+          color="success"
           prepend-icon="mdi-file-delimited"
           @click="exportAsTSV"
         >
@@ -210,7 +210,7 @@
         <p class="text-body-2 mb-4">{{ t('exportDialog.json.description') }}</p>
         <v-btn
           block
-          color="primary"
+          color="success"
           prepend-icon="mdi-code-json"
           @click="exportAsJSON"
         >

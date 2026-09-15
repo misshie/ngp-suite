@@ -4,7 +4,8 @@
     "analysis": "解析",
     "export": "書き出し",
     "settings": "設定",
-    "about": "情報"
+    "about": "情報",
+    "galleryAdd": "ギャラリー追加"
   },
   "startPage": {
     "welcome": "ようこそ",
@@ -48,7 +49,10 @@
     "port": "ポート",
     "auth": "認証",
     "user": "ユーザー名",
-    "password": "パスワード"
+    "password": "パスワード",
+    "experimental": "実験的機能",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "有効にすると、ナビゲーションに実験的機能（例: ギャラリー追加）が表示されます。"
   },
   "exportDialog": {
     "title": "書き出し",
@@ -86,5 +90,25 @@
     "clear": "結果をクリア",
     "reset": "デフォルトにリセット",
     "ok": "OK"
+  },
+  "galleryAddDialog": {
+    "title": "ギャラリー追加",
+    "subtitle": "特徴ベクトルと手入力メタデータをJSONで書き出します（実験的）。",
+    "experimentalNotice": "実験的機能です。研究用途向け。顔画像は含まれません。スキーマは変更されることがあります。",
+    "metadataTitle": "メタデータ",
+    "metadataDescription": "JSON書き出しに含める任意のメタデータを入力してください。",
+    "fields": {
+      "imageId": "画像ID",
+      "patientId": "患者ID",
+      "disorderName": "疾患名",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "遺伝子名",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "メモ"
+    },
+    "vectorsTitle": "特徴ベクトル",
+    "vectorsDescription": "モデル／ギャラリー版、メタデータ、モデル m0–m2 の512次元ベクトルを含むJSONをダウンロードします。",
+    "button": "Gallery Add JSONをダウンロード"
   }
 }

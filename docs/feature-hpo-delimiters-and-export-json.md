@@ -35,7 +35,7 @@ Upload Analysis File ダイアログの「Input comma-separated HPO IDs」で、
 #### C. バックエンド
 
 - API は `hpo_ids: string[]` を受け取るだけなので**変更不要**。
-- （任意）`backend/pingpong_client.py` の `args.hpo.split(',')` を同様に `re.split(r'[,;\s]+', args.hpo)` などにすると、CLI でも同じ区切りが使える。
+- （任意）`backend/ngpsuite_client.py` の `args.hpo.split(',')` を同様に `re.split(r'[,;\s]+', args.hpo)` などにすると、CLI でも同じ区切りが使える。
 
 ### 変更ファイル一覧（HPO 区切り）
 

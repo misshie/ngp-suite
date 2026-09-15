@@ -40,6 +40,13 @@
     },
     "pubcasefinder": {
       "$ref": "#/$defs/pubCaseFinderResult"
+    },
+    "feature_vectors": {
+      "type": "array",
+      "description": "Optional experimental GestaltMatcher-Arc feature vectors (one entry per model, typically 512-dim).",
+      "items": {
+        "$ref": "#/$defs/featureVectorEntry"
+      }
     }
   },
   "required": [
@@ -50,6 +57,19 @@
     "suggested_patients_list"
   ],
   "$defs": {
+    "featureVectorEntry": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string", "description": "Model identifier, e.g. m0, m1, m2." },
+        "dim": { "type": "integer", "description": "Feature vector dimensionality." },
+        "representations": {
+          "type": "array",
+          "description": "Feature vector values.",
+          "items": { "type": "number" }
+        }
+      },
+      "required": ["model", "dim", "representations"]
+    },
     "geneEntry": {
       "type": "object",
       "properties": {

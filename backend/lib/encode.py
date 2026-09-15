@@ -63,6 +63,25 @@ def encode(models, device, img, flip_flag=True, gray_flag=True):
     return result
 
 
+def encoding_to_feature_vectors(encoding_df):
+    """Convert encode() DataFrame rows into a JSON-serializable feature vector list.
+
+    Expects one row per model (no TTA). Returns items ordered m0, m1, m2, ...
+    """
+    vectors = []
+    for model_name in sorted(encoding_df["model"].unique()):
+        row = encoding_df[encoding_df["model"] == model_name].iloc[0]
+        repr_list = row["repr"]
+        if hasattr(repr_list, "tolist"):
+            repr_list = repr_list.tolist()
+        vectors.append({
+            "model": str(model_name),
+            "dim": len(repr_list),
+            "representations": [float(x) for x in repr_list],
+        })
+    return vectors
+
+
 def get_models():
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")

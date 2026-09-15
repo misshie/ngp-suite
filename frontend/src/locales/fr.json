@@ -4,7 +4,8 @@
     "analysis": "Analyse",
     "export": "Exporter",
     "settings": "Paramètres",
-    "about": "À propos"
+    "about": "À propos",
+    "galleryAdd": "Gallery Add"
   },
   "startPage": {
     "welcome": "Bienvenue sur",
@@ -48,7 +49,10 @@
     "port": "Port",
     "auth": "Authentification",
     "user": "Nom d'utilisateur",
-    "password": "Mot de passe"
+    "password": "Mot de passe",
+    "experimental": "Experimental",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "When enabled, additional experimental features appear in the navigation (e.g. Gallery Add)."
   },
   "exportDialog": {
     "title": "Exporter",
@@ -86,5 +90,25 @@
     "clear": "Effacer le résultat",
     "reset": "Réinitialiser aux valeurs par défaut",
     "ok": "OK"
+  },
+  "galleryAddDialog": {
+    "title": "Gallery Add",
+    "subtitle": "Export feature vectors with hand-entered metadata (experimental).",
+    "experimentalNotice": "Experimental. For research use. Does not include face images. Schema may change.",
+    "metadataTitle": "Metadata",
+    "metadataDescription": "Enter optional metadata to include in the JSON export.",
+    "fields": {
+      "imageId": "Image ID",
+      "patientId": "Patient ID",
+      "disorderName": "Disorder name",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "Gene name",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "Notes"
+    },
+    "vectorsTitle": "Feature vectors",
+    "vectorsDescription": "Downloads a JSON file with model/gallery versions, metadata, and 512-dim vectors for models m0–m2.",
+    "button": "Download Gallery Add JSON"
   }
 }

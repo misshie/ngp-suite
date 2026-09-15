@@ -4,7 +4,8 @@
     "analysis": "분석",
     "export": "내보내기",
     "settings": "설정",
-    "about": "정보"
+    "about": "정보",
+    "galleryAdd": "Gallery Add"
   },
   "startPage": {
     "welcome": "다음에 오신 것을 환영합니다",
@@ -48,7 +49,10 @@
     "port": "포트",
     "auth": "인증",
     "user": "사용자 이름",
-    "password": "비밀번호"
+    "password": "비밀번호",
+    "experimental": "Experimental",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "When enabled, additional experimental features appear in the navigation (e.g. Gallery Add)."
   },
   "exportDialog": {
     "title": "내보내기",
@@ -86,5 +90,25 @@
     "clear": "결과 지우기",
     "reset": "기본값으로 재설정",
     "ok": "확인"
+  },
+  "galleryAddDialog": {
+    "title": "Gallery Add",
+    "subtitle": "Export feature vectors with hand-entered metadata (experimental).",
+    "experimentalNotice": "Experimental. For research use. Does not include face images. Schema may change.",
+    "metadataTitle": "Metadata",
+    "metadataDescription": "Enter optional metadata to include in the JSON export.",
+    "fields": {
+      "imageId": "Image ID",
+      "patientId": "Patient ID",
+      "disorderName": "Disorder name",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "Gene name",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "Notes"
+    },
+    "vectorsTitle": "Feature vectors",
+    "vectorsDescription": "Downloads a JSON file with model/gallery versions, metadata, and 512-dim vectors for models m0–m2.",
+    "button": "Download Gallery Add JSON"
   }
 }

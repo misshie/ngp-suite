@@ -4,7 +4,8 @@
     "analysis": "分析",
     "export": "匯出",
     "settings": "設定",
-    "about": "關於"
+    "about": "關於",
+    "galleryAdd": "Gallery Add"
   },
   "startPage": {
     "welcome": "歡迎來到",
@@ -48,7 +49,10 @@
     "port": "連接埠",
     "auth": "驗證",
     "user": "使用者名稱",
-    "password": "密碼"
+    "password": "密碼",
+    "experimental": "Experimental",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "When enabled, additional experimental features appear in the navigation (e.g. Gallery Add)."
   },
   "exportDialog": {
     "title": "匯出",
@@ -86,5 +90,25 @@
     "clear": "清除結果",
     "reset": "重設為預設值",
     "ok": "確定"
+  },
+  "galleryAddDialog": {
+    "title": "Gallery Add",
+    "subtitle": "Export feature vectors with hand-entered metadata (experimental).",
+    "experimentalNotice": "Experimental. For research use. Does not include face images. Schema may change.",
+    "metadataTitle": "Metadata",
+    "metadataDescription": "Enter optional metadata to include in the JSON export.",
+    "fields": {
+      "imageId": "Image ID",
+      "patientId": "Patient ID",
+      "disorderName": "Disorder name",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "Gene name",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "Notes"
+    },
+    "vectorsTitle": "Feature vectors",
+    "vectorsDescription": "Downloads a JSON file with model/gallery versions, metadata, and 512-dim vectors for models m0–m2.",
+    "button": "Download Gallery Add JSON"
   }
 }

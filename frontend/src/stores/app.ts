@@ -61,6 +61,12 @@ interface PubCaseFinderResult {
   hpo_names: HpoNames
 }
 
+export interface FeatureVectorEntry {
+  model: string
+  dim: number
+  representations: number[]
+}
+
 export interface AnalysisResult {
   model_version: string
   gallery_version: string
@@ -71,6 +77,8 @@ export interface AnalysisResult {
   queried_hpo_ids?: string[]
   // The structured result from pubcasefinder.py
   pubcasefinder?: PubCaseFinderResult
+  // Experimental: 3x512 feature vectors from GestaltMatcher-Arc
+  feature_vectors?: FeatureVectorEntry[]
 }
 
 export interface AppSettings {
@@ -79,6 +87,7 @@ export interface AppSettings {
   user: string
   password: string
   locale: string
+  experimentalFunctions: boolean
 }
 
 // LocalStorage key for settings
@@ -91,6 +100,7 @@ const defaultSettings: AppSettings = {
   user: 'your_username',
   password: 'your_password',
   locale: 'en-US',
+  experimentalFunctions: false,
 }
 
 // Load settings from localStorage
@@ -105,7 +115,7 @@ function loadSettingsFromStorage (): AppSettings {
   } catch (error) {
     console.warn('Failed to load settings from localStorage:', error)
   }
-  return defaultSettings
+  return { ...defaultSettings }
 }
 
 // Save settings to localStorage
@@ -127,6 +137,7 @@ export const useStore = defineStore('app', {
     user: initialSettings.user,
     password: initialSettings.password,
     locale: initialSettings.locale,
+    experimentalFunctions: initialSettings.experimentalFunctions,
     analysisResult: null as AnalysisResult | null,
     uploadedImage: null as string | null,
   }),
@@ -167,6 +178,7 @@ export const useStore = defineStore('app', {
       this.port = newSettings.port
       this.user = newSettings.user
       this.password = newSettings.password
+      this.experimentalFunctions = newSettings.experimentalFunctions
       // Save to localStorage (preserve locale setting)
       const currentSettings = loadSettingsFromStorage()
       saveSettingsToStorage({
@@ -174,6 +186,7 @@ export const useStore = defineStore('app', {
         port: newSettings.port,
         user: newSettings.user,
         password: newSettings.password,
+        experimentalFunctions: newSettings.experimentalFunctions,
         locale: currentSettings.locale,
       })
     },
@@ -191,6 +204,7 @@ export const useStore = defineStore('app', {
       this.user = defaultSettings.user
       this.password = defaultSettings.password
       this.locale = defaultSettings.locale
+      this.experimentalFunctions = defaultSettings.experimentalFunctions
     },
   },
 })

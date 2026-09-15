@@ -73,7 +73,7 @@
       XLSX.utils.book_append_sheet(wb, ws, 'Patients')
     }
 
-    XLSX.writeFile(wb, 'piNGPong_tables_results.xlsx')
+    XLSX.writeFile(wb, 'ngpsuite_results.xlsx')
     emit('update:modelValue', false)
   }
 

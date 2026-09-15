@@ -12,6 +12,7 @@ declare module 'vue' {
     Analysis: typeof import('./components/Analysis.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     Export: typeof import('./components/Export.vue')['default']
+    GalleryAdd: typeof import('./components/GalleryAdd.vue')['default']
     Results: typeof import('./components/Results.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

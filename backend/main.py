@@ -168,7 +168,11 @@ async def predict_endpoint(username: Annotated[str, Depends(get_current_username
         else:
             final_result = gestaltmatcher_result
 
-        final_result["feature_vectors"] = encoding_to_feature_vectors(encoding)
+        try:
+            final_result["feature_vectors"] = encoding_to_feature_vectors(encoding)
+        except Exception as e:
+            # Non-fatal: analysis results should still be returned for Gallery Add opt-in export.
+            print(f"Feature vector extraction error: {e}")
 
     except Exception as e:
         print(f"Evaluation or combination error: {e}")

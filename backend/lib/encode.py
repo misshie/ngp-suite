@@ -67,11 +67,12 @@ def encoding_to_feature_vectors(encoding_df):
     """Convert encode() DataFrame rows into a JSON-serializable feature vector list.
 
     Expects one row per model (no TTA). Returns items ordered m0, m1, m2, ...
+    Column name matches encode(): "representations".
     """
     vectors = []
     for model_name in sorted(encoding_df["model"].unique()):
         row = encoding_df[encoding_df["model"] == model_name].iloc[0]
-        repr_list = row["repr"]
+        repr_list = row["representations"]
         if hasattr(repr_list, "tolist"):
             repr_list = repr_list.tolist()
         vectors.append({

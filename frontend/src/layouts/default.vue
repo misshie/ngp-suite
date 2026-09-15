@@ -107,7 +107,7 @@
         width="80"
         @click="isGalleryAddOpen = true"
       >
-        <v-icon>mdi-library-plus</v-icon>
+        <v-icon>mdi-image-plus</v-icon>
         <span class="text-caption">{{ t('nav.galleryAdd') }}</span>
       </v-btn>
 

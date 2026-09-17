@@ -242,6 +242,7 @@ def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id='', 
         pp4_level, pp4_support = get_pp4(synd, 1.3 - float(dist))
         name = synd['syndrome_name']
         output = {'syndrome_name': name,
+                  'syndrome_labels': synd.get('syndrome_labels') or {'en': name},
                   'omim_id': synd['omim_id'],
                   'mondo_id': synd['mondo_id'],
                   'mondo_parents': synd['mondo_parents'],
@@ -309,21 +310,24 @@ def format_gene_json(results, genes_metadata_dict, images_dict, case_id=''):
     return output_list
 
 
-def format_subject_json(results, synds_metadata_dict, images_dict, case_id=''):
+def format_subject_json(results, images_genes_dict, images_synds_dict, case_id=''):
     subjects = results[0][0][:100]
     dists = results[1][0][:100]
     img_ids = results[2][0][:100]
 
     output_list = []
     for subject, dist, image_id in zip(subjects, dists, img_ids):
+        gene_row = images_genes_dict[int(image_id)][0]
+        synd_row = images_synds_dict.get(int(image_id), {})
         output = {'subject_id': subject,
-                  'gene_name': images_dict[int(image_id)][0]['gene_name'],
-                  'gene_entrez_id': images_dict[int(image_id)][0]['gene_entrez_id'],
+                  'gene_name': gene_row['gene_name'],
+                  'gene_entrez_id': gene_row['gene_entrez_id'],
                   'distance': round(float(dist), 3),
                   'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
-                  'syndrome_name': images_dict[int(image_id)][0]['disorder_names'],
-                  'omim_id': images_dict[int(image_id)][0]['omim_ids']
+                  'syndrome_name': gene_row['disorder_names'],
+                  'omim_id': gene_row['omim_ids'],
+                  'mondo_id': sorted(synd_row.get('mondo_id') or []),
         }
         output_list.append(output)
 
@@ -389,7 +393,7 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
 
     synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id, synds_probabilities_dict)
     gene_output_list = format_gene_json(first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
-    subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
+    subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], images_genes_dict, images_synds_dict, case_id)
 
     output_finished_time = time.time()
 

@@ -41,9 +41,11 @@ OBO を gzip 透過で読み、`{mondo_id: {"name", "parents"}}` を構築する
 
 - `load_mondo_index(path)` — `is_obsolete: true` のスタンザは完全にスキップする。廃止用語も
   旧来の xref を保持しているため、残すと後継の現行用語を覆い隠す
-- `resolve(index, mondo_id)` — ラベル、親、祖父母を返す。祖父母は親の親を集合化し、自身と
+- `resolve(index, mondo_id)` — ラベル、`labels`（言語コード → 表示名）、親、祖父母を返す。祖父母は親の親を集合化し、自身と
   親集合を除外した上で MONDO ID 昇順に並べる。MONDO は多重継承を許すため、除外しないと
   同じ用語が親と祖父母の両方に現れる
+- 翻訳は `property_value: skos:altLabel "ウィリアムズ症候群@ja" xsd:string` から取る。`synonym` 行の `{language="…"}` も読め
+  るようにしてあるが、現行リリースでは使われていない
 - `build_syndrome_index(metadata, mondo_index)` — ギャラリーを症候群候補に展開する。
   各候補は安定した文字列キーを持ち、MONDO があれば `MONDO:0008678`、無ければ
   `GMDB:<disorder_internal_id>` になる
@@ -166,5 +168,12 @@ gm_rank 11）が PubCaseFinder rank 3 と組み合わさって meta_rank 4 に�
 - **MONDO には非ヒト疾患の用語が含まれる。** 遺伝子経由の解決で稀に
   `dwarfism, GON4L-related, cattle` のような用語が候補に出る。除外するならフェーズ1の
   マッピング側で対処するのが筋
-- **患者タブは OMIM 表示のまま。** `numeric_omim_id` / `phenotypic_series_id` を使い続けている。
-  `image_id` 経由で MONDO を引くことは可能なので、将来の拡張候補
+- **患者タブの Syndrome Name は GMDB 側の表記のまま。** MONDO ID 列は nearest image の
+  `mondo_id` 配列を縦積みする。行複製はしない
+
+## 結果テーブルの表示改善（2026-09-17 追記）
+
+- バージョン行は `Model Version: …, Gallery Version: …` を右寄せ1行にした
+- Syndromes / Genes / Patients それぞれ独立の Columns メニュー。PP4 は初期 off。HPO が無い解析では Meta Rank と PCF 3列も初期 off。切替は解析結果ごとにデフォルトへ戻し、localStorage には残さない
+- MONDO 病名は OBO の `skos:altLabel "…@ja"` を `labels` に載せ、フロントがロケールの primary subtag で選ぶ。無ければ英語。現状 58,517 語中 26,551 語に日本語がある
+- Patients に MONDO ID 列を追加（`string[]`）

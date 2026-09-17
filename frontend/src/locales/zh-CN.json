@@ -39,6 +39,7 @@
       "syndromes": "搜索综合征",
       "patients": "搜索患者"
     },
+    "columns": "列",
     "mondo": {
       "geneDerived": "源自基因",
       "geneDerivedHint": "该疾病由基因符号推定，而非 OMIM ID"

@@ -39,6 +39,7 @@
       "syndromes": "Cerca Sindromi",
       "patients": "Cerca Pazienti"
     },
+    "columns": "Colonne",
     "mondo": {
       "geneDerived": "derivato dal gene",
       "geneDerivedHint": "Malattia dedotta dal simbolo del gene, non da un ID OMIM"

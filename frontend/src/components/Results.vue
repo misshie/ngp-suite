@@ -3,17 +3,21 @@
   import { computed, inject, ref, watch } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { useStore } from '@/stores/app'
+  import { syndromeLabel } from '@/utils/mondoLabel'
 
   const { t } = useI18n()
   const store = useStore()
   const openExport = inject<() => void>('openExport')
 
-  const tab = ref('Syndromes')
+  type TabKey = 'Syndromes' | 'Genes' | 'Patients'
+
+  const tab = ref<TabKey>('Syndromes')
   const geneSearch = ref('')
   const syndromeSearch = ref('')
   const patientSearch = ref('')
 
   type ReadonlyHeaders = VDataTable['$props']['headers']
+  type Header = NonNullable<ReadonlyHeaders>[number]
   type TableSortItem = {
     key: string
     order?: 'asc' | 'desc' | boolean
@@ -21,9 +25,11 @@
 
   const syndromeSortBy = ref<TableSortItem[]>([{ key: 'gm_rank', order: 'asc' }])
 
+  const PCF_COLUMN_KEYS = new Set(['meta_rank', 'pubcasefinder_rank', 'pubcasefinder_score', 'pcf_match_visual'])
+
   const tabs = computed(() => {
     if (!store.analysisResult) return []
-    const availableTabs: { key: string, labelKey: string, count: number }[] = []
+    const availableTabs: { key: TabKey, labelKey: string, count: number }[] = []
     if (store.analysisResult.suggested_syndromes_list?.length) {
       availableTabs.push({ key: 'Syndromes', labelKey: 'resultsPage.tabs.syndromes', count: store.analysisResult.suggested_syndromes_list.length })
     }
@@ -36,7 +42,7 @@
     return availableTabs
   })
 
-  const geneHeaders = computed((): ReadonlyHeaders => [
+  const geneHeadersAll = computed((): Header[] => [
     { title: 'Meta Rank', key: 'meta_rank', align: 'end' },
     { title: 'GM Rank', key: 'gm_rank', align: 'end' },
     { title: 'PCF Rank', key: 'pubcasefinder_rank', align: 'end' },
@@ -48,7 +54,7 @@
     { title: 'PCF Match', key: 'pcf_match_visual', align: 'center', sortable: false },
   ])
 
-  const syndromeHeaders = computed((): ReadonlyHeaders => [
+  const syndromeHeadersAll = computed((): Header[] => [
     { title: 'Meta Rank', key: 'meta_rank', align: 'end' },
     { title: 'GM Rank', key: 'gm_rank', align: 'end' },
     { title: 'PCF Rank', key: 'pubcasefinder_rank', align: 'end' },
@@ -65,12 +71,13 @@
     { title: 'PCF Match', key: 'pcf_match_visual', align: 'center', sortable: false },
   ])
 
-  const patientHeaders = computed((): ReadonlyHeaders => [
+  const patientHeadersAll = computed((): Header[] => [
     { title: 'Meta Rank', key: 'meta_rank', align: 'end' },
     { title: 'GM Rank', key: 'gm_rank', align: 'end' },
     { title: 'PCF Rank', key: 'pubcasefinder_rank', align: 'end' },
     { title: 'GM Patient ID', key: 'subject_id', align: 'start' },
     { title: 'Syndrome Name', key: 'syndrome_name', align: 'start' },
+    { title: 'MONDO ID', key: 'mondo_id', align: 'start', sortable: false },
     { title: 'OMIM ID', key: 'numeric_omim_id', align: 'start' },
     { title: 'Phenotypic Series', key: 'phenotypic_series_id', align: 'start' },
     { title: 'GM Distance', key: 'distance', align: 'end' },
@@ -78,6 +85,58 @@
     { title: 'PCF Score', key: 'pubcasefinder_score', align: 'end' },
     { title: 'PCF Match', key: 'pcf_match_visual', align: 'center', sortable: false },
   ])
+
+  const headersByTab = computed((): Record<TabKey, Header[]> => ({
+    Syndromes: syndromeHeadersAll.value,
+    Genes: geneHeadersAll.value,
+    Patients: patientHeadersAll.value,
+  }))
+
+  const columnVisibility = ref<Record<TabKey, Record<string, boolean>>>({
+    Syndromes: {},
+    Genes: {},
+    Patients: {},
+  })
+
+  function hasHpo (result: typeof store.analysisResult) {
+    return Boolean(result?.queried_hpo_ids?.length)
+  }
+
+  function defaultVisibility (headers: Header[], tabKey: TabKey, withHpo: boolean) {
+    const visible: Record<string, boolean> = {}
+    for (const header of headers) {
+      const key = header.key as string
+      if (tabKey === 'Syndromes' && key === 'ACMG_PP4') {
+        visible[key] = false
+      } else if (!withHpo && PCF_COLUMN_KEYS.has(key)) {
+        visible[key] = false
+      } else {
+        visible[key] = true
+      }
+    }
+    return visible
+  }
+
+  function applyColumnDefaults () {
+    const withHpo = hasHpo(store.analysisResult)
+    columnVisibility.value = {
+      Syndromes: defaultVisibility(syndromeHeadersAll.value, 'Syndromes', withHpo),
+      Genes: defaultVisibility(geneHeadersAll.value, 'Genes', withHpo),
+      Patients: defaultVisibility(patientHeadersAll.value, 'Patients', withHpo),
+    }
+  }
+
+  function setColumnVisible (key: string, value: boolean | null) {
+    columnVisibility.value[tab.value] = {
+      ...columnVisibility.value[tab.value],
+      [key]: Boolean(value),
+    }
+  }
+
+  const currentTabHeaders = computed(() => headersByTab.value[tab.value] || [])
+  const geneHeaders = computed(() => geneHeadersAll.value.filter(h => columnVisibility.value.Genes[h.key as string] !== false))
+  const syndromeHeaders = computed(() => syndromeHeadersAll.value.filter(h => columnVisibility.value.Syndromes[h.key as string] !== false))
+  const patientHeaders = computed(() => patientHeadersAll.value.filter(h => columnVisibility.value.Patients[h.key as string] !== false))
 
   const hpoQueryList = computed(() => {
     const result = store.analysisResult
@@ -112,6 +171,9 @@
   watch(
     () => store.analysisResult,
     newResult => {
+      if (newResult) {
+        applyColumnDefaults()
+      }
       if (newResult && tabs.value.length > 0) {
         const currentTabExists = tabs.value.some(t => t.key === tab.value)
         if (!tab.value || !currentTabExists) {
@@ -228,9 +290,8 @@
 
     <!-- Main Results Card -->
     <v-card>
-      <v-card-text class="d-flex justify-space-between text-caption py-2">
-        <span>Model Version: {{ store.analysisResult?.model_version }}</span>
-        <span>Gallery Version: {{ store.analysisResult?.gallery_version }}</span>
+      <v-card-text class="d-flex justify-end text-caption py-2">
+        <span>{{ t('resultsPage.modelVersion') }}: {{ store.analysisResult?.model_version }}, {{ t('resultsPage.galleryVersion') }}: {{ store.analysisResult?.gallery_version }}</span>
       </v-card-text>
       <v-divider />
 
@@ -240,6 +301,31 @@
             {{ t(item.labelKey) }} ({{ item.count }})
           </v-tab>
         </v-tabs>
+        <v-menu :close-on-content-click="false">
+          <template #activator="{ props }">
+            <v-btn
+              class="text-none me-2"
+              color="surface"
+              prepend-icon="mdi-table-column"
+              size="small"
+              v-bind="props"
+              variant="flat"
+            >
+              {{ t('resultsPage.columns') }}
+            </v-btn>
+          </template>
+          <v-list density="compact" max-height="420" style="overflow-y: auto">
+            <v-list-item v-for="header in currentTabHeaders" :key="String(header.key)">
+              <v-checkbox
+                density="compact"
+                hide-details
+                :label="String(header.title)"
+                :model-value="columnVisibility[tab][header.key as string] !== false"
+                @update:model-value="setColumnVisible(header.key as string, $event)"
+              />
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-btn
           class="text-none me-2"
           color="surface"
@@ -277,7 +363,7 @@
               :search="syndromeSearch"
             >
               <template #item.syndrome_name="{ item }">
-                {{ item.syndrome_name }}
+                {{ syndromeLabel(item, store.locale) }}
                 <v-chip
                   v-if="item.mondo_source === 'gene'"
                   class="ml-1"
@@ -386,6 +472,7 @@
             >
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
+              <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" /></template>
               <template #item.numeric_omim_id="{ item }"><a
                 v-if="item.numeric_omim_id"
                 class="text-decoration-none"

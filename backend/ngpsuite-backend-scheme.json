@@ -89,7 +89,12 @@
       "type": "object",
       "properties": {
         "id": { "type": "string", "pattern": "^MONDO:[0-9]{7}$" },
-        "name": { "type": "string" }
+        "name": { "type": "string", "description": "English label." },
+        "labels": {
+          "type": "object",
+          "description": "Language code to display name. Always includes en; ja when MONDO has skos:altLabel @ja.",
+          "additionalProperties": { "type": "string" }
+        }
       },
       "required": ["id", "name"]
     },
@@ -98,7 +103,12 @@
       "properties": {
         "syndrome_name": {
           "type": "string",
-          "description": "MONDO label, or the GMDB disorder name when the disorder has no MONDO term."
+          "description": "English MONDO label, or the GMDB disorder name when the disorder has no MONDO term."
+        },
+        "syndrome_labels": {
+          "type": "object",
+          "description": "Language code to display name for syndrome_name. Always includes en.",
+          "additionalProperties": { "type": "string" }
         },
         "omim_id": {
           "type": ["integer", "string", "null"],
@@ -135,7 +145,7 @@
         "mean_rank": { "type": ["number", "null"] },
         "meta_rank": { "type": "integer" }
       },
-      "required": ["syndrome_name", "omim_id", "mondo_id", "mondo_parents", "mondo_grandparents", "mondo_source", "distance", "image_id", "subject_id", "score", "gm_rank", "meta_rank"]
+      "required": ["syndrome_name", "syndrome_labels", "omim_id", "mondo_id", "mondo_parents", "mondo_grandparents", "mondo_source", "distance", "image_id", "subject_id", "score", "gm_rank", "meta_rank"]
     },
     "patientEntry": {
       "type": "object",
@@ -154,9 +164,14 @@
         "mean_rank": { "type": ["number", "null"] },
         "meta_rank": { "type": "integer" },
         "numeric_omim_id": { "type": ["integer", "null"] },
-        "phenotypic_series_id": { "type": ["string", "null"] }
+        "phenotypic_series_id": { "type": ["string", "null"] },
+        "mondo_id": {
+          "type": "array",
+          "description": "MONDO IDs of the nearest gallery image, sorted. Empty when the image has no MONDO term.",
+          "items": { "type": "string", "pattern": "^MONDO:[0-9]{7}$" }
+        }
       },
-      "required": ["subject_id", "gene_name", "gene_entrez_id", "distance", "image_id", "syndrome_name", "omim_id", "score", "gm_rank", "meta_rank"]
+      "required": ["subject_id", "gene_name", "gene_entrez_id", "distance", "image_id", "syndrome_name", "omim_id", "mondo_id", "score", "gm_rank", "meta_rank"]
     },
     "pubCaseFinderResult": {
       "type": "object",

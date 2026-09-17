@@ -15,10 +15,12 @@ interface GeneEntry {
 export interface MondoTerm {
   id: string
   name: string
+  labels?: Record<string, string>
 }
 
 interface SyndromeEntry {
   syndrome_name: string
+  syndrome_labels?: Record<string, string>
   omim_id: number
   mondo_id: string | null
   mondo_parents: MondoTerm[]
@@ -53,6 +55,7 @@ interface PatientEntry {
   meta_rank?: number
   numeric_omim_id?: number | null
   phenotypic_series_id?: string | null
+  mondo_id?: string[]
 }
 
 interface HpoNameEntry {

@@ -6,9 +6,15 @@ are resolved here at startup from the OBO release shipped in ``data/``.
 
 import gzip
 import io
-from typing import Any, Dict, List, Optional
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
 MondoIndex = Dict[str, Dict[str, Any]]
+
+SYN_RE = re.compile(r'^synonym: "([^"]+)"(.*)$')
+LANG_RE = re.compile(r'language="([a-zA-Z-]+)"')
+# MONDO international stores translations as: property_value: skos:altLabel "ウィリアムズ症候群@ja" xsd:string
+ALT_LABEL_RE = re.compile(r'^property_value: skos:altLabel "(.+)@([a-zA-Z-]+)"')
 
 
 def _open_text(path: str) -> io.TextIOBase:
@@ -17,22 +23,45 @@ def _open_text(path: str) -> io.TextIOBase:
     return open(path, "r", encoding="utf-8")
 
 
+def _pick_label(candidates: List[Tuple[bool, str]]) -> str:
+    """Prefer the first EXACT synonym, otherwise the first synonym of that language."""
+    for exact, text in candidates:
+        if exact:
+            return text
+    return candidates[0][1]
+
+
 def load_mondo_index(path: str) -> MondoIndex:
-    """Parse an OBO file into ``{mondo_id: {"name": str, "parents": [mondo_id]}}``.
+    """Parse an OBO file into ``{mondo_id: {"name", "labels", "parents"}}``.
 
     Obsolete terms are dropped so that retired IDs cannot shadow their replacements.
+    ``labels`` maps ISO 639 language codes (``en``, ``ja``, …) onto display names.
     """
     index: MondoIndex = {}
 
     term_id: Optional[str] = None
     name = ""
     parents: List[str] = []
+    # language -> [(is_exact, text), ...]
+    synonyms: Dict[str, List[Tuple[bool, str]]] = {}
     obsolete = False
     in_term = False
 
     def flush() -> None:
-        if in_term and term_id and not obsolete:
-            index[term_id] = {"name": name, "parents": sorted(set(parents))}
+        if not in_term or not term_id or obsolete:
+            return
+        labels: Dict[str, str] = {}
+        if name:
+            labels["en"] = name
+        for lang, candidates in synonyms.items():
+            if lang == "en" and "en" in labels:
+                continue
+            labels[lang] = _pick_label(candidates)
+        index[term_id] = {
+            "name": name,
+            "labels": labels,
+            "parents": sorted(set(parents)),
+        }
 
     with _open_text(path) as handle:
         for raw_line in handle:
@@ -43,6 +72,7 @@ def load_mondo_index(path: str) -> MondoIndex:
                 term_id = None
                 name = ""
                 parents = []
+                synonyms = {}
                 obsolete = False
             elif not in_term:
                 continue
@@ -51,6 +81,22 @@ def load_mondo_index(path: str) -> MondoIndex:
                     term_id = line[4:].strip()
             elif line.startswith("name: "):
                 name = line[6:].strip()
+            elif line.startswith("synonym: "):
+                match = SYN_RE.match(line)
+                if not match:
+                    continue
+                text, rest = match.group(1), match.group(2)
+                lang_match = LANG_RE.search(rest)
+                if not lang_match:
+                    continue
+                lang = lang_match.group(1).lower()
+                synonyms.setdefault(lang, []).append(("EXACT" in rest, text))
+            elif line.startswith("property_value: skos:altLabel "):
+                match = ALT_LABEL_RE.match(line)
+                if not match:
+                    continue
+                text, lang = match.group(1), match.group(2).lower()
+                synonyms.setdefault(lang, []).append((False, text))
             elif line.startswith("is_a: "):
                 # 'is_a: MONDO:0002254 {source="DOID:1928"} ! syndromic disease'
                 fields = line[6:].split()
@@ -63,11 +109,17 @@ def load_mondo_index(path: str) -> MondoIndex:
     return index
 
 
-def _terms(index: MondoIndex, mondo_ids) -> List[Dict[str, str]]:
-    return [
-        {"id": mondo_id, "name": index[mondo_id]["name"] if mondo_id in index else ""}
-        for mondo_id in sorted(mondo_ids)
-    ]
+def _term(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:
+    entry = index.get(mondo_id)
+    name = entry["name"] if entry else ""
+    labels = dict(entry["labels"]) if entry else {}
+    if name and "en" not in labels:
+        labels["en"] = name
+    return {"id": mondo_id, "name": name, "labels": labels}
+
+
+def _terms(index: MondoIndex, mondo_ids) -> List[Dict[str, Any]]:
+    return [_term(index, mondo_id) for mondo_id in sorted(mondo_ids)]
 
 
 def resolve(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:
@@ -78,7 +130,7 @@ def resolve(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:
     """
     entry = index.get(mondo_id)
     if entry is None:
-        return {"name": "", "parents": [], "grandparents": []}
+        return {"name": "", "labels": {}, "parents": [], "grandparents": []}
 
     parents = set(entry["parents"])
     grandparents = set()
@@ -89,6 +141,7 @@ def resolve(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:
 
     return {
         "name": entry["name"],
+        "labels": dict(entry.get("labels") or {}),
         "parents": _terms(index, parents),
         "grandparents": _terms(index, grandparents),
     }
@@ -114,8 +167,13 @@ def build_syndrome_index(metadata, mondo_index: MondoIndex):
         for key in keys:
             if key not in metadata_by_key:
                 resolved = resolve(mondo_index, key) if mondo_ids else None
+                english = (resolved["name"] if resolved else "") or row["disorder_name"]
+                labels = dict(resolved["labels"]) if resolved else {}
+                if english:
+                    labels.setdefault("en", english)
                 metadata_by_key[key] = {
-                    "syndrome_name": (resolved["name"] if resolved else "") or row["disorder_name"],
+                    "syndrome_name": english,
+                    "syndrome_labels": labels,
                     "mondo_id": key if mondo_ids else None,
                     "mondo_parents": resolved["parents"] if resolved else [],
                     "mondo_grandparents": resolved["grandparents"] if resolved else [],

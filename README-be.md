@@ -141,9 +141,10 @@ A syndrome list sorted by the distance in ascending order.
 * **distance** is the cosine distance to the nearest image with the gene in the gallery. A smaller distance indicates a higher similarity.
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
-* **syndrome_name and omim_id** the syndrome name and omim id. The name is the MONDO label, falling back to the GMDB disorder name when the disorder has no MONDO term.
+* **syndrome_name and omim_id** the English syndrome name and omim id. The name is the MONDO label, falling back to the GMDB disorder name when the disorder has no MONDO term.
+* **syndrome_labels** language code to display name (`en` always, `ja` when MONDO has a Japanese altLabel). The UI picks the active locale and falls back to English.
 * **mondo_id** the MONDO term identifying the disorder, or null when MONDO has no entry for it.
-* **mondo_parents and mondo_grandparents** the two ancestor levels above `mondo_id`, sorted by MONDO ID. Grandparents exclude any term that is also a direct parent.
+* **mondo_parents and mondo_grandparents** the two ancestor levels above `mondo_id`, sorted by MONDO ID. Each term has `id`, English `name`, and `labels`. Grandparents exclude any term that is also a direct parent.
 * **mondo_source** whether the MONDO term came from the OMIM ID (`omim`) or was inferred from the gene symbol (`gene`).
 * **gestalt score** is the same as the distance.
 
@@ -153,15 +154,16 @@ maps to more than one disease — contributes one entry per MONDO ID at the same
     "suggested_syndromes_list": [
         {
             "syndrome_name": "Cornelia de Lange syndrome 1",
+            "syndrome_labels": {"en": "Cornelia de Lange syndrome 1", "ja": "コルネリアデランゲ症候群1"},
             "omim_id": 122470,
             "mondo_id": "MONDO:0007387",
             "mondo_parents": [
-                {"id": "MONDO:0016033", "name": "Cornelia de Lange syndrome"},
-                {"id": "MONDO:0019713", "name": "non-syndromic limb reduction defect"}
+                {"id": "MONDO:0016033", "name": "Cornelia de Lange syndrome", "labels": {"en": "Cornelia de Lange syndrome", "ja": "コルネリアデランゲ症候群"}},
+                {"id": "MONDO:0019713", "name": "non-syndromic limb reduction defect", "labels": {"en": "non-syndromic limb reduction defect"}}
             ],
             "mondo_grandparents": [
-                {"id": "MONDO:0002254", "name": "syndromic disease"},
-                {"id": "MONDO:0003847", "name": "hereditary disease"}
+                {"id": "MONDO:0002254", "name": "syndromic disease", "labels": {"en": "syndromic disease", "ja": "症候群性疾患"}},
+                {"id": "MONDO:0003847", "name": "hereditary disease", "labels": {"en": "hereditary disease", "ja": "遺伝性疾患"}}
             ],
             "mondo_source": "omim",
             "distance": 0.44,
@@ -171,6 +173,7 @@ maps to more than one disease — contributes one entry per MONDO ID at the same
         },
         {
             "syndrome_name": "DDX23",
+            "syndrome_labels": {"en": "DDX23"},
             "omim_id": "",
             "mondo_id": null,
             "mondo_parents": [],
@@ -183,6 +186,9 @@ maps to more than one disease — contributes one entry per MONDO ID at the same
         },...
     ]
 ```
+
+`suggested_patients_list` entries include `mondo_id` as a sorted array of MONDO IDs for the nearest gallery image (empty when that image has no MONDO term). Unlike the syndrome list, a dual-diagnosis image does not duplicate the patient row.
+
 ## Step-by-step setup
 ### Environment
 Please use python version 3.8 or (3.7+), and the package listed in requirements.txt.

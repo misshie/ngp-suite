@@ -3,6 +3,7 @@
   import { useI18n } from 'vue-i18n'
   import * as XLSX from 'xlsx' // Import the xlsx library
   import { useStore } from '@/stores/app'
+  import { formatMondoTerm, syndromeLabel } from '@/utils/mondoLabel'
 
   const { t } = useI18n()
 
@@ -50,10 +51,21 @@
    * semicolon-separated "MONDO:xxx name" text. The JSON export keeps the raw shape.
    */
   const syndromeRows = computed(() =>
-    (store.analysisResult?.suggested_syndromes_list || []).map(item => ({
+    (store.analysisResult?.suggested_syndromes_list || []).map(item => {
+      const { mondo_parents, mondo_grandparents, syndrome_labels, ...rest } = item
+      return {
+        ...rest,
+        syndrome_name: syndromeLabel({ syndrome_name: item.syndrome_name, syndrome_labels }, store.locale),
+        mondo_parents: mondo_parents?.map(term => formatMondoTerm(term, store.locale)).join('; ') ?? '',
+        mondo_grandparents: mondo_grandparents?.map(term => formatMondoTerm(term, store.locale)).join('; ') ?? '',
+      }
+    }),
+  )
+
+  const patientRows = computed(() =>
+    (store.analysisResult?.suggested_patients_list || []).map(item => ({
       ...item,
-      mondo_parents: item.mondo_parents?.map(term => `${term.id} ${term.name}`.trim()).join('; ') ?? '',
-      mondo_grandparents: item.mondo_grandparents?.map(term => `${term.id} ${term.name}`.trim()).join('; ') ?? '',
+      mondo_id: (item.mondo_id || []).join('; '),
     })),
   )
 
@@ -81,7 +93,7 @@
       XLSX.utils.book_append_sheet(wb, ws, 'Genes')
     }
     if (store.analysisResult.suggested_patients_list) {
-      const ws = XLSX.utils.json_to_sheet(store.analysisResult.suggested_patients_list)
+      const ws = XLSX.utils.json_to_sheet(patientRows.value)
       XLSX.utils.book_append_sheet(wb, ws, 'Patients')
     }
 
@@ -133,7 +145,7 @@
         break
       }
       case 'patients': {
-        downloadTSV(store.analysisResult.suggested_patients_list, 'patients.tsv')
+        downloadTSV(patientRows.value, 'patients.tsv')
         break
       }
     }

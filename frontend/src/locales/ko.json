@@ -42,7 +42,8 @@
     "columns": "열",
     "mondo": {
       "geneDerived": "유전자 기반",
-      "geneDerivedHint": "OMIM ID가 아니라 유전자 기호에서 추정한 질환입니다"
+      "geneDerivedHint": "OMIM ID가 아니라 유전자 기호에서 추정한 질환입니다",
+      "panelSearch": "PubCaseFinder PanelSearch에서 열기"
     },
     "noResults": "표시할 결과가 없습니다."
   },

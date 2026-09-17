@@ -42,7 +42,8 @@
     "columns": "列",
     "mondo": {
       "geneDerived": "遺伝子由来",
-      "geneDerivedHint": "OMIM ID ではなく遺伝子シンボルから疾患を推定しています"
+      "geneDerivedHint": "OMIM ID ではなく遺伝子シンボルから疾患を推定しています",
+      "panelSearch": "PubCaseFinder PanelSearch で開く"
     },
     "noResults": "表示する結果がありません。"
   },

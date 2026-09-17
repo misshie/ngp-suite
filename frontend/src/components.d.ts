@@ -14,6 +14,7 @@ declare module 'vue' {
     Export: typeof import('./components/Export.vue')['default']
     GalleryAdd: typeof import('./components/GalleryAdd.vue')['default']
     MondoTermList: typeof import('./components/MondoTermList.vue')['default']
+    PubCaseFinderPanelLink: typeof import('./components/PubCaseFinderPanelLink.vue')['default']
     Results: typeof import('./components/Results.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

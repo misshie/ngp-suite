@@ -42,7 +42,8 @@
     "columns": "Colunas",
     "mondo": {
       "geneDerived": "derivado do gene",
-      "geneDerivedHint": "Doença inferida a partir do símbolo do gene, não de um ID OMIM"
+      "geneDerivedHint": "Doença inferida a partir do símbolo do gene, não de um ID OMIM",
+      "panelSearch": "Abrir no PubCaseFinder PanelSearch"
     },
     "noResults": "Nenhum resultado para exibir."
   },

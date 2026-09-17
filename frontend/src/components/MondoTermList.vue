@@ -4,7 +4,13 @@
   import { useStore } from '@/stores/app'
   import { mondoLabel } from '@/utils/mondoLabel'
 
-  const props = defineProps<{ terms?: MondoTerm[], ids?: string[] }>()
+  const props = withDefaults(defineProps<{
+    terms?: MondoTerm[]
+    ids?: string[]
+    panelLink?: boolean
+  }>(), {
+    panelLink: false,
+  })
   const store = useStore()
 
   const items = computed(() => {
@@ -27,6 +33,7 @@
         rel="noopener noreferrer"
         target="_blank"
       >{{ term.id }}</a>
+      <PubCaseFinderPanelLink v-if="panelLink" :mondo-id="term.id" />
       <span v-if="term.label" class="ml-1">{{ term.label }}</span>
     </div>
   </div>

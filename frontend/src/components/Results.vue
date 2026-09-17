@@ -373,13 +373,18 @@
                   variant="tonal"
                 >{{ t('resultsPage.mondo.geneDerived') }}</v-chip>
               </template>
-              <template #item.mondo_id="{ item }"><a
-                v-if="item.mondo_id"
-                class="text-decoration-none"
-                :href="`https://monarchinitiative.org/${item.mondo_id}`"
-                rel="noopener noreferrer"
-                target="_blank"
-              >{{ item.mondo_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a><span v-else>-</span></template>
+              <template #item.mondo_id="{ item }">
+                <template v-if="item.mondo_id">
+                  <a
+                    class="text-decoration-none"
+                    :href="`https://monarchinitiative.org/${item.mondo_id}`"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >{{ item.mondo_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a>
+                  <PubCaseFinderPanelLink :mondo-id="item.mondo_id" />
+                </template>
+                <span v-else>-</span>
+              </template>
               <template #item.mondo_parents="{ item }"><MondoTermList :terms="item.mondo_parents" /></template>
               <template #item.mondo_grandparents="{ item }"><MondoTermList :terms="item.mondo_grandparents" /></template>
               <template #item.gm_score="{ item }">{{ formatScore(item.gm_score) }}</template>
@@ -472,7 +477,7 @@
             >
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
-              <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" /></template>
+              <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" panel-link /></template>
               <template #item.numeric_omim_id="{ item }"><a
                 v-if="item.numeric_omim_id"
                 class="text-decoration-none"

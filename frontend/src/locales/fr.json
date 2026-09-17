@@ -42,7 +42,8 @@
     "columns": "Colonnes",
     "mondo": {
       "geneDerived": "dérivé du gène",
-      "geneDerivedHint": "Maladie déduite du symbole du gène, et non d'un identifiant OMIM"
+      "geneDerivedHint": "Maladie déduite du symbole du gène, et non d'un identifiant OMIM",
+      "panelSearch": "Ouvrir dans PubCaseFinder PanelSearch"
     },
     "noResults": "Aucun résultat à afficher."
   },

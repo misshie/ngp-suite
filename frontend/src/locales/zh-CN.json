@@ -42,7 +42,8 @@
     "columns": "列",
     "mondo": {
       "geneDerived": "源自基因",
-      "geneDerivedHint": "该疾病由基因符号推定，而非 OMIM ID"
+      "geneDerivedHint": "该疾病由基因符号推定，而非 OMIM ID",
+      "panelSearch": "在 PubCaseFinder PanelSearch 中打开"
     },
     "noResults": "无结果可显示。"
   },

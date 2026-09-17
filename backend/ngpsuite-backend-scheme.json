@@ -85,14 +85,49 @@
       },
       "required": ["gene_name", "gene_entrez_id", "distance", "score", "gm_rank", "meta_rank"]
     },
+    "mondoTerm": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^MONDO:[0-9]{7}$" },
+        "name": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
     "syndromeEntry": {
       "type": "object",
       "properties": {
-        "syndrome_name": { "type": "string" },
-        "omim_id": { "type": "integer" },
+        "syndrome_name": {
+          "type": "string",
+          "description": "MONDO label, or the GMDB disorder name when the disorder has no MONDO term."
+        },
+        "omim_id": {
+          "type": ["integer", "string", "null"],
+          "description": "Empty string when GMDB records no OMIM ID."
+        },
+        "mondo_id": {
+          "type": ["string", "null"],
+          "pattern": "^MONDO:[0-9]{7}$",
+          "description": "Null when the disorder could not be placed in MONDO."
+        },
+        "mondo_parents": {
+          "type": "array",
+          "description": "Direct is_a parents, sorted by MONDO ID.",
+          "items": { "$ref": "#/$defs/mondoTerm" }
+        },
+        "mondo_grandparents": {
+          "type": "array",
+          "description": "Parents of the parents, excluding the term itself and its direct parents, sorted by MONDO ID.",
+          "items": { "$ref": "#/$defs/mondoTerm" }
+        },
+        "mondo_source": {
+          "enum": ["omim", "gene", null],
+          "description": "Whether the MONDO term was resolved from the OMIM ID or from the gene symbol."
+        },
         "distance": { "type": "number" },
         "image_id": { "type": "string" },
         "subject_id": { "type": "string" },
+        "ACMG_PP4": { "type": "string" },
+        "ACMG_PP4_support": { "type": "string" },
         "score": { "type": ["number", "null"] },
         "gm_rank": { "type": "integer" },
         "pubcasefinder_rank": { "type": ["integer", "null"] },
@@ -100,7 +135,7 @@
         "mean_rank": { "type": ["number", "null"] },
         "meta_rank": { "type": "integer" }
       },
-      "required": ["syndrome_name", "omim_id", "distance", "image_id", "subject_id", "score", "gm_rank", "meta_rank"]
+      "required": ["syndrome_name", "omim_id", "mondo_id", "mondo_parents", "mondo_grandparents", "mondo_source", "distance", "image_id", "subject_id", "score", "gm_rank", "meta_rank"]
     },
     "patientEntry": {
       "type": "object",
@@ -145,6 +180,7 @@
         "rank": { "type": "integer" },
         "score": { "type": "number" },
         "hgnc_gene_symbol": { "type": "array", "items": { "type": "string" } },
+        "mondo_id": { "type": "array", "items": { "type": "string" } },
         "omim_disease_name_en": { "type": "string" }
       }
     },

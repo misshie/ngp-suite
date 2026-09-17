@@ -12,9 +12,18 @@ interface GeneEntry {
   meta_rank?: number
 }
 
+export interface MondoTerm {
+  id: string
+  name: string
+}
+
 interface SyndromeEntry {
   syndrome_name: string
   omim_id: number
+  mondo_id: string | null
+  mondo_parents: MondoTerm[]
+  mondo_grandparents: MondoTerm[]
+  mondo_source: 'omim' | 'gene' | null
   distance: number
   image_id: string
   subject_id: string

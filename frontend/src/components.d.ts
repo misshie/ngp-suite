@@ -13,6 +13,7 @@ declare module 'vue' {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     Export: typeof import('./components/Export.vue')['default']
     GalleryAdd: typeof import('./components/GalleryAdd.vue')['default']
+    MondoTermList: typeof import('./components/MondoTermList.vue')['default']
     Results: typeof import('./components/Results.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

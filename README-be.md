@@ -65,7 +65,8 @@ async def predict_endpoint(username: Annotated[str, Depends(get_current_username
                      _images_synds_dict,
                      _images_genes_dict,
                      _genes_metadata_dict,
-                     _synds_metadata_dict)
+                     _synd_key_metadata,
+                     _synd_entries_dict)
 
 ```
 
@@ -140,33 +141,45 @@ A syndrome list sorted by the distance in ascending order.
 * **distance** is the cosine distance to the nearest image with the gene in the gallery. A smaller distance indicates a higher similarity.
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
-* **syndrome_name and omim_id** the syndrome name and omim id.
+* **syndrome_name and omim_id** the syndrome name and omim id. The name is the MONDO label, falling back to the GMDB disorder name when the disorder has no MONDO term.
+* **mondo_id** the MONDO term identifying the disorder, or null when MONDO has no entry for it.
+* **mondo_parents and mondo_grandparents** the two ancestor levels above `mondo_id`, sorted by MONDO ID. Grandparents exclude any term that is also a direct parent.
+* **mondo_source** whether the MONDO term came from the OMIM ID (`omim`) or was inferred from the gene symbol (`gene`).
 * **gestalt score** is the same as the distance.
+
+A gallery image annotated with several MONDO IDs — a dual diagnosis, or a gene symbol that
+maps to more than one disease — contributes one entry per MONDO ID at the same distance.
 ```angular2html
     "suggested_syndromes_list": [
         {
-            "syndrome_name": "Cornelia de Lange syndrome",
+            "syndrome_name": "Cornelia de Lange syndrome 1",
             "omim_id": 122470,
+            "mondo_id": "MONDO:0007387",
+            "mondo_parents": [
+                {"id": "MONDO:0016033", "name": "Cornelia de Lange syndrome"},
+                {"id": "MONDO:0019713", "name": "non-syndromic limb reduction defect"}
+            ],
+            "mondo_grandparents": [
+                {"id": "MONDO:0002254", "name": "syndromic disease"},
+                {"id": "MONDO:0003847", "name": "hereditary disease"}
+            ],
+            "mondo_source": "omim",
             "distance": 0.44,
-            "gestalt_score": 0.44,
+            "gestalt_score": 0.86,
             "image_id": "4883",
             "subject_id": "3546"
         },
         {
             "syndrome_name": "DDX23",
             "omim_id": "",
+            "mondo_id": null,
+            "mondo_parents": [],
+            "mondo_grandparents": [],
+            "mondo_source": null,
             "distance": 0.575,
-            "gestalt_score": 0.575,
+            "gestalt_score": 0.725,
             "image_id": "8998",
             "subject_id": "5949"
-        },
-        {
-            "syndrome_name": "SMITH-MAGENIS SYNDROME; SMS",
-            "omim_id": 182290,
-            "distance": 0.699,
-            "gestalt_score": 0.699,
-            "image_id": "5961",
-            "subject_id": "4239"
         },...
     ]
 ```

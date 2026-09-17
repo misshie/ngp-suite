@@ -46,6 +46,18 @@
   })
 
   /**
+   * Spreadsheet cells cannot hold the MONDO ancestor arrays, so collapse them into
+   * semicolon-separated "MONDO:xxx name" text. The JSON export keeps the raw shape.
+   */
+  const syndromeRows = computed(() =>
+    (store.analysisResult?.suggested_syndromes_list || []).map(item => ({
+      ...item,
+      mondo_parents: item.mondo_parents?.map(term => `${term.id} ${term.name}`.trim()).join('; ') ?? '',
+      mondo_grandparents: item.mondo_grandparents?.map(term => `${term.id} ${term.name}`.trim()).join('; ') ?? '',
+    })),
+  )
+
+  /**
    * Exports all available result lists to a single XLSX file with multiple sheets.
    */
   function exportAsXLSX () {
@@ -61,7 +73,7 @@
 
     // Add other sheets as before
     if (store.analysisResult.suggested_syndromes_list) {
-      const ws = XLSX.utils.json_to_sheet(store.analysisResult.suggested_syndromes_list)
+      const ws = XLSX.utils.json_to_sheet(syndromeRows.value)
       XLSX.utils.book_append_sheet(wb, ws, 'Syndromes')
     }
     if (store.analysisResult.suggested_genes_list) {
@@ -117,7 +129,7 @@
         break
       }
       case 'syndromes': {
-        downloadTSV(store.analysisResult.suggested_syndromes_list, 'syndromes.tsv')
+        downloadTSV(syndromeRows.value, 'syndromes.tsv')
         break
       }
       case 'patients': {

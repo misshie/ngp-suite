@@ -68,7 +68,7 @@ def filter_by_distance(distances, thresh=0.1):
     return idx[np.argsort(distances[idx])]
 
 
-def get_first_synds(ranked_mean_dists_list, ranked_img_ids_list, images_synds_dict, verbose=False):
+def get_first_synds(ranked_mean_dists_list, ranked_img_ids_list, synd_entries_dict, verbose=False):
     # This removes all duplicate occurrences except for the first one.. for each test image
     img_synds_results_list = []
     img_dists_results_list = []
@@ -80,11 +80,12 @@ def get_first_synds(ranked_mean_dists_list, ranked_img_ids_list, images_synds_di
         img_dists = []
         img_ids = []
         for image_id, dist in zip(ranked_img_ids, ranked_mean_dists):
-            image_synd = images_synds_dict[int(image_id)]
-
-            img_synd_results.append(image_synd['disorder_internal_id'])
-            img_dists.append(dist)
-            img_ids.append(image_id)
+            # A gallery image can back several syndromes when its disorder was
+            # resolved through a gene symbol, so each key is ranked separately.
+            for synd_key in synd_entries_dict[int(image_id)]:
+                img_synd_results.append(synd_key)
+                img_dists.append(dist)
+                img_ids.append(image_id)
         img_synd_results = np.array(img_synd_results)
         img_dists = np.array(img_dists)
         img_ids = np.array(img_ids)
@@ -237,10 +238,15 @@ def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id='', 
 
     output_list = []
     for synd_id, dist, image_id in zip(synd_ids, dists, img_ids):
-        pp4_level, pp4_support = get_pp4(synds_metadata_dict[int(synd_id)], 1.3 - float(dist))
-        name = synds_metadata_dict[int(synd_id)]['disorder_name']
+        synd = synds_metadata_dict[str(synd_id)]
+        pp4_level, pp4_support = get_pp4(synd, 1.3 - float(dist))
+        name = synd['syndrome_name']
         output = {'syndrome_name': name,
-                  'omim_id': synds_metadata_dict[int(synd_id)]['omim_id'],
+                  'omim_id': synd['omim_id'],
+                  'mondo_id': synd['mondo_id'],
+                  'mondo_parents': synd['mondo_parents'],
+                  'mondo_grandparents': synd['mondo_grandparents'],
+                  'mondo_source': synd['mondo_source'],
                   'distance': round(float(dist), 3),
                   'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
@@ -276,6 +282,11 @@ def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id='', 
             })
 
         output_list.append(output)
+
+    # Gene-derived rows come in clusters that all share one gestalt distance, so break
+    # those ties in favour of the OMIM-derived diagnosis. The list is already sorted by
+    # distance and the sort is stable, so nothing else moves.
+    output_list.sort(key=lambda row: (row['distance'], row['mondo_source'] != 'omim'))
 
     return output_list
 
@@ -335,7 +346,7 @@ def get_gallery_encodings_set(images_synds_dict):
     return gallery_df
 
 
-def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_metadata, synds_metadata, synds_probabilities_dict=None):
+def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_metadata, synds_metadata, synd_entries_dict, synds_probabilities_dict=None):
     start_time = time.time()
     # Seed everything
     np.random.seed(1000)
@@ -360,7 +371,7 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
     evaluate_finished_time = time.time()
 
     # Get all synd_ids, dists, img_ids, subject_ids per syndrome in gallery
-    first_synd_ranks = get_first_synds(*all_ranks, images_synds_dict)
+    first_synd_ranks = get_first_synds(*all_ranks, synd_entries_dict)
     first_synd_ranks = np.array(first_synd_ranks)
     get_synds_time = time.time()
 

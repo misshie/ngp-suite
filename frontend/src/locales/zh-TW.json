@@ -39,6 +39,10 @@
       "syndromes": "搜尋症候群",
       "patients": "搜尋患者"
     },
+    "mondo": {
+      "geneDerived": "源自基因",
+      "geneDerivedHint": "該疾病由基因符號推定，而非 OMIM ID"
+    },
     "noResults": "無結果可顯示。"
   },
   "settingsDialog": {

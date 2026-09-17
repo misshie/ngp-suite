@@ -76,7 +76,8 @@ Place the following file in the `backend/data/gallery_encodings/` directory:
 4. Additional data for GestaltMatcher-Arc v1.1.4
 Place the following files in the `backend/data/` directory:
 * `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
-* `image_gene_and_syndrome_metadata_pp4_23052026_v1.1.4.p` (disorder/gene metadata)
+* `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
+* `mondo-international.obo.gz` (MONDO release used to label disorders and resolve their ancestors; [download](https://mondo.monarchinitiative.org/pages/download/), CC BY 4.0)
 
 The final file tree should look like this:
 
@@ -87,7 +88,8 @@ ngp-suite/
     │   ├── gallery_encodings/
     │   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
     │   ├── transformation_probabilities_07052025.csv
-    │   └── image_gene_and_syndrome_metadata_pp4_23052026_v1.1.4.p
+    │   ├── patient_metadata_2026-05-23_mondo.p
+    │   └── mondo-international.obo.gz
     ├── saved_models/
     │   ├── Resnet50_Final.pth
     │   ├── glint360k_r50.onnx

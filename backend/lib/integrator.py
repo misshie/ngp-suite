@@ -15,6 +15,10 @@ def _parse_composite_omim(omim_value: Any) -> Tuple[int | None, str | None]:
     
     return numeric_id, ps_id
 
+def _rank_key(entry: Dict[str, Any]) -> float:
+    rank = entry.get('pubcasefinder_rank')
+    return rank if isinstance(rank, (int, float)) else float('inf')
+
 def _add_gm_rank_and_score(item_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     if not item_list: return []
     for i, item in enumerate(item_list): item['gm_rank'] = i + 1
@@ -63,19 +67,31 @@ def integrate_json(raw_results: Dict[str, Any]) -> Dict[str, Any]:
         pcf_results_list = pcf_data.get('ranked_list', [])
         
         pcf_by_omim = {}
+        pcf_by_mondo = {}
         pcf_by_gene = {}
         for item in pcf_results_list:
+            entry = {'pubcasefinder_rank': item.get('rank'), 'pubcasefinder_score': item.get('score')}
             if item.get('id') and item['id'].startswith('OMIM:'):
                 omim_id_str = item['id'].replace('OMIM:', '')
-                pcf_by_omim[omim_id_str] = {'pubcasefinder_rank': item.get('rank'), 'pubcasefinder_score': item.get('score')}
+                pcf_by_omim[omim_id_str] = entry
+            # The OMIM-targeted response already carries MONDO IDs, so no extra request
+            # is needed. Several OMIM entries can share a MONDO term; keep the best rank.
+            for mondo_id in (item.get('mondo_id') or []):
+                previous = pcf_by_mondo.get(mondo_id)
+                if previous is None or _rank_key(entry) < _rank_key(previous):
+                    pcf_by_mondo[mondo_id] = entry
             if item.get('hgnc_gene_symbol') and isinstance(item.get('hgnc_gene_symbol'), list):
                 for gene_symbol in item['hgnc_gene_symbol']:
-                    pcf_by_gene[gene_symbol] = {'pubcasefinder_rank': item.get('rank'), 'pubcasefinder_score': item.get('score')}
+                    pcf_by_gene[gene_symbol] = entry
         
         if 'suggested_syndromes_list' in raw_results:
             for item in raw_results['suggested_syndromes_list']:
+                mondo_id = item.get('mondo_id')
                 omim_id = item.get('omim_id')
-                if omim_id and str(omim_id) in pcf_by_omim:
+                if mondo_id and mondo_id in pcf_by_mondo:
+                    item.update(pcf_by_mondo[mondo_id])
+                elif omim_id and str(omim_id) in pcf_by_omim:
+                    # Rows MONDO could not place still match through their GMDB OMIM ID.
                     item.update(pcf_by_omim[str(omim_id)])
 
         if patient_key in raw_results:

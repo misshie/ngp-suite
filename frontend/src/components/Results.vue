@@ -53,6 +53,9 @@
     { title: 'GM Rank', key: 'gm_rank', align: 'end' },
     { title: 'PCF Rank', key: 'pubcasefinder_rank', align: 'end' },
     { title: 'Syndrome Name', key: 'syndrome_name', align: 'start' },
+    { title: 'MONDO ID', key: 'mondo_id', align: 'start' },
+    { title: 'Parent (MONDO)', key: 'mondo_parents', align: 'start', sortable: false },
+    { title: 'Grandparent (MONDO)', key: 'mondo_grandparents', align: 'start', sortable: false },
     { title: 'OMIM ID', key: 'omim_id', align: 'start' },
     { title: 'GM Score', key: 'gm_score', align: 'end' },
     { title: 'ACMG PP4', key: 'ACMG_PP4', align: 'start' },
@@ -273,6 +276,26 @@
               :items="syndromeTableItems"
               :search="syndromeSearch"
             >
+              <template #item.syndrome_name="{ item }">
+                {{ item.syndrome_name }}
+                <v-chip
+                  v-if="item.mondo_source === 'gene'"
+                  class="ml-1"
+                  color="blue-grey"
+                  size="x-small"
+                  :title="t('resultsPage.mondo.geneDerivedHint')"
+                  variant="tonal"
+                >{{ t('resultsPage.mondo.geneDerived') }}</v-chip>
+              </template>
+              <template #item.mondo_id="{ item }"><a
+                v-if="item.mondo_id"
+                class="text-decoration-none"
+                :href="`https://monarchinitiative.org/${item.mondo_id}`"
+                rel="noopener noreferrer"
+                target="_blank"
+              >{{ item.mondo_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a><span v-else>-</span></template>
+              <template #item.mondo_parents="{ item }"><MondoTermList :terms="item.mondo_parents" /></template>
+              <template #item.mondo_grandparents="{ item }"><MondoTermList :terms="item.mondo_grandparents" /></template>
               <template #item.gm_score="{ item }">{{ formatScore(item.gm_score) }}</template>
               <template #item.ACMG_PP4="{ item }">{{ item.ACMG_PP4 ?? '-' }}</template>
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>

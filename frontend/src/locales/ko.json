@@ -39,6 +39,10 @@
       "syndromes": "증후군 검색",
       "patients": "환자 검색"
     },
+    "mondo": {
+      "geneDerived": "유전자 기반",
+      "geneDerivedHint": "OMIM ID가 아니라 유전자 기호에서 추정한 질환입니다"
+    },
     "noResults": "표시할 결과가 없습니다."
   },
   "settingsDialog": {

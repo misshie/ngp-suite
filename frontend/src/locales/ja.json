@@ -39,6 +39,10 @@
       "syndromes": "症候群を検索",
       "patients": "患者を検索"
     },
+    "mondo": {
+      "geneDerived": "遺伝子由来",
+      "geneDerivedHint": "OMIM ID ではなく遺伝子シンボルから疾患を推定しています"
+    },
     "noResults": "表示する結果がありません。"
   },
   "settingsDialog": {

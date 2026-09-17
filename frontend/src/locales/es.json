@@ -39,6 +39,10 @@
       "syndromes": "Buscar síndromes",
       "patients": "Buscar pacientes"
     },
+    "mondo": {
+      "geneDerived": "derivado del gen",
+      "geneDerivedHint": "Enfermedad derivada del símbolo del gen, no de un ID OMIM"
+    },
     "noResults": "No hay resultados para mostrar."
   },
   "settingsDialog": {

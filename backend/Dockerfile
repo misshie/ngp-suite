@@ -30,7 +30,9 @@ COPY saved_models/s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last
 COPY saved_models/s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth ./saved_models/s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
 COPY data/gallery_encodings/GMDB_gallery_encodings_23052026_v1.1.4_service.pkl ./data/gallery_encodings/GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
 COPY data/transformation_probabilities_07052025.csv ./data/transformation_probabilities_07052025.csv
-COPY data/image_gene_and_syndrome_metadata_pp4_23052026_v1.1.4.p ./data/image_gene_and_syndrome_metadata_pp4_23052026_v1.1.4.p
+COPY data/patient_metadata_2026-05-23_mondo.p ./data/patient_metadata_2026-05-23_mondo.p
+# MONDO is CC BY 4.0 and contains no patient data, so it ships inside the image.
+COPY data/mondo-international.obo.gz ./data/mondo-international.obo.gz
 COPY main.py ./main.py
 COPY config.json ./config.json
 COPY lib ./lib

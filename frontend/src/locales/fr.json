@@ -39,6 +39,10 @@
       "syndromes": "Rechercher des syndromes",
       "patients": "Rechercher des patients"
     },
+    "mondo": {
+      "geneDerived": "dérivé du gène",
+      "geneDerivedHint": "Maladie déduite du symbole du gène, et non d'un identifiant OMIM"
+    },
     "noResults": "Aucun résultat à afficher."
   },
   "settingsDialog": {

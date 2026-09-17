@@ -77,7 +77,10 @@ Place the following file in the `backend/data/gallery_encodings/` directory:
 Place the following files in the `backend/data/` directory:
 * `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
 * `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
-* `mondo-international.obo.gz` (MONDO release used to label disorders and resolve their ancestors; [download](https://mondo.monarchinitiative.org/pages/download/), CC BY 4.0)
+
+5. MONDO ontology (shipped with the repository)
+The following file is tracked under `backend/mondo/` (CC BY 4.0; no patient data) and does not need to be downloaded separately:
+* `mondo-international.obo.gz` (labels and ancestor hierarchy for gallery disorders; [source](https://mondo.monarchinitiative.org/pages/download/))
 
 The final file tree should look like this:
 
@@ -88,7 +91,8 @@ ngp-suite/
     │   ├── gallery_encodings/
     │   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
     │   ├── transformation_probabilities_07052025.csv
-    │   ├── patient_metadata_2026-05-23_mondo.p
+    │   └── patient_metadata_2026-05-23_mondo.p
+    ├── mondo/
     │   └── mondo-international.obo.gz
     ├── saved_models/
     │   ├── Resnet50_Final.pth

@@ -98,7 +98,7 @@ async def lifespan(app: FastAPI):
     _images_synds_dict = data["disorder_level_metadata"]
     _images_genes_dict = data["gene_level_metadata"]
     _genes_metadata_dict = data["gene_metadata"]
-    mondo_index = load_mondo_index(os.path.join("data", "mondo-international.obo.gz"))
+    mondo_index = load_mondo_index(os.path.join("mondo", "mondo-international.obo.gz"))
     _synd_entries_dict, _synd_key_metadata = build_syndrome_index(data, mondo_index)
     print("Load MONDO index: {} terms, {} syndrome keys".format(
         len(mondo_index), len(_synd_key_metadata)))

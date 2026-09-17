@@ -20,15 +20,15 @@ OMIM 単独のときは 974 件だった。
 
 ## 入力データ
 
-`backend/data/` に2ファイルを配置する（`.gitignore` 対象。Docker イメージには焼き込む）。
+入力は次の2系統。
 
-| ファイル | 内容 |
-| --- | --- |
-| `patient_metadata_2026-05-23_mondo.p` | ギャラリーのメタデータ。`disorder_level_metadata` の各画像が `mondo_id: list[str]` と `mondo_source` を持つ |
-| `mondo-international.obo.gz` | MONDO リリース（8.5 MB、58,517 用語）。用語ラベルと `is_a` 階層の解決に使う |
+| ファイル | 配置 | 内容 |
+| --- | --- | --- |
+| `patient_metadata_2026-05-23_mondo.p` | `backend/data/`（`.gitignore`。ユーザー設置／Docker に焼き込み） | ギャラリーのメタデータ。`disorder_level_metadata` の各画像が `mondo_id: list[str]` と `mondo_source` を持つ |
+| `mondo-international.obo.gz` | `backend/mondo/`（git 管理・同梱） | MONDO リリース（8.5 MB、58,517 用語）。用語ラベルと `is_a` 階層の解決に使う |
 
 生成手順は別リポジトリ `gmdb-mondo`（患者メタデータを含むため private）にある。
-MONDO は CC BY 4.0 で再配布可能、患者データを含まないため Docker イメージに同梱している。
+MONDO は CC BY 4.0 で再配布可能、患者データを含まないためリポジトリと Docker イメージに同梱している。
 
 pickle 側の主な数値: 採用画像 17,566 枚、`mondo_id` を持つ 17,282 枚（98.4%）、
 distinct MONDO ID 1,560 語、`mondo_id` を2つ以上持つ画像 739 枚。

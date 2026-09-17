@@ -1,7 +1,7 @@
 """Minimal MONDO OBO reader used to label and place gallery disorders in the ontology.
 
 The gallery metadata only stores MONDO IDs, so names and the surrounding hierarchy
-are resolved here at startup from the OBO release shipped in ``data/``.
+are resolved here at startup from the OBO release shipped in ``mondo/``.
 """
 
 import gzip

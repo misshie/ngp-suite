@@ -18,13 +18,18 @@
     },
     "nando_ids": {
       "type": "object",
-      "description": "MONDO ID to NANDO ID list map for IDs present in this response (from OBO xref: NANDO:).",
+      "description": "MONDO ID to a single NANDO ID (the smallest xref when multiple exist) for IDs present in this response.",
       "additionalProperties": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "pattern": "^NANDO:[0-9]+$"
-        }
+        "type": "string",
+        "pattern": "^NANDO:[0-9]+$"
+      }
+    },
+    "omim_ids": {
+      "type": "object",
+      "description": "MONDO ID to a single OMIM entry number from OBO MONDO:equivalentTo xref (smallest when multiple exist).",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
       }
     },
     "suggested_genes_list": {

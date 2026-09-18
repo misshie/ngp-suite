@@ -9,9 +9,11 @@
     ids?: string[]
     panelLink?: boolean
     nanbyoLink?: boolean
+    omimLink?: boolean
   }>(), {
     panelLink: false,
     nanbyoLink: false,
+    omimLink: false,
   })
   const store = useStore()
 
@@ -37,6 +39,7 @@
       >{{ term.id }}</a>
       <PubCaseFinderPanelLink v-if="panelLink" :mondo-id="term.id" />
       <NanbyoDataLink v-if="nanbyoLink" :mondo-id="term.id" />
+      <OmimEntryLink v-if="omimLink" :mondo-id="term.id" />
       <span v-if="term.label" class="ml-1">{{ term.label }}</span>
     </div>
   </div>

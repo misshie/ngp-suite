@@ -15,7 +15,7 @@ from lib.utils_functions import readb64, encodeb64
 from datetime import datetime
 from lib.pubcasefinder import query_pubcasefinder
 from lib.integrator import integrate_json
-from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map
+from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -91,6 +91,7 @@ async def lifespan(app: FastAPI):
     global _synds_probabilities_dict
     global _mondo_version
     global _mondo_nando
+    global _mondo_omim
     _models = get_models()
     _cropper_model, _device = load_cropper_model()
     _synds_probabilities_dict = _load_synds_probabilities_dict()
@@ -102,9 +103,10 @@ async def lifespan(app: FastAPI):
     _genes_metadata_dict = data["gene_metadata"]
     mondo_index, _mondo_version = load_mondo_index(os.path.join("mondo", "mondo-international.obo.gz"))
     _mondo_nando = build_nando_map(mondo_index)
+    _mondo_omim = build_omim_map(mondo_index)
     _synd_entries_dict, _synd_key_metadata = build_syndrome_index(data, mondo_index)
-    print("Load MONDO index: {} terms, {} syndrome keys, version={}, nando_mapped={}".format(
-        len(mondo_index), len(_synd_key_metadata), _mondo_version, len(_mondo_nando)))
+    print("Load MONDO index: {} terms, {} syndrome keys, version={}, nando_mapped={}, omim_mapped={}".format(
+        len(mondo_index), len(_synd_key_metadata), _mondo_version, len(_mondo_nando), len(_mondo_omim)))
     _gallery_df = get_gallery_encodings_set(_images_synds_dict)
     yield
 
@@ -194,6 +196,14 @@ async def predict_endpoint(username: Annotated[str, Depends(get_current_username
         }
         if nando_ids:
             final_result["nando_ids"] = nando_ids
+
+        omim_ids = {
+            mid: _mondo_omim[mid]
+            for mid in sorted(mondo_ids)
+            if mid in _mondo_omim
+        }
+        if omim_ids:
+            final_result["omim_ids"] = omim_ids
 
         try:
             final_result["feature_vectors"] = encoding_to_feature_vectors(encoding)

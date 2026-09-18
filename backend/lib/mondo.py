@@ -17,6 +17,7 @@ LANG_RE = re.compile(r'language="([a-zA-Z-]+)"')
 ALT_LABEL_RE = re.compile(r'^property_value: skos:altLabel "(.+)@([a-zA-Z-]+)"')
 VERSION_INFO_RE = re.compile(r'^property_value: owl:versionInfo "([^"]+)"')
 NANDO_XREF_RE = re.compile(r'^xref: (NANDO:\d+)')
+OMIM_XREF_RE = re.compile(r'^xref: OMIM:(\d+)(.*)$')
 
 
 def _open_text(path: str) -> io.TextIOBase:
@@ -50,6 +51,7 @@ def load_mondo_index(path: str) -> Tuple[MondoIndex, Optional[str]]:
     name = ""
     parents: List[str] = []
     nando_ids: List[str] = []
+    omim_ids: List[str] = []
     # language -> [(is_exact, text), ...]
     synonyms: Dict[str, List[Tuple[bool, str]]] = {}
     obsolete = False
@@ -70,6 +72,7 @@ def load_mondo_index(path: str) -> Tuple[MondoIndex, Optional[str]]:
             "labels": labels,
             "parents": sorted(set(parents)),
             "nando_ids": sorted(set(nando_ids)),
+            "omim_ids": sorted(set(omim_ids)),
         }
 
     with _open_text(path) as handle:
@@ -82,6 +85,7 @@ def load_mondo_index(path: str) -> Tuple[MondoIndex, Optional[str]]:
                 name = ""
                 parents = []
                 nando_ids = []
+                omim_ids = []
                 synonyms = {}
                 obsolete = False
             elif not in_term:
@@ -113,6 +117,10 @@ def load_mondo_index(path: str) -> Tuple[MondoIndex, Optional[str]]:
                 match = NANDO_XREF_RE.match(line)
                 if match:
                     nando_ids.append(match.group(1))
+            elif line.startswith("xref: OMIM:"):
+                match = OMIM_XREF_RE.match(line)
+                if match and "MONDO:equivalentTo" in match.group(2):
+                    omim_ids.append(match.group(1))
             elif line.startswith("is_a: "):
                 # 'is_a: MONDO:0002254 {source="DOID:1928"} ! syndromic disease'
                 fields = line[6:].split()
@@ -125,12 +133,21 @@ def load_mondo_index(path: str) -> Tuple[MondoIndex, Optional[str]]:
     return index, version
 
 
-def build_nando_map(index: MondoIndex) -> Dict[str, List[str]]:
-    """MONDO ID -> NANDO xrefs, keeping only terms that have at least one."""
+def build_nando_map(index: MondoIndex) -> Dict[str, str]:
+    """MONDO ID -> smallest NANDO xref (lexicographic min of NANDO:…)."""
     return {
-        mondo_id: list(entry["nando_ids"])
+        mondo_id: min(entry["nando_ids"])
         for mondo_id, entry in index.items()
         if entry.get("nando_ids")
+    }
+
+
+def build_omim_map(index: MondoIndex) -> Dict[str, str]:
+    """MONDO ID -> smallest equivalent OMIM entry number."""
+    return {
+        mondo_id: min(entry["omim_ids"])
+        for mondo_id, entry in index.items()
+        if entry.get("omim_ids")
     }
 
 

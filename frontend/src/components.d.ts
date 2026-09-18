@@ -15,6 +15,7 @@ declare module 'vue' {
     GalleryAdd: typeof import('./components/GalleryAdd.vue')['default']
     MondoTermList: typeof import('./components/MondoTermList.vue')['default']
     NanbyoDataLink: typeof import('./components/NanbyoDataLink.vue')['default']
+    OmimEntryLink: typeof import('./components/OmimEntryLink.vue')['default']
     PubCaseFinderPanelLink: typeof import('./components/PubCaseFinderPanelLink.vue')['default']
     Results: typeof import('./components/Results.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

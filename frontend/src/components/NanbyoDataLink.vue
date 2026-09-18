@@ -11,37 +11,35 @@
   const store = useStore()
   const { t } = useI18n()
 
-  const nandoIds = computed(() => {
-    if (!props.mondoId) return []
-    return store.analysisResult?.nando_ids?.[props.mondoId] || []
+  const nandoId = computed(() => {
+    if (!props.mondoId) return null
+    return store.analysisResult?.nando_ids?.[props.mondoId] || null
   })
 
-  function href (nandoId: string) {
+  const href = computed(() => {
+    if (!nandoId.value) return ''
     const params = new URLSearchParams({ lang: store.locale })
-    return `https://nanbyodata.jp/disease/${nandoId}?${params.toString()}`
-  }
+    return `https://nanbyodata.jp/disease/${nandoId.value}?${params.toString()}`
+  })
 </script>
 
 <template>
-  <template v-if="nandoIds.length > 0">
-    <a
-      v-for="nandoId in nandoIds"
-      :key="nandoId"
-      class="nanbyo-data-link"
-      :href="href(nandoId)"
-      rel="noopener noreferrer"
-      target="_blank"
-      :title="t('resultsPage.mondo.nanbyoData', { id: nandoId })"
+  <a
+    v-if="nandoId"
+    class="nanbyo-data-link"
+    :href="href"
+    rel="noopener noreferrer"
+    target="_blank"
+    :title="t('resultsPage.mondo.nanbyoData', { id: nandoId })"
+  >
+    <img
+      :alt="t('resultsPage.mondo.nanbyoData', { id: nandoId })"
+      class="nanbyo-data-link__icon"
+      height="14"
+      :src="nanbyoIcon"
+      width="21"
     >
-      <img
-        :alt="t('resultsPage.mondo.nanbyoData', { id: nandoId })"
-        class="nanbyo-data-link__icon"
-        height="14"
-        :src="nanbyoIcon"
-        width="21"
-      >
-    </a>
-  </template>
+  </a>
 </template>
 
 <style scoped>

@@ -48,7 +48,8 @@
       "geneDerived": "源自基因",
       "geneDerivedHint": "该疾病由基因符号推定，而非 OMIM ID",
       "panelSearch": "在 PubCaseFinder PanelSearch 中打开",
-      "nanbyoData": "在 NanbyoData 中打开 {id}"
+      "nanbyoData": "在 NanbyoData 中打开 {id}",
+      "omimEntry": "打开 OMIM {id}"
     },
     "noResults": "无结果可显示。"
   },

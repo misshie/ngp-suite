@@ -48,7 +48,8 @@
       "geneDerived": "derivato dal gene",
       "geneDerivedHint": "Malattia dedotta dal simbolo del gene, non da un ID OMIM",
       "panelSearch": "Apri in PubCaseFinder PanelSearch",
-      "nanbyoData": "Apri {id} in NanbyoData"
+      "nanbyoData": "Apri {id} in NanbyoData",
+      "omimEntry": "Apri OMIM {id}"
     },
     "noResults": "Nessun risultato da visualizzare."
   },

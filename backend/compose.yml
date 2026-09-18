@@ -1,6 +1,7 @@
 services:
   # 1. FastAPI API server service
   api:
+    image: backend-api:latest
     build:
       context: . # Use the Dockerfile in the project root
       args:
@@ -18,6 +19,7 @@ services:
 
   # 2. Nginx reverse proxy service
   nginx:
+    image: backend-nginx:latest
     build:
       context: ./nginx
     container_name: ngpsuite-proxy

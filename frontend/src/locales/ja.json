@@ -53,7 +53,11 @@
     },
     "gene": {
       "unresolved": "遺伝子未確定",
-      "unresolvedHint": "GMDB に原因遺伝子の登録がないため、疾患名（MONDO ラベル）を表示しています"
+      "unresolvedHint": "GMDB に原因遺伝子の登録がないため、疾患名（MONDO ラベル）を表示しています",
+      "subtypeUnresolved": "サブタイプ未確定",
+      "subtypeUnresolvedHint": "サブタイプが未確定で、候補遺伝子が今回の結果に含まれていません",
+      "mondoSourced": "MONDO 由来",
+      "mondoSourcedHint": "GMDB に遺伝子登録がない症例に対し、MONDO の疾患-遺伝子関係から補った候補です"
     },
     "noResults": "表示する結果がありません。"
   },

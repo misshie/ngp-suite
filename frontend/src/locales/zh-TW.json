@@ -53,7 +53,11 @@
     },
     "gene": {
       "unresolved": "基因未確定",
-      "unresolvedHint": "GMDB 未登錄致病基因，因此顯示疾病名稱（MONDO 標籤）"
+      "unresolvedHint": "GMDB 未登錄致病基因，因此顯示疾病名稱（MONDO 標籤）",
+      "subtypeUnresolved": "亞型未確定",
+      "subtypeUnresolvedHint": "亞型未確定，且候選基因未出現在本次結果中",
+      "mondoSourced": "MONDO 來源",
+      "mondoSourcedHint": "因 GMDB 無此病例的基因紀錄，故依 MONDO 疾病-基因關係補齊"
     },
     "noResults": "無結果可顯示。"
   },

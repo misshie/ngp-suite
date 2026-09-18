@@ -53,7 +53,11 @@
     },
     "gene": {
       "unresolved": "gene non determinato",
-      "unresolvedHint": "GMDB non registra un gene causale; viene mostrato il nome della malattia (etichetta MONDO)"
+      "unresolvedHint": "GMDB non registra un gene causale; viene mostrato il nome della malattia (etichetta MONDO)",
+      "subtypeUnresolved": "sottotipo non determinato",
+      "subtypeUnresolvedHint": "Sottotipo non determinato e nessun gene candidato compare in questo risultato",
+      "mondoSourced": "da MONDO",
+      "mondoSourcedHint": "Integrato da una relazione malattia–gene MONDO perché GMDB non ha un gene per questo caso"
     },
     "noResults": "Nessun risultato da visualizzare."
   },

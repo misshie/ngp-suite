@@ -93,11 +93,13 @@ A gene list sorted by the distance in ascending order which can be used for vari
 * **distance** is the cosine distance to the nearest image with the gene in the gallery. A smaller distance indicates a higher similarity.
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
-* **gene_entrez_id and gene_name** the gene id and gene name. For true genes, `gene_name` is the HGNC symbol. When GMDB records no causative gene (chromosomal abnormality, large deletion, clinical diagnosis only), `gene_name` is the English MONDO label (falling back to the GMDB disorder name), `gene_entrez_id` is null, `gene_unresolved` is true, and `gene_labels` maps language codes to the same display string so the UI can follow the active locale.
+* **gene_entrez_id and gene_name** the gene id and gene name. For true genes, `gene_name` is the HGNC symbol. Gallery rows without a GMDB gene are classified in the metadata pickle (`gene_status`):
+  * `gmdb` / `mondo` — real gene symbols. `mondo` means the symbol was filled from MONDO’s disease–gene relation and merged into that gene’s gallery id; `gene_source` is `mondo` on those evidence images. Optional `hgnc_id` is present when Entrez is missing.
+  * `subtype_unresolved` — parent / multi-gene disease label with MONDO subtype candidates. At predict time, NGPsuite merges the row into the nearest candidate gene already in the ranked list (by GM distance). If no candidate is present, the row stays with `subtype_unresolved: true` and localized `gene_labels`.
+  * `gene_unresolved` — chromosomal disorders and other diseases with no usable gene; `gene_name` is the English MONDO label (fallback: GMDB disorder name), `gene_entrez_id` is null, and `gene_labels` follows the UI locale.
 * **gestalt score** is the same as the distance.
 
-**Note:** some syndromes have no gene associated because they are the chromosomal abnormality or huge deletion that cover
-multiple genes. We still keep them in the entry (for example Williams syndrome). Filter these with `gene_unresolved` (or a null `gene_entrez_id`) when you only need true gene symbols.  
+**Note:** chromosomal and truly gene-unknown diseases remain as disease-name rows (for example Williams syndrome). Filter with `gene_unresolved` / `subtype_unresolved` (or a null `gene_entrez_id`) when you only need true gene symbols. MONDO-sourced fills are inferences from ontology and facial similarity, not confirmed genotypes.
 
 ```angular2html
 {    

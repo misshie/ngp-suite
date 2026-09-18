@@ -53,7 +53,11 @@
     },
     "gene": {
       "unresolved": "유전자 미확정",
-      "unresolvedHint": "GMDB에 원인 유전자가 등록되어 있지 않아 질환명(MONDO 라벨)을 표시합니다"
+      "unresolvedHint": "GMDB에 원인 유전자가 등록되어 있지 않아 질환명(MONDO 라벨)을 표시합니다",
+      "subtypeUnresolved": "아형 미확정",
+      "subtypeUnresolvedHint": "아형이 미확정이며 후보 유전자가 이번 결과에 포함되어 있지 않습니다",
+      "mondoSourced": "MONDO 유래",
+      "mondoSourcedHint": "GMDB에 유전자가 없어 MONDO 질환-유전자 관계로 보완한 후보입니다"
     },
     "noResults": "표시할 결과가 없습니다."
   },

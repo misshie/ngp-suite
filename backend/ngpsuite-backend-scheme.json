@@ -103,12 +103,25 @@
         },
         "gene_labels": {
           "type": "object",
-          "description": "Language code to display name. Present only when gene_unresolved is true.",
+          "description": "Language code to display name. Present when gene_unresolved or subtype_unresolved is true.",
           "additionalProperties": { "type": "string" }
         },
         "gene_unresolved": {
           "type": "boolean",
-          "description": "True when the row represents a disease without a registered causative gene."
+          "description": "True when the row represents a disease without a usable causative gene (chromosomal or unknown)."
+        },
+        "subtype_unresolved": {
+          "type": "boolean",
+          "description": "True when MONDO lists subtype gene candidates but none appear in this result set."
+        },
+        "hgnc_id": {
+          "type": ["string", "null"],
+          "description": "HGNC id (e.g. HGNC:7133). Used when Entrez is missing for MONDO-filled genes."
+        },
+        "gene_source": {
+          "type": ["string", "null"],
+          "description": "gmdb for GMDB-registered genes; mondo when filled from MONDO disease–gene relations.",
+          "enum": ["gmdb", "mondo", null]
         },
         "distance": { "type": "number" },
         "score": { "type": ["number", "null"] },

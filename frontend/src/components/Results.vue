@@ -446,16 +446,42 @@
                   :title="t('resultsPage.gene.unresolvedHint')"
                   variant="tonal"
                 >{{ t('resultsPage.gene.unresolved') }}</v-chip>
+                <v-chip
+                  v-else-if="item.subtype_unresolved"
+                  class="ml-1"
+                  color="amber-darken-2"
+                  size="x-small"
+                  :title="t('resultsPage.gene.subtypeUnresolvedHint')"
+                  variant="tonal"
+                >{{ t('resultsPage.gene.subtypeUnresolved') }}</v-chip>
+                <v-chip
+                  v-else-if="item.gene_source === 'mondo'"
+                  class="ml-1"
+                  color="teal"
+                  size="x-small"
+                  :title="t('resultsPage.gene.mondoSourcedHint')"
+                  variant="tonal"
+                >{{ t('resultsPage.gene.mondoSourced') }}</v-chip>
               </template>
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
-              <template #item.gene_entrez_id="{ item }"><a
-                v-if="item.gene_entrez_id"
-                class="text-decoration-none"
-                :href="`https://www.ncbi.nlm.nih.gov/gene/${item.gene_entrez_id}`"
-                rel="noopener noreferrer"
-                target="_blank"
-              >{{ item.gene_entrez_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a><span v-else>-</span></template>
+              <template #item.gene_entrez_id="{ item }">
+                <a
+                  v-if="item.gene_entrez_id"
+                  class="text-decoration-none"
+                  :href="`https://www.ncbi.nlm.nih.gov/gene/${item.gene_entrez_id}`"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >{{ item.gene_entrez_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a>
+                <a
+                  v-else-if="item.hgnc_id"
+                  class="text-decoration-none"
+                  :href="`https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/${item.hgnc_id}`"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >{{ item.hgnc_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a>
+                <span v-else>-</span>
+              </template>
               <template #item.pubcasefinder_rank="{ item }">{{ item.pubcasefinder_rank ?? '-' }}</template>
               <template #item.pubcasefinder_score="{ item }">{{ formatScore(item.pubcasefinder_score) }}</template>
               <template #item.pcf_match_visual="{ item }"><v-progress-linear

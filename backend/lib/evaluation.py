@@ -312,6 +312,15 @@ def _subject_syndrome_labels(keys, synds_metadata):
     return english, labels
 
 
+def _gene_status(meta, images_synds_dict, image_id):
+    """Prefer pickle gene_status; fall back for pre-resolution pickles."""
+    status = meta.get('gene_status')
+    if status:
+        return status
+    empty = not (images_synds_dict.get(int(image_id), {}).get('gene_names') or '').strip()
+    return 'gene_unresolved' if empty else 'gmdb'
+
+
 def format_gene_json(results, genes_metadata_dict, images_dict, images_synds_dict,
                      synds_metadata, synd_entries_dict, case_id=''):
     genes = results[0][0]
@@ -321,24 +330,74 @@ def format_gene_json(results, genes_metadata_dict, images_dict, images_synds_dic
     output_list = []
     for gene, dist, image_id in zip(genes, dists, img_ids):
         meta = genes_metadata_dict[int(gene)]
-        # GMDB rows without a causative gene carry the disease name as a pseudo gene.
-        unresolved = not (images_synds_dict.get(int(image_id), {}).get('gene_names') or '').strip()
-        name, labels = (
-            _subject_syndrome_labels(synd_entries_dict.get(int(image_id)) or [], synds_metadata)
-            if unresolved else (None, None)
-        )
-        output = {'gene_name': name or meta['gene_name'],
-                  'gene_entrez_id': meta['gene_entrez_id'],
-                  'distance': round(float(dist), 3),
-                  'gestalt_score': round(1.3 - float(dist), 3),
-                  'image_id': image_id,
-                  'subject_id': str(images_dict[int(image_id)][0]['patient_id'])}
-        if unresolved:
+        gene_row = images_dict[int(image_id)][0]
+        status = _gene_status(meta, images_synds_dict, image_id)
+        disease_name = disease_labels = None
+        if status in ('gene_unresolved', 'subtype_unresolved'):
+            disease_name, disease_labels = _subject_syndrome_labels(
+                synd_entries_dict.get(int(image_id)) or [], synds_metadata)
+
+        output = {
+            'gene_name': disease_name or meta['gene_name'],
+            'gene_entrez_id': meta['gene_entrez_id'],
+            'distance': round(float(dist), 3),
+            'gestalt_score': round(1.3 - float(dist), 3),
+            'image_id': image_id,
+            'subject_id': str(gene_row['patient_id']),
+        }
+        hgnc_id = meta.get('hgnc_id')
+        if hgnc_id:
+            output['hgnc_id'] = hgnc_id
+        gene_source = gene_row.get('gene_source') or (
+            'mondo' if status == 'mondo' else 'gmdb' if status == 'gmdb' else None)
+        if gene_source:
+            output['gene_source'] = gene_source
+        if status == 'gene_unresolved':
             output['gene_unresolved'] = True
-            output['gene_labels'] = labels or {'en': output['gene_name']}
+            output['gene_labels'] = disease_labels or {'en': output['gene_name']}
+        elif status == 'subtype_unresolved':
+            output['subtype_unresolved'] = True
+            output['gene_labels'] = disease_labels or {'en': output['gene_name']}
+            candidates = meta.get('subtype_candidates')
+            if candidates:
+                output['subtype_candidates'] = candidates
         output_list.append(output)
 
     return output_list
+
+
+def resolve_subtype_genes(gene_output_list):
+    """Merge subtype-unresolved disease rows into their nearest candidate gene row."""
+    best_by_symbol = {}
+    for row in gene_output_list:
+        if not row.get('subtype_unresolved') and not row.get('gene_unresolved'):
+            best_by_symbol.setdefault(row['gene_name'], row)
+
+    resolved = []
+    for row in gene_output_list:
+        if not row.get('subtype_unresolved'):
+            resolved.append(row)
+            continue
+        candidates = [
+            best_by_symbol[c['gene_name']]
+            for c in row.get('subtype_candidates') or []
+            if c.get('gene_name') in best_by_symbol
+        ]
+        if not candidates:
+            resolved.append(row)
+            continue
+        target = min(candidates, key=lambda r: r['distance'])
+        if row['distance'] < target['distance']:
+            # Same dict may already sit in ``resolved``; mutate in place.
+            target.update({
+                k: row[k] for k in ('distance', 'gestalt_score', 'image_id', 'subject_id')
+            })
+            target['gene_source'] = 'mondo'
+        # Drop the disease row; the candidate gene row remains.
+    for row in resolved:
+        row.pop('subtype_candidates', None)
+    resolved.sort(key=lambda r: r['distance'])
+    return resolved
 
 
 def format_subject_json(results, images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id=''):
@@ -430,6 +489,7 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
     gene_output_list = format_gene_json(
         first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict,
         images_synds_dict, synds_metadata, synd_entries_dict, case_id)
+    gene_output_list = resolve_subtype_genes(gene_output_list)
     subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id)
 
     output_finished_time = time.time()

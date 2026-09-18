@@ -53,7 +53,11 @@
     },
     "gene": {
       "unresolved": "Gen unbestimmt",
-      "unresolvedHint": "In GMDB ist kein kausales Gen hinterlegt; der Krankheitsname (MONDO-Label) wird angezeigt"
+      "unresolvedHint": "In GMDB ist kein kausales Gen hinterlegt; der Krankheitsname (MONDO-Label) wird angezeigt",
+      "subtypeUnresolved": "Subtyp unbestimmt",
+      "subtypeUnresolvedHint": "Subtyp unbestimmt; kein Kandidatengen erscheint in diesem Ergebnis",
+      "mondoSourced": "MONDO-basiert",
+      "mondoSourcedHint": "Aus einer MONDO-Krankheits-Gen-Beziehung ergänzt, da GMDB kein Gen für diesen Fall hat"
     },
     "noResults": "Keine Ergebnisse zum Anzeigen."
   },

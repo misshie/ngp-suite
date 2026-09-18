@@ -53,7 +53,11 @@
     },
     "gene": {
       "unresolved": "gene unresolved",
-      "unresolvedHint": "No causative gene is registered in GMDB; the disease name (MONDO label) is shown instead"
+      "unresolvedHint": "No causative gene is registered in GMDB; the disease name (MONDO label) is shown instead",
+      "subtypeUnresolved": "subtype unresolved",
+      "subtypeUnresolvedHint": "Subtype is unresolved and no candidate gene appears in this result set",
+      "mondoSourced": "MONDO-sourced",
+      "mondoSourcedHint": "Filled from a MONDO disease–gene relation because GMDB has no gene for this case"
     },
     "noResults": "No results to display."
   },

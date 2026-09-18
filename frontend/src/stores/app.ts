@@ -5,6 +5,9 @@ interface GeneEntry {
   gene_entrez_id: string | null
   gene_labels?: Record<string, string>
   gene_unresolved?: boolean
+  subtype_unresolved?: boolean
+  hgnc_id?: string | null
+  gene_source?: 'gmdb' | 'mondo' | null
   distance: number
   score: number | null
   gm_rank?: number

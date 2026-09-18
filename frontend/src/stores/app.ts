@@ -47,7 +47,7 @@ interface SyndromeEntry {
 interface PatientEntry {
   subject_id: string
   gene_name: string
-  gene_entrez_id: string
+  gene_entrez_id: string | null
   distance: number
   image_id: string
   syndrome_name: string

@@ -103,7 +103,7 @@
         },
         "gene_labels": {
           "type": "object",
-          "description": "Language code to display name. Present when gene_unresolved or subtype_unresolved is true.",
+          "description": "Language code to display name. Present when gene_unresolved is true (and for legacy subtype_unresolved rows).",
           "additionalProperties": { "type": "string" }
         },
         "gene_unresolved": {
@@ -112,7 +112,7 @@
         },
         "subtype_unresolved": {
           "type": "boolean",
-          "description": "True when MONDO lists subtype gene candidates but none appear in this result set."
+          "description": "Legacy only. Present for old pickles that stored parent-disease rows instead of expanding MONDO subtype candidates into gene_level entries."
         },
         "hgnc_id": {
           "type": ["string", "null"],
@@ -120,7 +120,7 @@
         },
         "gene_source": {
           "type": ["string", "null"],
-          "description": "gmdb for GMDB-registered genes; mondo when filled from MONDO disease–gene relations.",
+          "description": "gmdb for GMDB-registered genes; mondo when filled or expanded from MONDO disease–gene relations.",
           "enum": ["gmdb", "mondo", null]
         },
         "distance": { "type": "number" },
@@ -199,8 +199,14 @@
       "type": "object",
       "properties": {
         "subject_id": { "type": "string" },
-        "gene_name": { "type": "string" },
-        "gene_entrez_id": { "type": "string" },
+        "gene_name": {
+          "type": "string",
+          "description": "Gene symbol(s) of the nearest gallery image. Multiple MONDO-expanded candidates are joined with '; '."
+        },
+        "gene_entrez_id": {
+          "type": ["string", "null"],
+          "description": "Entrez ID(s) for gene_name, joined with '; ' when several. Null when none of the entries have an Entrez ID."
+        },
         "distance": { "type": "number" },
         "image_id": { "type": "string" },
         "syndrome_name": {

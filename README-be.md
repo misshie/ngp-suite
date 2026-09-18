@@ -94,12 +94,11 @@ A gene list sorted by the distance in ascending order which can be used for vari
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
 * **gene_entrez_id and gene_name** the gene id and gene name. For true genes, `gene_name` is the HGNC symbol. Gallery rows without a GMDB gene are classified in the metadata pickle (`gene_status`):
-  * `gmdb` / `mondo` — real gene symbols. `mondo` means the symbol was filled from MONDO’s disease–gene relation and merged into that gene’s gallery id; `gene_source` is `mondo` on those evidence images. Optional `hgnc_id` is present when Entrez is missing.
-  * `subtype_unresolved` — parent / multi-gene disease label with MONDO subtype candidates. At predict time, NGPsuite merges the row into the nearest candidate gene already in the ranked list (by GM distance). If no candidate is present, the row stays with `subtype_unresolved: true` and localized `gene_labels`.
+  * `gmdb` / `mondo` — real gene symbols. `mondo` means the symbol was filled from MONDO’s disease–gene relation (single-gene terms) or expanded from a parent / multi-gene term into one `gene_level` entry per candidate (same image, same GM distance). Optional `hgnc_id` is present when Entrez is missing; `gene_source` is `mondo` on those evidence images.
   * `gene_unresolved` — chromosomal disorders and other diseases with no usable gene; `gene_name` is the English MONDO label (fallback: GMDB disorder name), `gene_entrez_id` is null, and `gene_labels` follows the UI locale.
 * **gestalt score** is the same as the distance.
 
-**Note:** chromosomal and truly gene-unknown diseases remain as disease-name rows (for example Williams syndrome). Filter with `gene_unresolved` / `subtype_unresolved` (or a null `gene_entrez_id`) when you only need true gene symbols. MONDO-sourced fills are inferences from ontology and facial similarity, not confirmed genotypes.
+**Note:** chromosomal and truly gene-unknown diseases remain as disease-name rows (for example Williams syndrome). Filter with `gene_unresolved` (or a null `gene_entrez_id`) when you only need true gene symbols. MONDO-sourced fills and expansions are ontology-backed candidates, not confirmed genotypes.
 
 ```angular2html
 {    
@@ -188,7 +187,7 @@ maps to more than one disease — contributes one entry per MONDO ID at the same
     ]
 ```
 
-`suggested_patients_list` entries include `mondo_id` as a sorted array of MONDO IDs for the nearest gallery image (empty when that image has no MONDO term). Unlike the syndrome list, a dual-diagnosis image does not duplicate the patient row. `syndrome_name` is the English MONDO label (or the GMDB disorder name when there is no MONDO term); when the image has several MONDO IDs the labels are joined with `; `. `syndrome_labels` maps language codes to the same display string so the UI can follow the active locale.
+`suggested_patients_list` entries include `mondo_id` as a sorted array of MONDO IDs for the nearest gallery image (empty when that image has no MONDO term). Unlike the syndrome list, a dual-diagnosis image does not duplicate the patient row. `syndrome_name` is the English MONDO label (or the GMDB disorder name when there is no MONDO term); when the image has several MONDO IDs the labels are joined with `; `. `syndrome_labels` maps language codes to the same display string so the UI can follow the active locale. `gene_name` / `gene_entrez_id` come from every `gene_level` entry of that image joined with `; ` (so a MONDO-expanded parent disease lists all candidate symbols; a GMDB-annotated gene is shown as-is).
 
 ## Step-by-step setup
 ### Environment

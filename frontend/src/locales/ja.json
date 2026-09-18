@@ -10,7 +10,10 @@
   "startPage": {
     "welcome": "ようこそ",
     "getStarted": "はじめましょう",
-    "pressAnalysis": "左のナビゲーションバーにある<strong>解析</strong>ボタンを押して、解析を開始してください。"
+    "pressAnalysis": "左のナビゲーションバーにある<strong>解析</strong>ボタンを押して、解析を開始してください。",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "同梱の Mondo international edition",
+    "mondoAttribution": "このプロダクトには Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）を同梱しています。Mondoのライセンスは <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a> です。"
   },
   "analysisDialog": {
     "title": "解析ファイルをアップロード",
@@ -84,6 +87,7 @@
     "title": "NGPsuiteについて",
     "programmedBy": "プログラム作成者",
     "poweredBy": "このアプリケーションはGestaltMatcherとPubCaseFinderを利用して動作しています。",
+    "mondoAttribution": "このプロダクトには Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）を同梱しています。Mondoのライセンスは <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a> です。",
     "disclaimer": "NGPsuite, GestaltMatcher, PubCaseFinder, およびその他の情報源は、<strong>研究および教育目的</strong>でのみ使用されることを意図しています。"
   },
   "footer": {

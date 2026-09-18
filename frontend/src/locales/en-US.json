@@ -10,7 +10,10 @@
   "startPage": {
     "welcome": "Welcome to",
     "getStarted": "Get Started",
-    "pressAnalysis": "Press the <strong>Analysis</strong> button on the left navigation bar to start."
+    "pressAnalysis": "Press the <strong>Analysis</strong> button on the left navigation bar to start.",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "Bundled Mondo international edition",
+    "mondoAttribution": "This product includes the Mondo Disease Ontology (Mondo) international edition (<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>). Mondo's license is <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>."
   },
   "analysisDialog": {
     "title": "Upload Analysis File",
@@ -84,6 +87,7 @@
     "title": "About NGPsuite",
     "programmedBy": "Programmed by",
     "poweredBy": "This application is powered by GestaltMatcher and PubCaseFinder.",
+    "mondoAttribution": "This product includes the Mondo Disease Ontology (Mondo) international edition (<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>). Mondo's license is <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>.",
     "disclaimer": "NGPsuite. GestaltMatcher, PubCaseFinder and other data sources are intended for <strong>research and educational purposes only.</strong>"
   },
   "footer": {

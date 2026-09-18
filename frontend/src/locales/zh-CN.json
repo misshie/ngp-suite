@@ -10,7 +10,10 @@
   "startPage": {
     "welcome": "欢迎来到",
     "getStarted": "开始",
-    "pressAnalysis": "请按左侧导航栏上的<strong>分析</strong>按钮开始。"
+    "pressAnalysis": "请按左侧导航栏上的<strong>分析</strong>按钮开始。",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "已内置 Mondo international edition",
+    "mondoAttribution": "本产品包含 Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）。Mondo 的许可是 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>。"
   },
   "analysisDialog": {
     "title": "上传分析文件",
@@ -84,6 +87,7 @@
     "title": "关于 NGPsuite",
     "programmedBy": "编程者",
     "poweredBy": "此应用程序由GestaltMatcher和PubCaseFinder提供支持。",
+    "mondoAttribution": "本产品包含 Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）。Mondo 的许可是 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>。",
     "disclaimer": "NGPsuite仅用于<strong>研究和教育目的。</strong>"
   },
   "footer": {

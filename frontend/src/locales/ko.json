@@ -10,7 +10,10 @@
   "startPage": {
     "welcome": "다음에 오신 것을 환영합니다",
     "getStarted": "시작하기",
-    "pressAnalysis": "시작하려면 왼쪽 탐색 모음에서 <strong>분석</strong> 버튼을 누르세요."
+    "pressAnalysis": "시작하려면 왼쪽 탐색 모음에서 <strong>분석</strong> 버튼을 누르세요.",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "포함된 Mondo international edition",
+    "mondoAttribution": "이 제품에는 Mondo Disease Ontology (Mondo) international edition(<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>)이 포함되어 있습니다. Mondo의 라이선스는 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>입니다."
   },
   "analysisDialog": {
     "title": "분석 파일 업로드",
@@ -84,6 +87,7 @@
     "title": "NGPsuite 정보",
     "programmedBy": "프로그래머",
     "poweredBy": "이 애플리케이션은 GestaltMatcher 및 PubCaseFinder에 의해 구동됩니다.",
+    "mondoAttribution": "이 제품에는 Mondo Disease Ontology (Mondo) international edition(<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>)이 포함되어 있습니다. Mondo의 라이선스는 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>입니다.",
     "disclaimer": "NGPsuite는 <strong>연구 및 교육 목적</strong>으로만 사용됩니다."
   },
   "footer": {

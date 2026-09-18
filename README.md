@@ -79,8 +79,10 @@ Place the following files in the `backend/data/` directory:
 * `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
 
 5. MONDO ontology (shipped with the repository)
-The following file is tracked under `backend/mondo/` (CC BY 4.0; no patient data) and does not need to be downloaded separately:
-* `mondo-international.obo.gz` (labels and ancestor hierarchy for gallery disorders; [source](https://mondo.monarchinitiative.org/pages/download/))
+The following file is tracked under `backend/mondo/` (no patient data) and does not need to be downloaded separately:
+* `mondo-international.obo.gz` (labels and ancestor hierarchy for gallery disorders)
+
+This product includes the Mondo Disease Ontology (Mondo) international edition ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See also [Acknowledgements](#acknowledgements).
 
 The final file tree should look like this:
 
@@ -224,6 +226,10 @@ See the [LICENSE.md](LICENSE.md) file for full details.
 The backend service of this project is based on the work of
 [GestaltMatcher](https://www.gestaltmatcher.org/) with their [repository](https://github.com/igsb/GestaltMatcher-Arc/).
 The backend service utilizes the API of PubCaseFinder; see [detailed description](https://pubcasefinder.dbcls.jp/api). The author is grateful for their foundational contributions to the field.
+
+This product includes the Mondo Disease Ontology (Mondo) international edition
+([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The ontology file is shipped under `backend/mondo/`.
 
 We would like to thank all participants and organizers of the [DBCLS BioHackathon 2025](https://2025.biohackathon.org/) (September 14-20, 2025, Mie, Japan) for their valuable discussions and support, which contributed significantly to the development of this project.
 

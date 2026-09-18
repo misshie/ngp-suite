@@ -34,13 +34,19 @@
   ]
 
   // Related Resources
-  const resources = [
+  const resources = computed(() => [
     {
       href: 'https://github.com/misshie/ngp-suite',
       icon: 'mdi-github',
       title: 'NGPsuite GitHub repository',
     },
-  ]
+    {
+      href: 'https://mondo.monarchinitiative.org/',
+      icon: 'mdi-graph-outline',
+      title: t('startPage.mondoResourceTitle'),
+      subtitle: t('startPage.mondoResourceSubtitle'),
+    },
+  ])
 
   // Updated Publications list
   const publications = [
@@ -178,7 +184,7 @@
       <!-- Related Resources -->
       <div class="text-left mb-6">
         <h3 class="text-h6 font-weight-medium mb-2">Related Resources</h3>
-        <v-list bg-color="transparent" lines="one">
+        <v-list bg-color="transparent" lines="two">
           <v-list-item
             v-for="resource in resources"
             :key="resource.title"
@@ -191,11 +197,16 @@
               <v-icon class="mr-4" :icon="resource.icon" />
             </template>
             <v-list-item-title>{{ resource.title }}</v-list-item-title>
+            <v-list-item-subtitle v-if="resource.subtitle">{{ resource.subtitle }}</v-list-item-subtitle>
             <template #append>
               <v-icon icon="mdi-open-in-new" size="small" />
             </template>
           </v-list-item>
         </v-list>
+        <p
+          class="text-body-2 text-medium-emphasis mt-2 px-2"
+          v-html="t('startPage.mondoAttribution')"
+        />
       </div>
 
       <!-- Publications -->

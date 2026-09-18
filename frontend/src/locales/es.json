@@ -10,7 +10,10 @@
   "startPage": {
     "welcome": "Bienvenido a",
     "getStarted": "Empezar",
-    "pressAnalysis": "Presione el botón <strong>Análisis</strong> en la barra de navegación izquierda para empezar."
+    "pressAnalysis": "Presione el botón <strong>Análisis</strong> en la barra de navegación izquierda para empezar.",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "Edición internacional de Mondo incluida",
+    "mondoAttribution": "Este producto incluye la Mondo Disease Ontology (Mondo) international edition (<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>). La licencia de Mondo es <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>."
   },
   "analysisDialog": {
     "title": "Subir archivo de análisis",
@@ -84,6 +87,7 @@
     "title": "Acerca de NGPsuite",
     "programmedBy": "Programado por",
     "poweredBy": "Esta aplicación es impulsada por GestaltMatcher y PubCaseFinder.",
+    "mondoAttribution": "Este producto incluye la Mondo Disease Ontology (Mondo) international edition (<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>). La licencia de Mondo es <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>.",
     "disclaimer": "NGPsuite está destinado únicamente para fines de <strong>investigación y educativos.</strong>"
   },
   "footer": {

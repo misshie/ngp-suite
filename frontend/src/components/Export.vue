@@ -3,7 +3,7 @@
   import { useI18n } from 'vue-i18n'
   import * as XLSX from 'xlsx' // Import the xlsx library
   import { useStore } from '@/stores/app'
-  import { formatMondoTerm, syndromeLabel } from '@/utils/mondoLabel'
+  import { formatMondoTerm, geneLabel, syndromeLabel } from '@/utils/mondoLabel'
 
   const { t } = useI18n()
 
@@ -66,6 +66,16 @@
     }),
   )
 
+  const geneRows = computed(() =>
+    (store.analysisResult?.suggested_genes_list || []).map(item => {
+      const { gene_labels, ...rest } = item
+      return {
+        ...rest,
+        gene_name: geneLabel({ gene_name: item.gene_name, gene_labels }, store.locale),
+      }
+    }),
+  )
+
   const patientRows = computed(() =>
     (store.analysisResult?.suggested_patients_list || []).map(item => {
       const { syndrome_labels, ...rest } = item
@@ -97,7 +107,7 @@
       XLSX.utils.book_append_sheet(wb, ws, 'Syndromes')
     }
     if (store.analysisResult.suggested_genes_list) {
-      const ws = XLSX.utils.json_to_sheet(store.analysisResult.suggested_genes_list)
+      const ws = XLSX.utils.json_to_sheet(geneRows.value)
       XLSX.utils.book_append_sheet(wb, ws, 'Genes')
     }
     if (store.analysisResult.suggested_patients_list) {
@@ -145,7 +155,7 @@
         break
       }
       case 'genes': {
-        downloadTSV(store.analysisResult.suggested_genes_list, 'genes.tsv')
+        downloadTSV(geneRows.value, 'genes.tsv')
         break
       }
       case 'syndromes': {

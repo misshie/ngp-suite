@@ -93,12 +93,11 @@ A gene list sorted by the distance in ascending order which can be used for vari
 * **distance** is the cosine distance to the nearest image with the gene in the gallery. A smaller distance indicates a higher similarity.
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
-* **gene_entrez_id and gene_name** the gene id and gene name.
+* **gene_entrez_id and gene_name** the gene id and gene name. For true genes, `gene_name` is the HGNC symbol. When GMDB records no causative gene (chromosomal abnormality, large deletion, clinical diagnosis only), `gene_name` is the English MONDO label (falling back to the GMDB disorder name), `gene_entrez_id` is null, `gene_unresolved` is true, and `gene_labels` maps language codes to the same display string so the UI can follow the active locale.
 * **gestalt score** is the same as the distance.
 
 **Note:** some syndromes have no gene associated because they are the chromosomal abnormality or huge deletion that cover
-multiple genes. We still keep them in the entry. For example, WILLIAMS-BEUREN SYNDROME; WBS has no gene associated in OMIM, so we use gene_name: WILLIAMS-BEUREN SYNDROME; WBS and gene_entrez_id: null for this entry.
-Please filter out this kind of entry with null gene_entrez_id if you do need them.  
+multiple genes. We still keep them in the entry (for example Williams syndrome). Filter these with `gene_unresolved` (or a null `gene_entrez_id`) when you only need true gene symbols.  
 
 ```angular2html
 {    

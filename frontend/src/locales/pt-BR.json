@@ -51,6 +51,10 @@
       "nanbyoData": "Abrir {id} no NanbyoData",
       "omimEntry": "Abrir OMIM {id}"
     },
+    "gene": {
+      "unresolved": "gene indeterminado",
+      "unresolvedHint": "GMDB não registra um gene causal; o nome da doença (rótulo MONDO) é exibido"
+    },
     "noResults": "Nenhum resultado para exibir."
   },
   "settingsDialog": {

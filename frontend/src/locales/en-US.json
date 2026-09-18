@@ -51,6 +51,10 @@
       "nanbyoData": "Open {id} in NanbyoData",
       "omimEntry": "Open OMIM {id}"
     },
+    "gene": {
+      "unresolved": "gene unresolved",
+      "unresolvedHint": "No causative gene is registered in GMDB; the disease name (MONDO label) is shown instead"
+    },
     "noResults": "No results to display."
   },
   "settingsDialog": {

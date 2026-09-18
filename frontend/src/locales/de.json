@@ -51,6 +51,10 @@
       "nanbyoData": "{id} in NanbyoData öffnen",
       "omimEntry": "OMIM {id} öffnen"
     },
+    "gene": {
+      "unresolved": "Gen unbestimmt",
+      "unresolvedHint": "In GMDB ist kein kausales Gen hinterlegt; der Krankheitsname (MONDO-Label) wird angezeigt"
+    },
     "noResults": "Keine Ergebnisse zum Anzeigen."
   },
   "settingsDialog": {

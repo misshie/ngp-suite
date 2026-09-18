@@ -21,6 +21,13 @@ export function syndromeLabel (
   return mondoLabel({ name: item.syndrome_name, labels: item.syndrome_labels }, locale)
 }
 
+export function geneLabel (
+  item: { gene_name: string, gene_labels?: Record<string, string> },
+  locale: string,
+): string {
+  return mondoLabel({ name: item.gene_name, labels: item.gene_labels }, locale)
+}
+
 export function formatMondoTerm (term: MondoTerm, locale: string): string {
   const label = mondoLabel(term, locale)
   return label ? `${term.id} ${label}` : term.id

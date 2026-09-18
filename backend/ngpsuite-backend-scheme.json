@@ -93,8 +93,23 @@
     "geneEntry": {
       "type": "object",
       "properties": {
-        "gene_name": { "type": "string" },
-        "gene_entrez_id": { "type": "string" },
+        "gene_name": {
+          "type": "string",
+          "description": "HGNC gene symbol, or the MONDO disease label when GMDB records no causative gene."
+        },
+        "gene_entrez_id": {
+          "type": ["string", "null"],
+          "description": "NCBI Entrez Gene ID. Null when gene_unresolved is true."
+        },
+        "gene_labels": {
+          "type": "object",
+          "description": "Language code to display name. Present only when gene_unresolved is true.",
+          "additionalProperties": { "type": "string" }
+        },
+        "gene_unresolved": {
+          "type": "boolean",
+          "description": "True when the row represents a disease without a registered causative gene."
+        },
         "distance": { "type": "number" },
         "score": { "type": ["number", "null"] },
         "gm_rank": { "type": "integer" },

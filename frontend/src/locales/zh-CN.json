@@ -51,6 +51,10 @@
       "nanbyoData": "在 NanbyoData 中打开 {id}",
       "omimEntry": "打开 OMIM {id}"
     },
+    "gene": {
+      "unresolved": "基因未确定",
+      "unresolvedHint": "GMDB 未登记致病基因，因此显示疾病名称（MONDO 标签）"
+    },
     "noResults": "无结果可显示。"
   },
   "settingsDialog": {

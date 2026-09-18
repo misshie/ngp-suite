@@ -2,7 +2,9 @@ import { defineStore } from 'pinia'
 
 interface GeneEntry {
   gene_name: string
-  gene_entrez_id: string
+  gene_entrez_id: string | null
+  gene_labels?: Record<string, string>
+  gene_unresolved?: boolean
   distance: number
   score: number | null
   gm_rank?: number

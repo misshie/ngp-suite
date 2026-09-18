@@ -3,7 +3,7 @@
   import { computed, inject, ref, watch } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { useStore } from '@/stores/app'
-  import { syndromeLabel } from '@/utils/mondoLabel'
+  import { geneLabel, syndromeLabel } from '@/utils/mondoLabel'
 
   const { t } = useI18n()
   const store = useStore()
@@ -436,6 +436,17 @@
               :search="geneSearch"
               :sort-by="[{ key: 'gm_rank', order: 'asc' }]"
             >
+              <template #item.gene_name="{ item }">
+                {{ geneLabel(item, store.locale) }}
+                <v-chip
+                  v-if="item.gene_unresolved"
+                  class="ml-1"
+                  color="blue-grey"
+                  size="x-small"
+                  :title="t('resultsPage.gene.unresolvedHint')"
+                  variant="tonal"
+                >{{ t('resultsPage.gene.unresolved') }}</v-chip>
+              </template>
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
               <template #item.gene_entrez_id="{ item }"><a
@@ -444,7 +455,7 @@
                 :href="`https://www.ncbi.nlm.nih.gov/gene/${item.gene_entrez_id}`"
                 rel="noopener noreferrer"
                 target="_blank"
-              >{{ item.gene_entrez_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a></template>
+              >{{ item.gene_entrez_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a><span v-else>-</span></template>
               <template #item.pubcasefinder_rank="{ item }">{{ item.pubcasefinder_rank ?? '-' }}</template>
               <template #item.pubcasefinder_score="{ item }">{{ formatScore(item.pubcasefinder_score) }}</template>
               <template #item.pcf_match_visual="{ item }"><v-progress-linear

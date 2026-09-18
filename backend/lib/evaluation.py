@@ -292,26 +292,8 @@ def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id='', 
     return output_list
 
 
-def format_gene_json(results, genes_metadata_dict, images_dict, case_id=''):
-    genes = results[0][0]
-    dists = results[1][0]
-    img_ids = results[2][0]
-
-    output_list = []
-    for gene, dist, image_id in zip(genes, dists, img_ids):
-        output = {'gene_name': genes_metadata_dict[int(gene)]['gene_name'],
-                  'gene_entrez_id': genes_metadata_dict[int(gene)]['gene_entrez_id'],
-                  'distance': round(float(dist), 3),
-                  'gestalt_score': round(1.3 - float(dist), 3),
-                  'image_id': image_id,
-                  'subject_id': str(images_dict[int(image_id)][0]['patient_id'])}
-        output_list.append(output)
-
-    return output_list
-
-
 def _subject_syndrome_labels(keys, synds_metadata):
-    """MONDO-derived patient-row disease name. Multiple MONDO IDs are joined with '; '."""
+    """MONDO-derived disease name. Multiple MONDO IDs are joined with '; '."""
     entries = [synds_metadata[key] for key in keys if key in synds_metadata]
     if not entries:
         return None, None
@@ -328,6 +310,35 @@ def _subject_syndrome_labels(keys, synds_metadata):
     if english:
         labels.setdefault('en', english)
     return english, labels
+
+
+def format_gene_json(results, genes_metadata_dict, images_dict, images_synds_dict,
+                     synds_metadata, synd_entries_dict, case_id=''):
+    genes = results[0][0]
+    dists = results[1][0]
+    img_ids = results[2][0]
+
+    output_list = []
+    for gene, dist, image_id in zip(genes, dists, img_ids):
+        meta = genes_metadata_dict[int(gene)]
+        # GMDB rows without a causative gene carry the disease name as a pseudo gene.
+        unresolved = not (images_synds_dict.get(int(image_id), {}).get('gene_names') or '').strip()
+        name, labels = (
+            _subject_syndrome_labels(synd_entries_dict.get(int(image_id)) or [], synds_metadata)
+            if unresolved else (None, None)
+        )
+        output = {'gene_name': name or meta['gene_name'],
+                  'gene_entrez_id': meta['gene_entrez_id'],
+                  'distance': round(float(dist), 3),
+                  'gestalt_score': round(1.3 - float(dist), 3),
+                  'image_id': image_id,
+                  'subject_id': str(images_dict[int(image_id)][0]['patient_id'])}
+        if unresolved:
+            output['gene_unresolved'] = True
+            output['gene_labels'] = labels or {'en': output['gene_name']}
+        output_list.append(output)
+
+    return output_list
 
 
 def format_subject_json(results, images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id=''):
@@ -416,7 +427,9 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
     case_id = 1
 
     synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id, synds_probabilities_dict)
-    gene_output_list = format_gene_json(first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
+    gene_output_list = format_gene_json(
+        first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict,
+        images_synds_dict, synds_metadata, synd_entries_dict, case_id)
     subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id)
 
     output_finished_time = time.time()

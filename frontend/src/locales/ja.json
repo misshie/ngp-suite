@@ -51,6 +51,10 @@
       "nanbyoData": "NanbyoData で {id} を開く",
       "omimEntry": "OMIM {id} を開く"
     },
+    "gene": {
+      "unresolved": "遺伝子未確定",
+      "unresolvedHint": "GMDB に原因遺伝子の登録がないため、疾患名（MONDO ラベル）を表示しています"
+    },
     "noResults": "表示する結果がありません。"
   },
   "settingsDialog": {

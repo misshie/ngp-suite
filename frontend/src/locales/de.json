@@ -30,6 +30,7 @@
   "resultsPage": {
     "title": "Analyseergebnis",
     "queriedHpo": "Abgefragte HPO",
+    "mondoVersion": "Mondo-Version",
     "modelVersion": "Modellversion",
     "galleryVersion": "Galerieversion",
     "tabs": {
@@ -46,7 +47,8 @@
     "mondo": {
       "geneDerived": "genbasiert",
       "geneDerivedHint": "Krankheit aus dem Gensymbol abgeleitet, nicht aus einer OMIM-ID",
-      "panelSearch": "In PubCaseFinder PanelSearch öffnen"
+      "panelSearch": "In PubCaseFinder PanelSearch öffnen",
+      "nanbyoData": "{id} in NanbyoData öffnen"
     },
     "noResults": "Keine Ergebnisse zum Anzeigen."
   },

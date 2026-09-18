@@ -30,6 +30,7 @@
   "resultsPage": {
     "title": "Risultato dell'Analisi",
     "queriedHpo": "HPO Interrogati",
+    "mondoVersion": "Versione Mondo",
     "modelVersion": "Versione Modello",
     "galleryVersion": "Versione Galleria",
     "tabs": {
@@ -46,7 +47,8 @@
     "mondo": {
       "geneDerived": "derivato dal gene",
       "geneDerivedHint": "Malattia dedotta dal simbolo del gene, non da un ID OMIM",
-      "panelSearch": "Apri in PubCaseFinder PanelSearch"
+      "panelSearch": "Apri in PubCaseFinder PanelSearch",
+      "nanbyoData": "Apri {id} in NanbyoData"
     },
     "noResults": "Nessun risultato da visualizzare."
   },

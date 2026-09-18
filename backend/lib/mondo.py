@@ -15,6 +15,8 @@ SYN_RE = re.compile(r'^synonym: "([^"]+)"(.*)$')
 LANG_RE = re.compile(r'language="([a-zA-Z-]+)"')
 # MONDO international stores translations as: property_value: skos:altLabel "ウィリアムズ症候群@ja" xsd:string
 ALT_LABEL_RE = re.compile(r'^property_value: skos:altLabel "(.+)@([a-zA-Z-]+)"')
+VERSION_INFO_RE = re.compile(r'^property_value: owl:versionInfo "([^"]+)"')
+NANDO_XREF_RE = re.compile(r'^xref: (NANDO:\d+)')
 
 
 def _open_text(path: str) -> io.TextIOBase:
@@ -31,17 +33,23 @@ def _pick_label(candidates: List[Tuple[bool, str]]) -> str:
     return candidates[0][1]
 
 
-def load_mondo_index(path: str) -> MondoIndex:
+def load_mondo_index(path: str) -> Tuple[MondoIndex, Optional[str]]:
     """Parse an OBO file into ``{mondo_id: {"name", "labels", "parents"}}``.
 
     Obsolete terms are dropped so that retired IDs cannot shadow their replacements.
     ``labels`` maps ISO 639 language codes (``en``, ``ja``, …) onto display names.
+
+    Returns:
+        ``(index, version)`` where ``version`` is the OBO header
+        ``owl:versionInfo`` value (e.g. ``2026-07-06``), or ``None`` if absent.
     """
     index: MondoIndex = {}
+    version: Optional[str] = None
 
     term_id: Optional[str] = None
     name = ""
     parents: List[str] = []
+    nando_ids: List[str] = []
     # language -> [(is_exact, text), ...]
     synonyms: Dict[str, List[Tuple[bool, str]]] = {}
     obsolete = False
@@ -61,6 +69,7 @@ def load_mondo_index(path: str) -> MondoIndex:
             "name": name,
             "labels": labels,
             "parents": sorted(set(parents)),
+            "nando_ids": sorted(set(nando_ids)),
         }
 
     with _open_text(path) as handle:
@@ -72,10 +81,13 @@ def load_mondo_index(path: str) -> MondoIndex:
                 term_id = None
                 name = ""
                 parents = []
+                nando_ids = []
                 synonyms = {}
                 obsolete = False
             elif not in_term:
-                continue
+                match = VERSION_INFO_RE.match(line)
+                if match and version is None:
+                    version = match.group(1)
             elif line.startswith("id: "):
                 if term_id is None:
                     term_id = line[4:].strip()
@@ -97,6 +109,10 @@ def load_mondo_index(path: str) -> MondoIndex:
                     continue
                 text, lang = match.group(1), match.group(2).lower()
                 synonyms.setdefault(lang, []).append((False, text))
+            elif line.startswith("xref: NANDO:"):
+                match = NANDO_XREF_RE.match(line)
+                if match:
+                    nando_ids.append(match.group(1))
             elif line.startswith("is_a: "):
                 # 'is_a: MONDO:0002254 {source="DOID:1928"} ! syndromic disease'
                 fields = line[6:].split()
@@ -106,7 +122,16 @@ def load_mondo_index(path: str) -> MondoIndex:
                 obsolete = True
         flush()
 
-    return index
+    return index, version
+
+
+def build_nando_map(index: MondoIndex) -> Dict[str, List[str]]:
+    """MONDO ID -> NANDO xrefs, keeping only terms that have at least one."""
+    return {
+        mondo_id: list(entry["nando_ids"])
+        for mondo_id, entry in index.items()
+        if entry.get("nando_ids")
+    }
 
 
 def _term(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:

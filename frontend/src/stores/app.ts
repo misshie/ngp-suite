@@ -82,6 +82,8 @@ export interface FeatureVectorEntry {
 export interface AnalysisResult {
   model_version: string
   gallery_version: string
+  mondo_version?: string
+  nando_ids?: Record<string, string[]>
   suggested_genes_list: GeneEntry[]
   suggested_syndromes_list: SyndromeEntry[]
   suggested_patients_list: PatientEntry[]

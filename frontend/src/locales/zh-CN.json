@@ -30,6 +30,7 @@
   "resultsPage": {
     "title": "分析结果",
     "queriedHpo": "查询的HPO",
+    "mondoVersion": "Mondo 版本",
     "modelVersion": "模型版本",
     "galleryVersion": "图库版本",
     "tabs": {
@@ -46,7 +47,8 @@
     "mondo": {
       "geneDerived": "源自基因",
       "geneDerivedHint": "该疾病由基因符号推定，而非 OMIM ID",
-      "panelSearch": "在 PubCaseFinder PanelSearch 中打开"
+      "panelSearch": "在 PubCaseFinder PanelSearch 中打开",
+      "nanbyoData": "在 NanbyoData 中打开 {id}"
     },
     "noResults": "无结果可显示。"
   },

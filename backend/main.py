@@ -15,7 +15,7 @@ from lib.utils_functions import readb64, encodeb64
 from datetime import datetime
 from lib.pubcasefinder import query_pubcasefinder
 from lib.integrator import integrate_json
-from lib.mondo import load_mondo_index, build_syndrome_index
+from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -89,6 +89,8 @@ async def lifespan(app: FastAPI):
     global _synd_entries_dict
     global _synd_key_metadata
     global _synds_probabilities_dict
+    global _mondo_version
+    global _mondo_nando
     _models = get_models()
     _cropper_model, _device = load_cropper_model()
     _synds_probabilities_dict = _load_synds_probabilities_dict()
@@ -98,10 +100,11 @@ async def lifespan(app: FastAPI):
     _images_synds_dict = data["disorder_level_metadata"]
     _images_genes_dict = data["gene_level_metadata"]
     _genes_metadata_dict = data["gene_metadata"]
-    mondo_index = load_mondo_index(os.path.join("mondo", "mondo-international.obo.gz"))
+    mondo_index, _mondo_version = load_mondo_index(os.path.join("mondo", "mondo-international.obo.gz"))
+    _mondo_nando = build_nando_map(mondo_index)
     _synd_entries_dict, _synd_key_metadata = build_syndrome_index(data, mondo_index)
-    print("Load MONDO index: {} terms, {} syndrome keys".format(
-        len(mondo_index), len(_synd_key_metadata)))
+    print("Load MONDO index: {} terms, {} syndrome keys, version={}, nando_mapped={}".format(
+        len(mondo_index), len(_synd_key_metadata), _mondo_version, len(_mondo_nando)))
     _gallery_df = get_gallery_encodings_set(_images_synds_dict)
     yield
 
@@ -173,6 +176,24 @@ async def predict_endpoint(username: Annotated[str, Depends(get_current_username
             final_result['queried_hpo_ids'] = hpo_ids
         else:
             final_result = gestaltmatcher_result
+
+        if _mondo_version:
+            final_result["mondo_version"] = _mondo_version
+
+        mondo_ids = {
+            item["mondo_id"]
+            for item in final_result.get("suggested_syndromes_list", [])
+            if item.get("mondo_id")
+        }
+        for item in final_result.get("suggested_patients_list", []):
+            mondo_ids.update(item.get("mondo_id") or [])
+        nando_ids = {
+            mid: _mondo_nando[mid]
+            for mid in sorted(mondo_ids)
+            if mid in _mondo_nando
+        }
+        if nando_ids:
+            final_result["nando_ids"] = nando_ids
 
         try:
             final_result["feature_vectors"] = encoding_to_feature_vectors(encoding)

@@ -8,8 +8,10 @@
     terms?: MondoTerm[]
     ids?: string[]
     panelLink?: boolean
+    nanbyoLink?: boolean
   }>(), {
     panelLink: false,
+    nanbyoLink: false,
   })
   const store = useStore()
 
@@ -34,6 +36,7 @@
         target="_blank"
       >{{ term.id }}</a>
       <PubCaseFinderPanelLink v-if="panelLink" :mondo-id="term.id" />
+      <NanbyoDataLink v-if="nanbyoLink" :mondo-id="term.id" />
       <span v-if="term.label" class="ml-1">{{ term.label }}</span>
     </div>
   </div>

@@ -291,7 +291,9 @@
     <!-- Main Results Card -->
     <v-card>
       <v-card-text class="d-flex justify-end text-caption py-2">
-        <span>{{ t('resultsPage.modelVersion') }}: {{ store.analysisResult?.model_version }}, {{ t('resultsPage.galleryVersion') }}: {{ store.analysisResult?.gallery_version }}</span>
+        <span>
+          <template v-if="store.analysisResult?.mondo_version">{{ t('resultsPage.mondoVersion') }}: {{ store.analysisResult.mondo_version }}, </template>{{ t('resultsPage.modelVersion') }}: {{ store.analysisResult?.model_version }}, {{ t('resultsPage.galleryVersion') }}: {{ store.analysisResult?.gallery_version }}
+        </span>
       </v-card-text>
       <v-divider />
 
@@ -382,6 +384,7 @@
                     target="_blank"
                   >{{ item.mondo_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a>
                   <PubCaseFinderPanelLink :mondo-id="item.mondo_id" />
+                  <NanbyoDataLink :mondo-id="item.mondo_id" />
                 </template>
                 <span v-else>-</span>
               </template>
@@ -477,7 +480,7 @@
             >
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
-              <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" panel-link /></template>
+              <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" nanbyo-link panel-link /></template>
               <template #item.numeric_omim_id="{ item }"><a
                 v-if="item.numeric_omim_id"
                 class="text-decoration-none"

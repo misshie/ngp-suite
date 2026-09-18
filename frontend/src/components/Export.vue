@@ -24,10 +24,14 @@
   const metadataItems = computed(() => {
     if (!store.analysisResult) return []
 
-    const items = [
+    const items = []
+    if (store.analysisResult.mondo_version) {
+      items.push({ parameter: 'Mondo Version', value_en: store.analysisResult.mondo_version, value_ja: '' })
+    }
+    items.push(
       { parameter: 'Model Version', value_en: store.analysisResult.model_version, value_ja: '' },
       { parameter: 'Gallery Version', value_en: store.analysisResult.gallery_version, value_ja: '' },
-    ]
+    )
 
     const hpoIds = store.analysisResult.queried_hpo_ids
     const hpoNames = store.analysisResult.pubcasefinder?.hpo_names

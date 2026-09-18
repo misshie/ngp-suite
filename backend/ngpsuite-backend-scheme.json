@@ -12,6 +12,21 @@
       "type": "string",
       "description": "Version of the gallery data used."
     },
+    "mondo_version": {
+      "type": "string",
+      "description": "owl:versionInfo from the bundled Mondo international OBO release (e.g. 2026-07-06)."
+    },
+    "nando_ids": {
+      "type": "object",
+      "description": "MONDO ID to NANDO ID list map for IDs present in this response (from OBO xref: NANDO:).",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^NANDO:[0-9]+$"
+        }
+      }
+    },
     "suggested_genes_list": {
       "type": "array",
       "items": {

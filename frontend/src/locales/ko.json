@@ -30,6 +30,7 @@
   "resultsPage": {
     "title": "분석 결과",
     "queriedHpo": "쿼리된 HPO",
+    "mondoVersion": "Mondo 버전",
     "modelVersion": "모델 버전",
     "galleryVersion": "갤러리 버전",
     "tabs": {
@@ -46,7 +47,8 @@
     "mondo": {
       "geneDerived": "유전자 기반",
       "geneDerivedHint": "OMIM ID가 아니라 유전자 기호에서 추정한 질환입니다",
-      "panelSearch": "PubCaseFinder PanelSearch에서 열기"
+      "panelSearch": "PubCaseFinder PanelSearch에서 열기",
+      "nanbyoData": "NanbyoData에서 {id} 열기"
     },
     "noResults": "표시할 결과가 없습니다."
   },

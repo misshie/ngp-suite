@@ -561,6 +561,6 @@
 
 <style scoped>
 .results-tabs :deep(.v-tab__slider) {
-  height: 3px;
+  height: 4px;
 }
 </style>

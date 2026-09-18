@@ -310,7 +310,27 @@ def format_gene_json(results, genes_metadata_dict, images_dict, case_id=''):
     return output_list
 
 
-def format_subject_json(results, images_genes_dict, images_synds_dict, case_id=''):
+def _subject_syndrome_labels(keys, synds_metadata):
+    """MONDO-derived patient-row disease name. Multiple MONDO IDs are joined with '; '."""
+    entries = [synds_metadata[key] for key in keys if key in synds_metadata]
+    if not entries:
+        return None, None
+    labels = {}
+    for lang in {lang for e in entries for lang in (e.get('syndrome_labels') or {})}:
+        parts = [
+            (e.get('syndrome_labels') or {}).get(lang)
+            or (e.get('syndrome_labels') or {}).get('en')
+            or e['syndrome_name']
+            for e in entries
+        ]
+        labels[lang] = '; '.join(p for p in parts if p)
+    english = '; '.join(e['syndrome_name'] for e in entries if e['syndrome_name'])
+    if english:
+        labels.setdefault('en', english)
+    return english, labels
+
+
+def format_subject_json(results, images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id=''):
     subjects = results[0][0][:100]
     dists = results[1][0][:100]
     img_ids = results[2][0][:100]
@@ -319,13 +339,17 @@ def format_subject_json(results, images_genes_dict, images_synds_dict, case_id='
     for subject, dist, image_id in zip(subjects, dists, img_ids):
         gene_row = images_genes_dict[int(image_id)][0]
         synd_row = images_synds_dict.get(int(image_id), {})
+        keys = synd_entries_dict.get(int(image_id)) or []
+        name, labels = _subject_syndrome_labels(keys, synds_metadata)
+        fallback = gene_row['disorder_names']
         output = {'subject_id': subject,
                   'gene_name': gene_row['gene_name'],
                   'gene_entrez_id': gene_row['gene_entrez_id'],
                   'distance': round(float(dist), 3),
                   'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
-                  'syndrome_name': gene_row['disorder_names'],
+                  'syndrome_name': name or fallback,
+                  'syndrome_labels': labels or {'en': fallback},
                   'omim_id': gene_row['omim_ids'],
                   'mondo_id': sorted(synd_row.get('mondo_id') or []),
         }
@@ -393,7 +417,7 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
 
     synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id, synds_probabilities_dict)
     gene_output_list = format_gene_json(first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
-    subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], images_genes_dict, images_synds_dict, case_id)
+    subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id)
 
     output_finished_time = time.time()
 

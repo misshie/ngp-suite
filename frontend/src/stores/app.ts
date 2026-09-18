@@ -46,6 +46,7 @@ interface PatientEntry {
   distance: number
   image_id: string
   syndrome_name: string
+  syndrome_labels?: Record<string, string>
   omim_id: number | string
   score: number | null
   gm_rank?: number

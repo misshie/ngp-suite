@@ -175,7 +175,15 @@
         "gene_entrez_id": { "type": "string" },
         "distance": { "type": "number" },
         "image_id": { "type": "string" },
-        "syndrome_name": { "type": "string" },
+        "syndrome_name": {
+          "type": "string",
+          "description": "English MONDO label(s) for the nearest gallery image, joined with '; ' when the image has several MONDO IDs. Falls back to the GMDB disorder name when the image has no MONDO term."
+        },
+        "syndrome_labels": {
+          "type": "object",
+          "description": "Language code to display name for syndrome_name. Always includes en; multiple MONDO IDs are joined with '; '.",
+          "additionalProperties": { "type": "string" }
+        },
         "omim_id": { "type": ["integer", "string"] },
         "score": { "type": ["number", "null"] },
         "gm_rank": { "type": "integer" },
@@ -191,7 +199,7 @@
           "items": { "type": "string", "pattern": "^MONDO:[0-9]{7}$" }
         }
       },
-      "required": ["subject_id", "gene_name", "gene_entrez_id", "distance", "image_id", "syndrome_name", "omim_id", "mondo_id", "score", "gm_rank", "meta_rank"]
+      "required": ["subject_id", "gene_name", "gene_entrez_id", "distance", "image_id", "syndrome_name", "syndrome_labels", "omim_id", "mondo_id", "score", "gm_rank", "meta_rank"]
     },
     "pubCaseFinderResult": {
       "type": "object",

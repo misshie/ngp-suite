@@ -480,6 +480,7 @@
               :sort-by="[{ key: 'gm_rank', order: 'asc' }]"
             >
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
+              <template #item.syndrome_name="{ item }">{{ syndromeLabel(item, store.locale) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
               <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" nanbyo-link omim-link panel-link /></template>
               <template #item.numeric_omim_id="{ item }"><a

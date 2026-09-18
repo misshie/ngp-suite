@@ -187,7 +187,7 @@ maps to more than one disease — contributes one entry per MONDO ID at the same
     ]
 ```
 
-`suggested_patients_list` entries include `mondo_id` as a sorted array of MONDO IDs for the nearest gallery image (empty when that image has no MONDO term). Unlike the syndrome list, a dual-diagnosis image does not duplicate the patient row.
+`suggested_patients_list` entries include `mondo_id` as a sorted array of MONDO IDs for the nearest gallery image (empty when that image has no MONDO term). Unlike the syndrome list, a dual-diagnosis image does not duplicate the patient row. `syndrome_name` is the English MONDO label (or the GMDB disorder name when there is no MONDO term); when the image has several MONDO IDs the labels are joined with `; `. `syndrome_labels` maps language codes to the same display string so the UI can follow the active locale.
 
 ## Step-by-step setup
 ### Environment

@@ -67,10 +67,14 @@
   )
 
   const patientRows = computed(() =>
-    (store.analysisResult?.suggested_patients_list || []).map(item => ({
-      ...item,
-      mondo_id: (item.mondo_id || []).join('; '),
-    })),
+    (store.analysisResult?.suggested_patients_list || []).map(item => {
+      const { syndrome_labels, ...rest } = item
+      return {
+        ...rest,
+        syndrome_name: syndromeLabel({ syndrome_name: item.syndrome_name, syndrome_labels }, store.locale),
+        mondo_id: (item.mondo_id || []).join('; '),
+      }
+    }),
   )
 
   /**

@@ -22,7 +22,7 @@
   <img src="./assets/ngpsuite-ss2.png" width="30%" alt="NGPsuite screenshot 2" />
   <img src="./assets/ngpsuite-ss3.png" width="30%" alt="NGPsuite screenshot 3" />
 </p>
-<p align="center"><em>image from Dr. Ibrahim Abdelrazek at https://db.gestaltmatcher.org/patients/15727</em></p>
+<p align="center"><em>Image from Dr. Ibrahim Abdelrazek at GestaltMatcher Database https://db.gestaltmatcher.org/patients/15727</em></p>
 
 ----
 ## **Introduction**
@@ -231,7 +231,7 @@ This product includes the Mondo Disease Ontology (Mondo) international edition
 ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The ontology file is shipped under `backend/mondo/`.
 
-We would like to thank all participants and organizers of the [DBCLS BioHackathon 2025](https://2025.biohackathon.org/) (September 14-20, 2025, Mie, Japan) for their valuable discussions and support, which contributed significantly to the development of this project.
+We would like to thank all participants and organizers of the [DBCLS BioHackathon 2025](https://2025.biohackathon.org/) (September 14-20, 2025, Mie, Japan) and [DBCLS BioHackathon 2026](https://2026.biohackathon.org/) (September 13-19, 2026, Ehime, Japan) for their valuable discussions and support, which contributed significantly to the development of this project.
 
 ## **Author**
 

@@ -522,6 +522,13 @@
               :sort-by="[{ key: 'gm_rank', order: 'asc' }]"
             >
               <template #item.distance="{ item }">{{ formatScore(item.distance) }}</template>
+              <template #item.subject_id="{ item }"><a
+                v-if="item.subject_id"
+                class="text-decoration-none"
+                :href="`https://gestaltmatcher.org/patients/${item.subject_id}`"
+                rel="noopener noreferrer"
+                target="_blank"
+              >{{ item.subject_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a><span v-else>-</span></template>
               <template #item.syndrome_name="{ item }">{{ syndromeLabel(item, store.locale) }}</template>
               <template #item.score="{ item }"><v-progress-linear color="blue-grey" height="10" :model-value="(item.score || 0) * 100" rounded /></template>
               <template #item.mondo_id="{ item }"><MondoTermList :ids="item.mondo_id" nanbyo-link omim-link panel-link /></template>

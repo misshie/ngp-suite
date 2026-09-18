@@ -298,7 +298,12 @@
       <v-divider />
 
       <div class="d-flex align-center bg-tertiary">
-        <v-tabs v-model="tab" bg-color="tertiary" class="flex-grow-1">
+        <v-tabs
+          v-model="tab"
+          bg-color="tertiary"
+          class="results-tabs flex-grow-1"
+          slider-color="white"
+        >
           <v-tab v-for="item in tabs" :key="item.key" :value="item.key">
             {{ t(item.labelKey) }} ({{ item.count }})
           </v-tab>
@@ -553,3 +558,9 @@
     <v-alert border="start" type="info" variant="tonal">{{ t('resultsPage.noResults') }}</v-alert>
   </v-container>
 </template>
+
+<style scoped>
+.results-tabs :deep(.v-tab__slider) {
+  height: 3px;
+}
+</style>

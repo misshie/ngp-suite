@@ -525,7 +525,7 @@
               <template #item.subject_id="{ item }"><a
                 v-if="item.subject_id"
                 class="text-decoration-none"
-                :href="`https://gestaltmatcher.org/patients/${item.subject_id}`"
+                :href="`https://db.gestaltmatcher.org/patients/${item.subject_id}`"
                 rel="noopener noreferrer"
                 target="_blank"
               >{{ item.subject_id }} <v-icon class="ml-1" icon="mdi-open-in-new" size="x-small" /></a><span v-else>-</span></template>

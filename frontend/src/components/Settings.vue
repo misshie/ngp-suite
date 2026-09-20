@@ -21,6 +21,7 @@
   const localPort = ref('')
   const localUser = ref('')
   const localPassword = ref('')
+  const localExperimentalFunctions = ref(false)
 
   // When the dialog is opened, copy the current settings from the store
   // to the local refs.
@@ -30,6 +31,7 @@
       localPort.value = store.port
       localUser.value = store.user
       localPassword.value = store.password
+      localExperimentalFunctions.value = store.experimentalFunctions
     }
   })
 
@@ -41,6 +43,7 @@
       port: localPort.value,
       user: localUser.value,
       password: localPassword.value,
+      experimentalFunctions: localExperimentalFunctions.value,
     })
     // Close the dialog after saving
     emit('update:modelValue', false)
@@ -55,6 +58,7 @@
     localPort.value = store.port
     localUser.value = store.user
     localPassword.value = store.password
+    localExperimentalFunctions.value = store.experimentalFunctions
   }
 </script>
 
@@ -110,6 +114,20 @@
           type="password"
           variant="outlined"
         />
+
+        <v-divider class="my-4" />
+
+        <p class="text-overline">{{ t('settingsDialog.experimental') }}</p>
+        <v-switch
+          v-model="localExperimentalFunctions"
+          color="warning"
+          density="compact"
+          hide-details
+          :label="t('settingsDialog.experimentalFunctions')"
+        />
+        <p class="text-caption text-medium-emphasis mt-1">
+          {{ t('settingsDialog.experimentalHint') }}
+        </p>
       </v-card-text>
 
       <v-card-actions>

@@ -2,7 +2,12 @@ import { defineStore } from 'pinia'
 
 interface GeneEntry {
   gene_name: string
-  gene_entrez_id: string
+  gene_entrez_id: string | null
+  gene_labels?: Record<string, string>
+  gene_unresolved?: boolean
+  subtype_unresolved?: boolean
+  hgnc_id?: string | null
+  gene_source?: 'gmdb' | 'mondo' | null
   distance: number
   score: number | null
   gm_rank?: number
@@ -12,13 +17,26 @@ interface GeneEntry {
   meta_rank?: number
 }
 
+export interface MondoTerm {
+  id: string
+  name: string
+  labels?: Record<string, string>
+}
+
 interface SyndromeEntry {
   syndrome_name: string
+  syndrome_labels?: Record<string, string>
   omim_id: number
+  mondo_id: string | null
+  mondo_parents: MondoTerm[]
+  mondo_grandparents: MondoTerm[]
+  mondo_source: 'omim' | 'gene' | null
   distance: number
   image_id: string
   subject_id: string
   score: number | null
+  ACMG_PP4?: string
+  ACMG_PP4_support?: string
   gm_rank?: number
   pubcasefinder_rank?: number
   pubcasefinder_score?: number
@@ -29,10 +47,11 @@ interface SyndromeEntry {
 interface PatientEntry {
   subject_id: string
   gene_name: string
-  gene_entrez_id: string
+  gene_entrez_id: string | null
   distance: number
   image_id: string
   syndrome_name: string
+  syndrome_labels?: Record<string, string>
   omim_id: number | string
   score: number | null
   gm_rank?: number
@@ -42,6 +61,7 @@ interface PatientEntry {
   meta_rank?: number
   numeric_omim_id?: number | null
   phenotypic_series_id?: string | null
+  mondo_id?: string[]
 }
 
 interface HpoNameEntry {
@@ -59,9 +79,18 @@ interface PubCaseFinderResult {
   hpo_names: HpoNames
 }
 
+export interface FeatureVectorEntry {
+  model: string
+  dim: number
+  representations: number[]
+}
+
 export interface AnalysisResult {
   model_version: string
   gallery_version: string
+  mondo_version?: string
+  nando_ids?: Record<string, string>
+  omim_ids?: Record<string, string>
   suggested_genes_list: GeneEntry[]
   suggested_syndromes_list: SyndromeEntry[]
   suggested_patients_list: PatientEntry[]
@@ -69,6 +98,8 @@ export interface AnalysisResult {
   queried_hpo_ids?: string[]
   // The structured result from pubcasefinder.py
   pubcasefinder?: PubCaseFinderResult
+  // Experimental: 3x512 feature vectors from GestaltMatcher-Arc
+  feature_vectors?: FeatureVectorEntry[]
 }
 
 export interface AppSettings {
@@ -77,6 +108,7 @@ export interface AppSettings {
   user: string
   password: string
   locale: string
+  experimentalFunctions: boolean
 }
 
 // LocalStorage key for settings
@@ -89,6 +121,7 @@ const defaultSettings: AppSettings = {
   user: 'your_username',
   password: 'your_password',
   locale: 'en-US',
+  experimentalFunctions: false,
 }
 
 // Load settings from localStorage
@@ -103,7 +136,7 @@ function loadSettingsFromStorage (): AppSettings {
   } catch (error) {
     console.warn('Failed to load settings from localStorage:', error)
   }
-  return defaultSettings
+  return { ...defaultSettings }
 }
 
 // Save settings to localStorage
@@ -125,6 +158,7 @@ export const useStore = defineStore('app', {
     user: initialSettings.user,
     password: initialSettings.password,
     locale: initialSettings.locale,
+    experimentalFunctions: initialSettings.experimentalFunctions,
     analysisResult: null as AnalysisResult | null,
     uploadedImage: null as string | null,
   }),
@@ -165,6 +199,7 @@ export const useStore = defineStore('app', {
       this.port = newSettings.port
       this.user = newSettings.user
       this.password = newSettings.password
+      this.experimentalFunctions = newSettings.experimentalFunctions
       // Save to localStorage (preserve locale setting)
       const currentSettings = loadSettingsFromStorage()
       saveSettingsToStorage({
@@ -172,6 +207,7 @@ export const useStore = defineStore('app', {
         port: newSettings.port,
         user: newSettings.user,
         password: newSettings.password,
+        experimentalFunctions: newSettings.experimentalFunctions,
         locale: currentSettings.locale,
       })
     },
@@ -189,6 +225,7 @@ export const useStore = defineStore('app', {
       this.user = defaultSettings.user
       this.password = defaultSettings.password
       this.locale = defaultSettings.locale
+      this.experimentalFunctions = defaultSettings.experimentalFunctions
     },
   },
 })

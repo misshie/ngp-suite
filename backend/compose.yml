@@ -1,8 +1,12 @@
 services:
   # 1. FastAPI API server service
   api:
+    image: backend-api:latest
     build:
       context: . # Use the Dockerfile in the project root
+      args:
+        # Default 0 = CPU-only PyTorch. Set USE_CUDA=1 for CUDA-enabled wheels.
+        USE_CUDA: ${USE_CUDA:-0}
     container_name: ngpsuite-api
     expose:
       - "5000"
@@ -15,6 +19,7 @@ services:
 
   # 2. Nginx reverse proxy service
   nginx:
+    image: backend-nginx:latest
     build:
       context: ./nginx
     container_name: ngpsuite-proxy

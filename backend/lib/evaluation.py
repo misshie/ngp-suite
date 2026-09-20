@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import math
 import torch
 import random
 import numpy as np
@@ -67,7 +68,7 @@ def filter_by_distance(distances, thresh=0.1):
     return idx[np.argsort(distances[idx])]
 
 
-def get_first_synds(ranked_mean_dists_list, ranked_img_ids_list, images_synds_dict, verbose=False):
+def get_first_synds(ranked_mean_dists_list, ranked_img_ids_list, synd_entries_dict, verbose=False):
     # This removes all duplicate occurrences except for the first one.. for each test image
     img_synds_results_list = []
     img_dists_results_list = []
@@ -79,11 +80,12 @@ def get_first_synds(ranked_mean_dists_list, ranked_img_ids_list, images_synds_di
         img_dists = []
         img_ids = []
         for image_id, dist in zip(ranked_img_ids, ranked_mean_dists):
-            image_synd = images_synds_dict[int(image_id)]
-
-            img_synd_results.append(image_synd['disorder_internal_id'])
-            img_dists.append(dist)
-            img_ids.append(image_id)
+            # A gallery image can back several syndromes when its disorder was
+            # resolved through a gene symbol, so each key is ranked separately.
+            for synd_key in synd_entries_dict[int(image_id)]:
+                img_synd_results.append(synd_key)
+                img_dists.append(dist)
+                img_ids.append(image_id)
         img_synd_results = np.array(img_synd_results)
         img_dists = np.array(img_dists)
         img_ids = np.array(img_ids)
@@ -206,57 +208,190 @@ def print_format_output(results):
     print(f"Subject ids: {list(subject_ids)}")
 
 
-def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id=''):
+def get_pp4(synd, score):
+    output = ''
+    support = 'Not available yet'
+    for level in ['very_strong', 'strong', 'moderate', 'supporting']:
+        if level not in synd:
+            continue
+        else:
+            support = 'Yes'
+            if score >= synd[level]:
+                output = level
+                break
+    return (output, support)
+
+
+def safe_float(x):
+    if isinstance(x, float):
+        if math.isfinite(x):  # excludes inf and nan
+            return round(x, 6)
+        else:
+            return None
+    return x
+
+
+def format_syndrome_json(results, synds_metadata_dict, images_dict, case_id='', synds_probabilities_dict=None):
     synd_ids = results[0][0]
     dists = results[1][0]
     img_ids = results[2][0]
 
     output_list = []
     for synd_id, dist, image_id in zip(synd_ids, dists, img_ids):
-        output = {'syndrome_name': synds_metadata_dict[int(synd_id)]['disorder_name'],
-                  'omim_id': synds_metadata_dict[int(synd_id)]['omim_id'],
+        synd = synds_metadata_dict[str(synd_id)]
+        pp4_level, pp4_support = get_pp4(synd, 1.3 - float(dist))
+        name = synd['syndrome_name']
+        output = {'syndrome_name': name,
+                  'syndrome_labels': synd.get('syndrome_labels') or {'en': name},
+                  'omim_id': synd['omim_id'],
+                  'mondo_id': synd['mondo_id'],
+                  'mondo_parents': synd['mondo_parents'],
+                  'mondo_grandparents': synd['mondo_grandparents'],
+                  'mondo_source': synd['mondo_source'],
                   'distance': round(float(dist), 3),
-                  'gestalt_score': round(float(dist), 3),
+                  'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
+                  'ACMG_PP4': pp4_level,
+                  'ACMG_PP4_support': pp4_support,
                   'subject_id': str(images_dict[int(image_id)]['patient_id'])}
+
+        if synds_probabilities_dict is not None and name in synds_probabilities_dict and False:
+            params = synds_probabilities_dict[name]
+            intercept = float(params["(Intercept)"])
+            syn_score = float(params["syn_scores"])
+            v_00 = float(params["v_00"])
+            v_10 = float(params["v_10"])
+            v_11 = float(params["v_11"])
+            dist_f = float(dist)
+            pred = intercept + syn_score * dist_f
+            se = v_00 + 2 * v_10 * dist_f + v_11 * dist_f ** 2
+            prob = np.exp(pred) / (1 + np.exp(pred))
+            ci_lower_pred = pred - 1.96 * se
+            ci_upper_pred = pred + 1.96 * se
+            ci_lower = np.exp(ci_lower_pred) / (1 + np.exp(ci_lower_pred))
+            ci_upper = np.exp(ci_upper_pred) / (1 + np.exp(ci_upper_pred))
+            output.update({
+                "probability": safe_float(prob),
+                "ci_lower": safe_float(ci_lower),
+                "ci_upper": safe_float(ci_upper)
+            })
+        else:
+            output.update({
+                "probability": None,
+                "ci_lower": None,
+                "ci_upper": None
+            })
+
         output_list.append(output)
+
+    # Gene-derived rows come in clusters that all share one gestalt distance, so break
+    # those ties in favour of the OMIM-derived diagnosis. The list is already sorted by
+    # distance and the sort is stable, so nothing else moves.
+    output_list.sort(key=lambda row: (row['distance'], row['mondo_source'] != 'omim'))
 
     return output_list
 
 
-def format_gene_json(results, genes_metadata_dict, images_dict, case_id=''):
+def _subject_syndrome_labels(keys, synds_metadata):
+    """MONDO-derived disease name. Multiple MONDO IDs are joined with '; '."""
+    entries = [synds_metadata[key] for key in keys if key in synds_metadata]
+    if not entries:
+        return None, None
+    labels = {}
+    for lang in {lang for e in entries for lang in (e.get('syndrome_labels') or {})}:
+        parts = [
+            (e.get('syndrome_labels') or {}).get(lang)
+            or (e.get('syndrome_labels') or {}).get('en')
+            or e['syndrome_name']
+            for e in entries
+        ]
+        labels[lang] = '; '.join(p for p in parts if p)
+    english = '; '.join(e['syndrome_name'] for e in entries if e['syndrome_name'])
+    if english:
+        labels.setdefault('en', english)
+    return english, labels
+
+
+def _gene_status(meta, images_synds_dict, image_id):
+    """Prefer pickle gene_status; fall back for pre-resolution pickles."""
+    status = meta.get('gene_status')
+    if status:
+        return status
+    empty = not (images_synds_dict.get(int(image_id), {}).get('gene_names') or '').strip()
+    return 'gene_unresolved' if empty else 'gmdb'
+
+
+def format_gene_json(results, genes_metadata_dict, images_dict, images_synds_dict,
+                     synds_metadata, synd_entries_dict, case_id=''):
     genes = results[0][0]
     dists = results[1][0]
     img_ids = results[2][0]
 
     output_list = []
     for gene, dist, image_id in zip(genes, dists, img_ids):
-        output = {'gene_name': genes_metadata_dict[int(gene)]['gene_name'],
-                  'gene_entrez_id': genes_metadata_dict[int(gene)]['gene_entrez_id'],
-                  'distance': round(float(dist), 3),
-                  'gestalt_score': round(float(dist), 3),
-                  'image_id': image_id,
-                  'subject_id': str(images_dict[int(image_id)][0]['patient_id'])}
+        meta = genes_metadata_dict[int(gene)]
+        gene_row = images_dict[int(image_id)][0]
+        status = _gene_status(meta, images_synds_dict, image_id)
+        # Old pickles may still carry subtype_unresolved as a disease-name row.
+        unresolved = status in ('gene_unresolved', 'subtype_unresolved')
+        disease_name = disease_labels = None
+        if unresolved:
+            disease_name, disease_labels = _subject_syndrome_labels(
+                synd_entries_dict.get(int(image_id)) or [], synds_metadata)
+
+        output = {
+            'gene_name': disease_name or meta['gene_name'],
+            'gene_entrez_id': meta['gene_entrez_id'],
+            'distance': round(float(dist), 3),
+            'gestalt_score': round(1.3 - float(dist), 3),
+            'image_id': image_id,
+            'subject_id': str(gene_row['patient_id']),
+        }
+        hgnc_id = meta.get('hgnc_id')
+        if hgnc_id:
+            output['hgnc_id'] = hgnc_id
+        gene_source = gene_row.get('gene_source') or (
+            'mondo' if status == 'mondo' else 'gmdb' if status == 'gmdb' else None)
+        if gene_source:
+            output['gene_source'] = gene_source
+        if unresolved:
+            output['gene_unresolved'] = True
+            output['gene_labels'] = disease_labels or {'en': output['gene_name']}
+            if status == 'subtype_unresolved':
+                # Legacy chip only; new pickles expand candidates in gene_level.
+                output['subtype_unresolved'] = True
         output_list.append(output)
 
     return output_list
 
 
-def format_subject_json(results, synds_metadata_dict, images_dict, case_id=''):
+def format_subject_json(results, images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id=''):
     subjects = results[0][0][:100]
     dists = results[1][0][:100]
     img_ids = results[2][0][:100]
 
     output_list = []
     for subject, dist, image_id in zip(subjects, dists, img_ids):
+        gene_rows = images_genes_dict[int(image_id)]
+        gene_row = gene_rows[0]
+        gene_name = '; '.join(r['gene_name'] for r in gene_rows)
+        entrez = '; '.join(
+            r['gene_entrez_id'] for r in gene_rows if r.get('gene_entrez_id')
+        ) or None
+        synd_row = images_synds_dict.get(int(image_id), {})
+        keys = synd_entries_dict.get(int(image_id)) or []
+        name, labels = _subject_syndrome_labels(keys, synds_metadata)
+        fallback = gene_row['disorder_names']
         output = {'subject_id': subject,
-                  'gene_name': images_dict[int(image_id)][0]['gene_name'],
-                  'gene_entrez_id': images_dict[int(image_id)][0]['gene_entrez_id'],
+                  'gene_name': gene_name,
+                  'gene_entrez_id': entrez,
                   'distance': round(float(dist), 3),
-                  'gestalt_score': round(float(dist), 3),
+                  'gestalt_score': round(1.3 - float(dist), 3),
                   'image_id': image_id,
-                  'syndrome_name': images_dict[int(image_id)][0]['disorder_names'],
-                  'omim_id': images_dict[int(image_id)][0]['omim_ids']
+                  'syndrome_name': name or fallback,
+                  'syndrome_labels': labels or {'en': fallback},
+                  'omim_id': gene_row['omim_ids'],
+                  'mondo_id': sorted(synd_row.get('mondo_id') or []),
         }
         output_list.append(output)
 
@@ -271,7 +406,7 @@ def save_to_json(results, output_dir, output_file):
 
 def get_gallery_encodings_set(images_synds_dict):
     gallery_list = []
-    gallery_input = os.path.join('data', 'gallery_encodings', 'GMDB_gallery_encodings_20082024_v1.1.0_service.pkl')
+    gallery_input = os.path.join('data', 'gallery_encodings', 'GMDB_gallery_encodings_23052026_v1.1.4_service.pkl')
     gallery_df = get_encodings_set(gallery_input, gallery_list)
     image_ids = [str(i) for i in images_synds_dict.keys()]
     gallery_df = gallery_df[gallery_df["img_name"].isin(image_ids)]
@@ -279,7 +414,7 @@ def get_gallery_encodings_set(images_synds_dict):
     return gallery_df
 
 
-def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_metadata, synds_metadata):
+def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_metadata, synds_metadata, synd_entries_dict, synds_probabilities_dict=None):
     start_time = time.time()
     # Seed everything
     np.random.seed(1000)
@@ -298,14 +433,13 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
     else:
         n = int(args.top_n)
 
-    all_ranks = evaluate(_gallery_df, case_df, "all", threshold=0.4)
-    # do we need np array?
-    #all_ranks = np.array(all_ranks)
+    all_ranks = evaluate(_gallery_df, case_df, "all", threshold=0.3)
+    all_ranks = np.array(all_ranks)
 
     evaluate_finished_time = time.time()
 
     # Get all synd_ids, dists, img_ids, subject_ids per syndrome in gallery
-    first_synd_ranks = get_first_synds(*all_ranks, images_synds_dict)
+    first_synd_ranks = get_first_synds(*all_ranks, synd_entries_dict)
     first_synd_ranks = np.array(first_synd_ranks)
     get_synds_time = time.time()
 
@@ -321,9 +455,11 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
 
     case_id = 1
 
-    synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id)
-    gene_output_list = format_gene_json(first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
-    subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], genes_metadata, images_genes_dict, case_id)
+    synd_output_list = format_syndrome_json(first_synd_ranks[:, :, :n], synds_metadata, images_synds_dict, case_id, synds_probabilities_dict)
+    gene_output_list = format_gene_json(
+        first_gene_ranks[:, :, :n], genes_metadata, images_genes_dict,
+        images_synds_dict, synds_metadata, synd_entries_dict, case_id)
+    subject_output_list = format_subject_json(first_subject_ranks[:, :, :n], images_genes_dict, images_synds_dict, synds_metadata, synd_entries_dict, case_id)
 
     output_finished_time = time.time()
 
@@ -333,8 +469,8 @@ def predict(test_df, _gallery_df, images_synds_dict, images_genes_dict, genes_me
     #print('Get genes: {:.2f}s'.format(get_genes_time-get_synds_time))
     #print('Format: {:.2f}s'.format(output_finished_time-get_genes_time))
     #print('Total: {:.2f}s'.format(output_finished_time-start_time))
-    output = {"model_version": "v1.1.0",
-              "gallery_version": "20.08.2024",
+    output = {"model_version": "v1.1.4",
+              "gallery_version": "23.05.2026",
               "suggested_genes_list": gene_output_list,
               "suggested_syndromes_list": synd_output_list,
               "suggested_patients_list": subject_output_list}

@@ -2,14 +2,18 @@
   "appTitle": "NGPsuite",
   "nav": {
     "analysis": "分析",
-    "export": "导出结果",
+    "export": "导出",
     "settings": "设置",
-    "about": "关于"
+    "about": "关于",
+    "galleryAdd": "Gallery Add"
   },
   "startPage": {
     "welcome": "欢迎来到",
     "getStarted": "开始",
-    "pressAnalysis": "请按左侧导航栏上的<strong>分析</strong>按钮开始。"
+    "pressAnalysis": "请按左侧导航栏上的<strong>分析</strong>按钮开始。",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "已内置 Mondo international edition",
+    "mondoAttribution": "本产品包含 Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）。Mondo 的许可是 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>。"
   },
   "analysisDialog": {
     "title": "上传分析文件",
@@ -26,6 +30,7 @@
   "resultsPage": {
     "title": "分析结果",
     "queriedHpo": "查询的HPO",
+    "mondoVersion": "Mondo 版本",
     "modelVersion": "模型版本",
     "galleryVersion": "图库版本",
     "tabs": {
@@ -38,6 +43,22 @@
       "syndromes": "搜索综合征",
       "patients": "搜索患者"
     },
+    "columns": "列",
+    "mondo": {
+      "geneDerived": "源自基因",
+      "geneDerivedHint": "该疾病由基因符号推定，而非 OMIM ID",
+      "panelSearch": "在 PubCaseFinder PanelSearch 中打开",
+      "nanbyoData": "在 NanbyoData 中打开 {id}",
+      "omimEntry": "打开 OMIM {id}"
+    },
+    "gene": {
+      "unresolved": "基因未确定",
+      "unresolvedHint": "GMDB 未登记致病基因，因此显示疾病名称（MONDO 标签）",
+      "subtypeUnresolved": "亚型未确定",
+      "subtypeUnresolvedHint": "亚型未确定，且候选基因未出现在本次结果中",
+      "mondoSourced": "MONDO 来源",
+      "mondoSourcedHint": "因 GMDB 无该病例的基因记录，故根据 MONDO 疾病-基因关系补全"
+    },
     "noResults": "无结果可显示。"
   },
   "settingsDialog": {
@@ -48,10 +69,13 @@
     "port": "端口",
     "auth": "认证",
     "user": "用户名",
-    "password": "密码"
+    "password": "密码",
+    "experimental": "Experimental",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "When enabled, additional experimental features appear in the navigation (e.g. Gallery Add)."
   },
   "exportDialog": {
-    "title": "导出结果",
+    "title": "导出",
     "subtitle": "选择您喜欢的导出格式。",
     "excel": {
       "title": "Excel格式",
@@ -74,6 +98,7 @@
     "title": "关于 NGPsuite",
     "programmedBy": "编程者",
     "poweredBy": "此应用程序由GestaltMatcher和PubCaseFinder提供支持。",
+    "mondoAttribution": "本产品包含 Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）。Mondo 的许可是 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>。",
     "disclaimer": "NGPsuite仅用于<strong>研究和教育目的。</strong>"
   },
   "footer": {
@@ -86,5 +111,25 @@
     "clear": "清除结果",
     "reset": "重置为默认值",
     "ok": "确定"
+  },
+  "galleryAddDialog": {
+    "title": "Gallery Add",
+    "subtitle": "Export feature vectors with hand-entered metadata (experimental).",
+    "experimentalNotice": "Experimental. For research use. Does not include face images. Schema may change.",
+    "metadataTitle": "Metadata",
+    "metadataDescription": "Enter optional metadata to include in the JSON export.",
+    "fields": {
+      "imageId": "Image ID",
+      "patientId": "Patient ID",
+      "disorderName": "Disorder name",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "Gene name",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "Notes"
+    },
+    "vectorsTitle": "Feature vectors",
+    "vectorsDescription": "Downloads a JSON file with model/gallery versions, metadata, and 512-dim vectors for models m0–m2.",
+    "button": "Download Gallery Add JSON"
   }
 }

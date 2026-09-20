@@ -65,7 +65,8 @@ async def predict_endpoint(username: Annotated[str, Depends(get_current_username
                      _images_synds_dict,
                      _images_genes_dict,
                      _genes_metadata_dict,
-                     _synds_metadata_dict)
+                     _synd_key_metadata,
+                     _synd_entries_dict)
 
 ```
 
@@ -92,12 +93,12 @@ A gene list sorted by the distance in ascending order which can be used for vari
 * **distance** is the cosine distance to the nearest image with the gene in the gallery. A smaller distance indicates a higher similarity.
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
-* **gene_entrez_id and gene_name** the gene id and gene name.
+* **gene_entrez_id and gene_name** the gene id and gene name. For true genes, `gene_name` is the HGNC symbol. Gallery rows without a GMDB gene are classified in the metadata pickle (`gene_status`):
+  * `gmdb` / `mondo` — real gene symbols. `mondo` means the symbol was filled from MONDO’s disease–gene relation (single-gene terms) or expanded from a parent / multi-gene term into one `gene_level` entry per candidate (same image, same GM distance). Optional `hgnc_id` is present when Entrez is missing; `gene_source` is `mondo` on those evidence images.
+  * `gene_unresolved` — chromosomal disorders and other diseases with no usable gene; `gene_name` is the English MONDO label (fallback: GMDB disorder name), `gene_entrez_id` is null, and `gene_labels` follows the UI locale.
 * **gestalt score** is the same as the distance.
 
-**Note:** some syndromes have no gene associated because they are the chromosomal abnormality or huge deletion that cover
-multiple genes. We still keep them in the entry. For example, WILLIAMS-BEUREN SYNDROME; WBS has no gene associated in OMIM, so we use gene_name: WILLIAMS-BEUREN SYNDROME; WBS and gene_entrez_id: null for this entry.
-Please filter out this kind of entry with null gene_entrez_id if you do need them.  
+**Note:** chromosomal and truly gene-unknown diseases remain as disease-name rows (for example Williams syndrome). Filter with `gene_unresolved` (or a null `gene_entrez_id`) when you only need true gene symbols. MONDO-sourced fills and expansions are ontology-backed candidates, not confirmed genotypes.
 
 ```angular2html
 {    
@@ -140,36 +141,54 @@ A syndrome list sorted by the distance in ascending order.
 * **distance** is the cosine distance to the nearest image with the gene in the gallery. A smaller distance indicates a higher similarity.
 * **image_id** is the image_id in GestaltMatcher Database which is the nearest image of that gene in the gallery.
 * **subject_id** is the patient_id in GestaltMatcher Database which is the nearest patient of that gene in the gallery.
-* **syndrome_name and omim_id** the syndrome name and omim id.
+* **syndrome_name and omim_id** the English syndrome name and omim id. The name is the MONDO label, falling back to the GMDB disorder name when the disorder has no MONDO term.
+* **syndrome_labels** language code to display name (`en` always, `ja` when MONDO has a Japanese altLabel). The UI picks the active locale and falls back to English.
+* **mondo_id** the MONDO term identifying the disorder, or null when MONDO has no entry for it.
+* **mondo_parents and mondo_grandparents** the two ancestor levels above `mondo_id`, sorted by MONDO ID. Each term has `id`, English `name`, and `labels`. Grandparents exclude any term that is also a direct parent.
+* **mondo_source** whether the MONDO term came from the OMIM ID (`omim`) or was inferred from the gene symbol (`gene`).
 * **gestalt score** is the same as the distance.
+
+A gallery image annotated with several MONDO IDs — a dual diagnosis, or a gene symbol that
+maps to more than one disease — contributes one entry per MONDO ID at the same distance.
 ```angular2html
     "suggested_syndromes_list": [
         {
-            "syndrome_name": "Cornelia de Lange syndrome",
+            "syndrome_name": "Cornelia de Lange syndrome 1",
+            "syndrome_labels": {"en": "Cornelia de Lange syndrome 1", "ja": "コルネリアデランゲ症候群1"},
             "omim_id": 122470,
+            "mondo_id": "MONDO:0007387",
+            "mondo_parents": [
+                {"id": "MONDO:0016033", "name": "Cornelia de Lange syndrome", "labels": {"en": "Cornelia de Lange syndrome", "ja": "コルネリアデランゲ症候群"}},
+                {"id": "MONDO:0019713", "name": "non-syndromic limb reduction defect", "labels": {"en": "non-syndromic limb reduction defect"}}
+            ],
+            "mondo_grandparents": [
+                {"id": "MONDO:0002254", "name": "syndromic disease", "labels": {"en": "syndromic disease", "ja": "症候群性疾患"}},
+                {"id": "MONDO:0003847", "name": "hereditary disease", "labels": {"en": "hereditary disease", "ja": "遺伝性疾患"}}
+            ],
+            "mondo_source": "omim",
             "distance": 0.44,
-            "gestalt_score": 0.44,
+            "gestalt_score": 0.86,
             "image_id": "4883",
             "subject_id": "3546"
         },
         {
             "syndrome_name": "DDX23",
+            "syndrome_labels": {"en": "DDX23"},
             "omim_id": "",
+            "mondo_id": null,
+            "mondo_parents": [],
+            "mondo_grandparents": [],
+            "mondo_source": null,
             "distance": 0.575,
-            "gestalt_score": 0.575,
+            "gestalt_score": 0.725,
             "image_id": "8998",
             "subject_id": "5949"
-        },
-        {
-            "syndrome_name": "SMITH-MAGENIS SYNDROME; SMS",
-            "omim_id": 182290,
-            "distance": 0.699,
-            "gestalt_score": 0.699,
-            "image_id": "5961",
-            "subject_id": "4239"
         },...
     ]
 ```
+
+`suggested_patients_list` entries include `mondo_id` as a sorted array of MONDO IDs for the nearest gallery image (empty when that image has no MONDO term). Unlike the syndrome list, a dual-diagnosis image does not duplicate the patient row. `syndrome_name` is the English MONDO label (or the GMDB disorder name when there is no MONDO term); when the image has several MONDO IDs the labels are joined with `; `. `syndrome_labels` maps language codes to the same display string so the UI can follow the active locale. `gene_name` / `gene_entrez_id` come from every `gene_level` entry of that image joined with `; ` (so a MONDO-expanded parent disease lists all candidate symbols; a GMDB-annotated gene is shown as-is).
+
 ## Step-by-step setup
 ### Environment
 Please use python version 3.8 or (3.7+), and the package listed in requirements.txt.

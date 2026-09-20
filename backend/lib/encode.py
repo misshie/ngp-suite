@@ -63,6 +63,26 @@ def encode(models, device, img, flip_flag=True, gray_flag=True):
     return result
 
 
+def encoding_to_feature_vectors(encoding_df):
+    """Convert encode() DataFrame rows into a JSON-serializable feature vector list.
+
+    Expects one row per model (no TTA). Returns items ordered m0, m1, m2, ...
+    Column name matches encode(): "representations".
+    """
+    vectors = []
+    for model_name in sorted(encoding_df["model"].unique()):
+        row = encoding_df[encoding_df["model"] == model_name].iloc[0]
+        repr_list = row["representations"]
+        if hasattr(repr_list, "tolist"):
+            repr_list = repr_list.tolist()
+        vectors.append({
+            "model": str(model_name),
+            "dim": len(repr_list),
+            "representations": [float(x) for x in repr_list],
+        })
+    return vectors
+
+
 def get_models():
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -88,9 +108,9 @@ def get_models():
         return _model
 
     # finetuned r100
-    model1 = get_model("saved_models/s1_glint360k_r50_512d_gmdb__v1.1.0_bs64_size112_channels3_last_model.pth", device=device).eval()
+    model1 = get_model("saved_models/s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth", device=device).eval()
     # original r100
-    model2 = get_model("saved_models/s2_glint360k_r100_512d_gmdb__v1.1.0_bs128_size112_channels3_last_model.pth", device=device).eval()
+    model2 = get_model("saved_models/s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth", device=device).eval()
     # mix
     model3 = get_model("saved_models/glint360k_r100.onnx", device=device).eval()
 

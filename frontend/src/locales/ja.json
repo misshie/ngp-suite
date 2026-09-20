@@ -2,14 +2,18 @@
   "appTitle": "NGPsuite",
   "nav": {
     "analysis": "解析",
-    "export": "結果のエクスポート",
+    "export": "書き出し",
     "settings": "設定",
-    "about": "情報"
+    "about": "情報",
+    "galleryAdd": "ギャラリー追加"
   },
   "startPage": {
     "welcome": "ようこそ",
     "getStarted": "はじめましょう",
-    "pressAnalysis": "左のナビゲーションバーにある<strong>解析</strong>ボタンを押して、解析を開始してください。"
+    "pressAnalysis": "左のナビゲーションバーにある<strong>解析</strong>ボタンを押して、解析を開始してください。",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "同梱の Mondo international edition",
+    "mondoAttribution": "このプロダクトには Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）を同梱しています。Mondoのライセンスは <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a> です。"
   },
   "analysisDialog": {
     "title": "解析ファイルをアップロード",
@@ -26,6 +30,7 @@
   "resultsPage": {
     "title": "解析結果",
     "queriedHpo": "問い合わせたHPO",
+    "mondoVersion": "Mondoバージョン",
     "modelVersion": "モデルバージョン",
     "galleryVersion": "ギャラリーバージョン",
     "tabs": {
@@ -38,6 +43,22 @@
       "syndromes": "症候群を検索",
       "patients": "患者を検索"
     },
+    "columns": "列",
+    "mondo": {
+      "geneDerived": "遺伝子由来",
+      "geneDerivedHint": "OMIM ID ではなく遺伝子シンボルから疾患を推定しています",
+      "panelSearch": "PubCaseFinder PanelSearch で開く",
+      "nanbyoData": "NanbyoData で {id} を開く",
+      "omimEntry": "OMIM {id} を開く"
+    },
+    "gene": {
+      "unresolved": "遺伝子未確定",
+      "unresolvedHint": "GMDB に原因遺伝子の登録がないため、疾患名（MONDO ラベル）を表示しています",
+      "subtypeUnresolved": "サブタイプ未確定",
+      "subtypeUnresolvedHint": "サブタイプが未確定で、候補遺伝子が今回の結果に含まれていません",
+      "mondoSourced": "MONDO 由来",
+      "mondoSourcedHint": "GMDB に遺伝子登録がない症例に対し、MONDO の疾患-遺伝子関係から補った候補です"
+    },
     "noResults": "表示する結果がありません。"
   },
   "settingsDialog": {
@@ -48,10 +69,13 @@
     "port": "ポート",
     "auth": "認証",
     "user": "ユーザー名",
-    "password": "パスワード"
+    "password": "パスワード",
+    "experimental": "実験的機能",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "有効にすると、ナビゲーションに実験的機能（例: ギャラリー追加）が表示されます。"
   },
   "exportDialog": {
-    "title": "結果のエクスポート",
+    "title": "書き出し",
     "subtitle": "希望のエクスポート形式を選択してください。",
     "excel": {
       "title": "Excel形式",
@@ -74,6 +98,7 @@
     "title": "NGPsuiteについて",
     "programmedBy": "プログラム作成者",
     "poweredBy": "このアプリケーションはGestaltMatcherとPubCaseFinderを利用して動作しています。",
+    "mondoAttribution": "このプロダクトには Mondo Disease Ontology (Mondo) international edition（<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>）を同梱しています。Mondoのライセンスは <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a> です。",
     "disclaimer": "NGPsuite, GestaltMatcher, PubCaseFinder, およびその他の情報源は、<strong>研究および教育目的</strong>でのみ使用されることを意図しています。"
   },
   "footer": {
@@ -86,5 +111,25 @@
     "clear": "結果をクリア",
     "reset": "デフォルトにリセット",
     "ok": "OK"
+  },
+  "galleryAddDialog": {
+    "title": "ギャラリー追加",
+    "subtitle": "特徴ベクトルと手入力メタデータをJSONで書き出します（実験的）。",
+    "experimentalNotice": "実験的機能です。研究用途向け。顔画像は含まれません。スキーマは変更されることがあります。",
+    "metadataTitle": "メタデータ",
+    "metadataDescription": "JSON書き出しに含める任意のメタデータを入力してください。",
+    "fields": {
+      "imageId": "画像ID",
+      "patientId": "患者ID",
+      "disorderName": "疾患名",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "遺伝子名",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "メモ"
+    },
+    "vectorsTitle": "特徴ベクトル",
+    "vectorsDescription": "モデル／ギャラリー版、メタデータ、モデル m0–m2 の512次元ベクトルを含むJSONをダウンロードします。",
+    "button": "Gallery Add JSONをダウンロード"
   }
 }

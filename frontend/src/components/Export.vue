@@ -3,6 +3,7 @@
   import { useI18n } from 'vue-i18n'
   import * as XLSX from 'xlsx' // Import the xlsx library
   import { useStore } from '@/stores/app'
+  import { formatMondoTerm, geneLabel, syndromeLabel } from '@/utils/mondoLabel'
 
   const { t } = useI18n()
 
@@ -23,10 +24,14 @@
   const metadataItems = computed(() => {
     if (!store.analysisResult) return []
 
-    const items = [
+    const items = []
+    if (store.analysisResult.mondo_version) {
+      items.push({ parameter: 'Mondo Version', value_en: store.analysisResult.mondo_version, value_ja: '' })
+    }
+    items.push(
       { parameter: 'Model Version', value_en: store.analysisResult.model_version, value_ja: '' },
       { parameter: 'Gallery Version', value_en: store.analysisResult.gallery_version, value_ja: '' },
-    ]
+    )
 
     const hpoIds = store.analysisResult.queried_hpo_ids
     const hpoNames = store.analysisResult.pubcasefinder?.hpo_names
@@ -46,6 +51,43 @@
   })
 
   /**
+   * Spreadsheet cells cannot hold the MONDO ancestor arrays, so collapse them into
+   * semicolon-separated "MONDO:xxx name" text. The JSON export keeps the raw shape.
+   */
+  const syndromeRows = computed(() =>
+    (store.analysisResult?.suggested_syndromes_list || []).map(item => {
+      const { mondo_parents, mondo_grandparents, syndrome_labels, ...rest } = item
+      return {
+        ...rest,
+        syndrome_name: syndromeLabel({ syndrome_name: item.syndrome_name, syndrome_labels }, store.locale),
+        mondo_parents: mondo_parents?.map(term => formatMondoTerm(term, store.locale)).join('; ') ?? '',
+        mondo_grandparents: mondo_grandparents?.map(term => formatMondoTerm(term, store.locale)).join('; ') ?? '',
+      }
+    }),
+  )
+
+  const geneRows = computed(() =>
+    (store.analysisResult?.suggested_genes_list || []).map(item => {
+      const { gene_labels, ...rest } = item
+      return {
+        ...rest,
+        gene_name: geneLabel({ gene_name: item.gene_name, gene_labels }, store.locale),
+      }
+    }),
+  )
+
+  const patientRows = computed(() =>
+    (store.analysisResult?.suggested_patients_list || []).map(item => {
+      const { syndrome_labels, ...rest } = item
+      return {
+        ...rest,
+        syndrome_name: syndromeLabel({ syndrome_name: item.syndrome_name, syndrome_labels }, store.locale),
+        mondo_id: (item.mondo_id || []).join('; '),
+      }
+    }),
+  )
+
+  /**
    * Exports all available result lists to a single XLSX file with multiple sheets.
    */
   function exportAsXLSX () {
@@ -61,19 +103,19 @@
 
     // Add other sheets as before
     if (store.analysisResult.suggested_syndromes_list) {
-      const ws = XLSX.utils.json_to_sheet(store.analysisResult.suggested_syndromes_list)
+      const ws = XLSX.utils.json_to_sheet(syndromeRows.value)
       XLSX.utils.book_append_sheet(wb, ws, 'Syndromes')
     }
     if (store.analysisResult.suggested_genes_list) {
-      const ws = XLSX.utils.json_to_sheet(store.analysisResult.suggested_genes_list)
+      const ws = XLSX.utils.json_to_sheet(geneRows.value)
       XLSX.utils.book_append_sheet(wb, ws, 'Genes')
     }
     if (store.analysisResult.suggested_patients_list) {
-      const ws = XLSX.utils.json_to_sheet(store.analysisResult.suggested_patients_list)
+      const ws = XLSX.utils.json_to_sheet(patientRows.value)
       XLSX.utils.book_append_sheet(wb, ws, 'Patients')
     }
 
-    XLSX.writeFile(wb, 'piNGPong_tables_results.xlsx')
+    XLSX.writeFile(wb, 'ngpsuite_results.xlsx')
     emit('update:modelValue', false)
   }
 
@@ -113,15 +155,15 @@
         break
       }
       case 'genes': {
-        downloadTSV(store.analysisResult.suggested_genes_list, 'genes.tsv')
+        downloadTSV(geneRows.value, 'genes.tsv')
         break
       }
       case 'syndromes': {
-        downloadTSV(store.analysisResult.suggested_syndromes_list, 'syndromes.tsv')
+        downloadTSV(syndromeRows.value, 'syndromes.tsv')
         break
       }
       case 'patients': {
-        downloadTSV(store.analysisResult.suggested_patients_list, 'patients.tsv')
+        downloadTSV(patientRows.value, 'patients.tsv')
         break
       }
     }
@@ -196,7 +238,7 @@
         <v-btn
           block
           class="mt-2"
-          color="secondary"
+          color="success"
           prepend-icon="mdi-file-delimited"
           @click="exportAsTSV"
         >
@@ -210,7 +252,7 @@
         <p class="text-body-2 mb-4">{{ t('exportDialog.json.description') }}</p>
         <v-btn
           block
-          color="primary"
+          color="success"
           prepend-icon="mdi-code-json"
           @click="exportAsJSON"
         >

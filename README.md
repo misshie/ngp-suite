@@ -16,6 +16,15 @@
 9. [References](#references)
 
 ----
+
+<p align="center">
+  <img src="./assets/ngpsuite-ss1.png" width="30%" alt="NGPsuite screenshot 1" />
+  <img src="./assets/ngpsuite-ss2.png" width="30%" alt="NGPsuite screenshot 2" />
+  <img src="./assets/ngpsuite-ss3.png" width="30%" alt="NGPsuite screenshot 3" />
+</p>
+<p align="center"><em>Image from Dr. Ibrahim Abdelrazek at GestaltMatcher Database https://db.gestaltmatcher.org/patients/15727</em></p>
+
+----
 ## **Introduction**
 
 **NGPsuite** is a web-based application designed to support the diagnosis of rare diseases.
@@ -56,13 +65,24 @@ Place the following files in the `backend/saved_models/` directory:
 * `glint360k_r100.onnx` (base pre-trained model for model b)
 
 2. Trained Feature Space Models (Gallery)
-Place the following files in the `backend/data/` directory:
-* `s1_glint360k_r50_512d_gmdb__v1.1.0_bs64_size112_channels3_last_model.pth` (model a)
-* `s2_glint360k_r100_512d_gmdb__v1.1.0_bs128_size112_channels3_last_model.pth` (model b)
+Place the following files in the `backend/saved_models/` directory:
+* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth` (model a)
+* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth` (model b)
 
 3. Annotations for the Gallery Encodings
 Place the following file in the `backend/data/gallery_encodings/` directory:
-* `GMDB_gallery_encodings_20082024_v1.1.0_service.pkl`
+* `GMDB_gallery_encodings_23052026_v1.1.4_service.pkl`
+
+4. Additional data for GestaltMatcher-Arc v1.1.4
+Place the following files in the `backend/data/` directory:
+* `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
+* `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
+
+5. MONDO ontology (shipped with the repository)
+The following file is tracked under `backend/mondo/` (no patient data) and does not need to be downloaded separately:
+* `mondo-international.obo.gz` (labels and ancestor hierarchy for gallery disorders)
+
+This product includes the Mondo Disease Ontology (Mondo) international edition ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See also [Acknowledgements](#acknowledgements).
 
 The final file tree should look like this:
 
@@ -70,8 +90,18 @@ The final file tree should look like this:
 ngp-suite/
 └── backend/
     ├── data/
-    │   └── gallery_encodings/
+    │   ├── gallery_encodings/
+    │   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
+    │   ├── transformation_probabilities_07052025.csv
+    │   └── patient_metadata_2026-05-23_mondo.p
+    ├── mondo/
+    │   └── mondo-international.obo.gz
     ├── saved_models/
+    │   ├── Resnet50_Final.pth
+    │   ├── glint360k_r50.onnx
+    │   ├── glint360k_r100.onnx
+    │   ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
+    │   └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
     └── ... (other backend files)
 ```
 
@@ -86,6 +116,39 @@ sudo docker compose up -d     # without `-d`, you can watch logs on console.
 ```
 
 The initial startup may take about 90 seconds as the API service loads the models.
+
+#### **GPU / CUDA note**
+
+The Docker deployment of NGPsuite (Web API) runs on **CPU**. It does **not** use a GPU for inference, even if one is present on the host. End users do not need CUDA, NVIDIA drivers, or any GPU-related setup.
+
+<details>
+<summary><strong>For developers: optional CUDA-enabled image build</strong></summary>
+
+By default, the API image installs **CPU-only** PyTorch (smaller image, no NVIDIA package dependencies).
+
+If you intentionally want a CUDA-enabled PyTorch install inside the image (for experiments or future GPU work), build with:
+
+```
+cd backend
+sudo docker compose build --build-arg USE_CUDA=1
+# optional: also rebuild without cache
+# sudo docker compose build --no-cache --build-arg USE_CUDA=1
+```
+
+Notes:
+
+* This only changes which PyTorch wheels are installed. The current Web API still runs inference on CPU unless the application code is changed to use CUDA.
+* The CUDA build is larger, slower, and needs more disk space during `pip install`.
+* Using a GPU at runtime additionally requires NVIDIA drivers and the NVIDIA Container Toolkit on the host; that is separate from this build flag.
+
+Requirements files:
+
+* `backend/requirements_docker.txt` — shared deps for the default (CPU) build; PyTorch / torchvision are installed from the official CPU wheel index in the Dockerfile
+* `backend/requirements_docker_cuda.txt` — same deps plus `torch` for the CUDA opt-in build
+
+The Dockerfile pins `torch==2.3.1` and `torchvision==0.18.1` with a pip constraints file so other packages cannot upgrade them to a CUDA build from PyPI.
+
+</details>
 
 ### **4. Access the Application**
 
@@ -164,7 +227,11 @@ The backend service of this project is based on the work of
 [GestaltMatcher](https://www.gestaltmatcher.org/) with their [repository](https://github.com/igsb/GestaltMatcher-Arc/).
 The backend service utilizes the API of PubCaseFinder; see [detailed description](https://pubcasefinder.dbcls.jp/api). The author is grateful for their foundational contributions to the field.
 
-We would like to thank all participants and organizers of the [DBCLS BioHackathon 2025](https://2025.biohackathon.org/) (September 14-20, 2025, Mie, Japan) for their valuable discussions and support, which contributed significantly to the development of this project.
+This product includes the Mondo Disease Ontology (Mondo) international edition
+([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The ontology file is shipped under `backend/mondo/`.
+
+We would like to thank all participants and organizers of the [DBCLS BioHackathon 2025](https://2025.biohackathon.org/) (September 14-20, 2025, Mie, Japan) and [DBCLS BioHackathon 2026](https://2026.biohackathon.org/) (September 13-19, 2026, Ehime, Japan) for their valuable discussions and support, which contributed significantly to the development of this project.
 
 ## **Author**
 

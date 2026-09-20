@@ -44,5 +44,11 @@
     "vite-plugin-vuetify": "^2.1.1",
     "vue-router": "^4.5.1",
     "vue-tsc": "^3.0.1"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.1": true,
+    "esbuild@0.25.9": true,
+    "fsevents@2.3.3": true,
+    "unrs-resolver@1.11.1": true
   }
 }

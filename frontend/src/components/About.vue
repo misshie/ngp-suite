@@ -41,6 +41,10 @@
             </a>
           </p>
           <p>{{ t('aboutDialog.poweredBy') }}</p>
+          <p
+            class="text-body-2 text-left"
+            v-html="t('aboutDialog.mondoAttribution')"
+          />
         </div>
 
         <v-alert

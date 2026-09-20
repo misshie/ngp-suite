@@ -1,8 +1,9 @@
 <script setup lang="ts">
-  import { computed } from 'vue'
+  import { computed, inject } from 'vue'
   import { useI18n } from 'vue-i18n'
 
   const { t } = useI18n()
+  const openAnalysis = inject<() => void>('openAnalysis')
 
   // Main Links
   const mainLinks = [
@@ -33,13 +34,19 @@
   ]
 
   // Related Resources
-  const resources = [
+  const resources = computed(() => [
     {
       href: 'https://github.com/misshie/ngp-suite',
       icon: 'mdi-github',
       title: 'NGPsuite GitHub repository',
     },
-  ]
+    {
+      href: 'https://mondo.monarchinitiative.org/',
+      icon: 'mdi-graph-outline',
+      title: t('startPage.mondoResourceTitle'),
+      subtitle: t('startPage.mondoResourceSubtitle'),
+    },
+  ])
 
   // Updated Publications list
   const publications = [
@@ -131,11 +138,16 @@
 
       <!-- Call to Action -->
       <v-card
-        class="py-4 mb-8"
+        class="get-started-card py-4 mb-8"
         color="tertiary"
         prepend-icon="mdi-rocket-launch-outline"
+        role="button"
         rounded="lg"
+        tabindex="0"
         variant="tonal"
+        @click="openAnalysis?.()"
+        @keydown.enter.prevent="openAnalysis?.()"
+        @keydown.space.prevent="openAnalysis?.()"
       >
         <template #title>
           <h2 class="text-h5 font-weight-bold">
@@ -172,7 +184,7 @@
       <!-- Related Resources -->
       <div class="text-left mb-6">
         <h3 class="text-h6 font-weight-medium mb-2">Related Resources</h3>
-        <v-list bg-color="transparent" lines="one">
+        <v-list bg-color="transparent" lines="two">
           <v-list-item
             v-for="resource in resources"
             :key="resource.title"
@@ -185,11 +197,16 @@
               <v-icon class="mr-4" :icon="resource.icon" />
             </template>
             <v-list-item-title>{{ resource.title }}</v-list-item-title>
+            <v-list-item-subtitle v-if="resource.subtitle">{{ resource.subtitle }}</v-list-item-subtitle>
             <template #append>
               <v-icon icon="mdi-open-in-new" size="small" />
             </template>
           </v-list-item>
         </v-list>
+        <p
+          class="text-body-2 text-medium-emphasis mt-2 px-2"
+          v-html="t('startPage.mondoAttribution')"
+        />
       </div>
 
       <!-- Publications -->
@@ -233,3 +250,17 @@
     </v-responsive>
   </v-container>
 </template>
+
+<style scoped>
+.get-started-card {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.get-started-card:hover {
+  opacity: 0.92;
+}
+.get-started-card:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 2px;
+}
+</style>

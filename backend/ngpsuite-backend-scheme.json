@@ -1,0 +1,273 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NGPsuite API Response",
+  "description": "Schema for the JSON response from the /api/predict endpoint.",
+  "type": "object",
+  "properties": {
+    "model_version": {
+      "type": "string",
+      "description": "Version of the GestaltMatcher model used."
+    },
+    "gallery_version": {
+      "type": "string",
+      "description": "Version of the gallery data used."
+    },
+    "mondo_version": {
+      "type": "string",
+      "description": "owl:versionInfo from the bundled Mondo international OBO release (e.g. 2026-07-06)."
+    },
+    "nando_ids": {
+      "type": "object",
+      "description": "MONDO ID to a single NANDO ID (the smallest xref when multiple exist) for IDs present in this response.",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^NANDO:[0-9]+$"
+      }
+    },
+    "omim_ids": {
+      "type": "object",
+      "description": "MONDO ID to a single OMIM entry number from OBO MONDO:equivalentTo xref (smallest when multiple exist).",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
+      }
+    },
+    "suggested_genes_list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/geneEntry"
+      }
+    },
+    "suggested_syndromes_list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/syndromeEntry"
+      }
+    },
+    "suggested_patients_list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/patientEntry"
+      }
+    },
+    "queried_hpo_ids": {
+      "type": "array",
+      "description": "The list of HPO IDs used in the query, if provided.",
+      "items": {
+        "type": "string",
+        "pattern": "^HP:[0-9]{7}$"
+      }
+    },
+    "pubcasefinder": {
+      "$ref": "#/$defs/pubCaseFinderResult"
+    },
+    "feature_vectors": {
+      "type": "array",
+      "description": "Optional experimental GestaltMatcher-Arc feature vectors (one entry per model, typically 512-dim).",
+      "items": {
+        "$ref": "#/$defs/featureVectorEntry"
+      }
+    }
+  },
+  "required": [
+    "model_version",
+    "gallery_version",
+    "suggested_genes_list",
+    "suggested_syndromes_list",
+    "suggested_patients_list"
+  ],
+  "$defs": {
+    "featureVectorEntry": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string", "description": "Model identifier, e.g. m0, m1, m2." },
+        "dim": { "type": "integer", "description": "Feature vector dimensionality." },
+        "representations": {
+          "type": "array",
+          "description": "Feature vector values.",
+          "items": { "type": "number" }
+        }
+      },
+      "required": ["model", "dim", "representations"]
+    },
+    "geneEntry": {
+      "type": "object",
+      "properties": {
+        "gene_name": {
+          "type": "string",
+          "description": "HGNC gene symbol, or the MONDO disease label when GMDB records no causative gene."
+        },
+        "gene_entrez_id": {
+          "type": ["string", "null"],
+          "description": "NCBI Entrez Gene ID. Null when gene_unresolved is true."
+        },
+        "gene_labels": {
+          "type": "object",
+          "description": "Language code to display name. Present when gene_unresolved is true (and for legacy subtype_unresolved rows).",
+          "additionalProperties": { "type": "string" }
+        },
+        "gene_unresolved": {
+          "type": "boolean",
+          "description": "True when the row represents a disease without a usable causative gene (chromosomal or unknown)."
+        },
+        "subtype_unresolved": {
+          "type": "boolean",
+          "description": "Legacy only. Present for old pickles that stored parent-disease rows instead of expanding MONDO subtype candidates into gene_level entries."
+        },
+        "hgnc_id": {
+          "type": ["string", "null"],
+          "description": "HGNC id (e.g. HGNC:7133). Used when Entrez is missing for MONDO-filled genes."
+        },
+        "gene_source": {
+          "type": ["string", "null"],
+          "description": "gmdb for GMDB-registered genes; mondo when filled or expanded from MONDO disease–gene relations.",
+          "enum": ["gmdb", "mondo", null]
+        },
+        "distance": { "type": "number" },
+        "score": { "type": ["number", "null"] },
+        "gm_rank": { "type": "integer" },
+        "pubcasefinder_rank": { "type": ["integer", "null"] },
+        "pubcasefinder_score": { "type": ["number", "null"] },
+        "mean_rank": { "type": ["number", "null"] },
+        "meta_rank": { "type": "integer" }
+      },
+      "required": ["gene_name", "gene_entrez_id", "distance", "score", "gm_rank", "meta_rank"]
+    },
+    "mondoTerm": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^MONDO:[0-9]{7}$" },
+        "name": { "type": "string", "description": "English label." },
+        "labels": {
+          "type": "object",
+          "description": "Language code to display name. Always includes en; ja when MONDO has skos:altLabel @ja.",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "required": ["id", "name"]
+    },
+    "syndromeEntry": {
+      "type": "object",
+      "properties": {
+        "syndrome_name": {
+          "type": "string",
+          "description": "English MONDO label, or the GMDB disorder name when the disorder has no MONDO term."
+        },
+        "syndrome_labels": {
+          "type": "object",
+          "description": "Language code to display name for syndrome_name. Always includes en.",
+          "additionalProperties": { "type": "string" }
+        },
+        "omim_id": {
+          "type": ["integer", "string", "null"],
+          "description": "Empty string when GMDB records no OMIM ID."
+        },
+        "mondo_id": {
+          "type": ["string", "null"],
+          "pattern": "^MONDO:[0-9]{7}$",
+          "description": "Null when the disorder could not be placed in MONDO."
+        },
+        "mondo_parents": {
+          "type": "array",
+          "description": "Direct is_a parents, sorted by MONDO ID.",
+          "items": { "$ref": "#/$defs/mondoTerm" }
+        },
+        "mondo_grandparents": {
+          "type": "array",
+          "description": "Parents of the parents, excluding the term itself and its direct parents, sorted by MONDO ID.",
+          "items": { "$ref": "#/$defs/mondoTerm" }
+        },
+        "mondo_source": {
+          "enum": ["omim", "gene", null],
+          "description": "Whether the MONDO term was resolved from the OMIM ID or from the gene symbol."
+        },
+        "distance": { "type": "number" },
+        "image_id": { "type": "string" },
+        "subject_id": { "type": "string" },
+        "ACMG_PP4": { "type": "string" },
+        "ACMG_PP4_support": { "type": "string" },
+        "score": { "type": ["number", "null"] },
+        "gm_rank": { "type": "integer" },
+        "pubcasefinder_rank": { "type": ["integer", "null"] },
+        "pubcasefinder_score": { "type": ["number", "null"] },
+        "mean_rank": { "type": ["number", "null"] },
+        "meta_rank": { "type": "integer" }
+      },
+      "required": ["syndrome_name", "syndrome_labels", "omim_id", "mondo_id", "mondo_parents", "mondo_grandparents", "mondo_source", "distance", "image_id", "subject_id", "score", "gm_rank", "meta_rank"]
+    },
+    "patientEntry": {
+      "type": "object",
+      "properties": {
+        "subject_id": { "type": "string" },
+        "gene_name": {
+          "type": "string",
+          "description": "Gene symbol(s) of the nearest gallery image. Multiple MONDO-expanded candidates are joined with '; '."
+        },
+        "gene_entrez_id": {
+          "type": ["string", "null"],
+          "description": "Entrez ID(s) for gene_name, joined with '; ' when several. Null when none of the entries have an Entrez ID."
+        },
+        "distance": { "type": "number" },
+        "image_id": { "type": "string" },
+        "syndrome_name": {
+          "type": "string",
+          "description": "English MONDO label(s) for the nearest gallery image, joined with '; ' when the image has several MONDO IDs. Falls back to the GMDB disorder name when the image has no MONDO term."
+        },
+        "syndrome_labels": {
+          "type": "object",
+          "description": "Language code to display name for syndrome_name. Always includes en; multiple MONDO IDs are joined with '; '.",
+          "additionalProperties": { "type": "string" }
+        },
+        "omim_id": { "type": ["integer", "string"] },
+        "score": { "type": ["number", "null"] },
+        "gm_rank": { "type": "integer" },
+        "pubcasefinder_rank": { "type": ["integer", "null"] },
+        "pubcasefinder_score": { "type": ["number", "null"] },
+        "mean_rank": { "type": ["number", "null"] },
+        "meta_rank": { "type": "integer" },
+        "numeric_omim_id": { "type": ["integer", "null"] },
+        "phenotypic_series_id": { "type": ["string", "null"] },
+        "mondo_id": {
+          "type": "array",
+          "description": "MONDO IDs of the nearest gallery image, sorted. Empty when the image has no MONDO term.",
+          "items": { "type": "string", "pattern": "^MONDO:[0-9]{7}$" }
+        }
+      },
+      "required": ["subject_id", "gene_name", "gene_entrez_id", "distance", "image_id", "syndrome_name", "syndrome_labels", "omim_id", "mondo_id", "score", "gm_rank", "meta_rank"]
+    },
+    "pubCaseFinderResult": {
+      "type": "object",
+      "properties": {
+        "ranked_list": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pcfRankedListItem" }
+        },
+        "hpo_names": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/hpoNameEntry" }
+        }
+      },
+      "required": ["ranked_list", "hpo_names"]
+    },
+    "pcfRankedListItem": {
+      "type": "object",
+      "description": "NOTE: This schema is based on the assumed structure used by the integrator. It may not be exhaustive.",
+      "properties": {
+        "id": { "type": "string" },
+        "rank": { "type": "integer" },
+        "score": { "type": "number" },
+        "hgnc_gene_symbol": { "type": "array", "items": { "type": "string" } },
+        "mondo_id": { "type": "array", "items": { "type": "string" } },
+        "omim_disease_name_en": { "type": "string" }
+      }
+    },
+    "hpoNameEntry": {
+      "type": "object",
+      "properties": {
+        "name_en": { "type": "string" },
+        "name_ja": { "type": "string" }
+      },
+      "required": ["name_en", "name_ja"]
+    }
+  }
+}

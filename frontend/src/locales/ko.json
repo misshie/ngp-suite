@@ -2,14 +2,18 @@
   "appTitle": "NGPsuite",
   "nav": {
     "analysis": "분석",
-    "export": "결과 내보내기",
+    "export": "내보내기",
     "settings": "설정",
-    "about": "정보"
+    "about": "정보",
+    "galleryAdd": "Gallery Add"
   },
   "startPage": {
     "welcome": "다음에 오신 것을 환영합니다",
     "getStarted": "시작하기",
-    "pressAnalysis": "시작하려면 왼쪽 탐색 모음에서 <strong>분석</strong> 버튼을 누르세요."
+    "pressAnalysis": "시작하려면 왼쪽 탐색 모음에서 <strong>분석</strong> 버튼을 누르세요.",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "포함된 Mondo international edition",
+    "mondoAttribution": "이 제품에는 Mondo Disease Ontology (Mondo) international edition(<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>)이 포함되어 있습니다. Mondo의 라이선스는 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>입니다."
   },
   "analysisDialog": {
     "title": "분석 파일 업로드",
@@ -26,6 +30,7 @@
   "resultsPage": {
     "title": "분석 결과",
     "queriedHpo": "쿼리된 HPO",
+    "mondoVersion": "Mondo 버전",
     "modelVersion": "모델 버전",
     "galleryVersion": "갤러리 버전",
     "tabs": {
@@ -38,6 +43,22 @@
       "syndromes": "증후군 검색",
       "patients": "환자 검색"
     },
+    "columns": "열",
+    "mondo": {
+      "geneDerived": "유전자 기반",
+      "geneDerivedHint": "OMIM ID가 아니라 유전자 기호에서 추정한 질환입니다",
+      "panelSearch": "PubCaseFinder PanelSearch에서 열기",
+      "nanbyoData": "NanbyoData에서 {id} 열기",
+      "omimEntry": "OMIM {id} 열기"
+    },
+    "gene": {
+      "unresolved": "유전자 미확정",
+      "unresolvedHint": "GMDB에 원인 유전자가 등록되어 있지 않아 질환명(MONDO 라벨)을 표시합니다",
+      "subtypeUnresolved": "아형 미확정",
+      "subtypeUnresolvedHint": "아형이 미확정이며 후보 유전자가 이번 결과에 포함되어 있지 않습니다",
+      "mondoSourced": "MONDO 유래",
+      "mondoSourcedHint": "GMDB에 유전자가 없어 MONDO 질환-유전자 관계로 보완한 후보입니다"
+    },
     "noResults": "표시할 결과가 없습니다."
   },
   "settingsDialog": {
@@ -48,10 +69,13 @@
     "port": "포트",
     "auth": "인증",
     "user": "사용자 이름",
-    "password": "비밀번호"
+    "password": "비밀번호",
+    "experimental": "Experimental",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "When enabled, additional experimental features appear in the navigation (e.g. Gallery Add)."
   },
   "exportDialog": {
-    "title": "결과 내보내기",
+    "title": "내보내기",
     "subtitle": "원하는 내보내기 형식을 선택하세요.",
     "excel": {
       "title": "Excel 형식",
@@ -74,6 +98,7 @@
     "title": "NGPsuite 정보",
     "programmedBy": "프로그래머",
     "poweredBy": "이 애플리케이션은 GestaltMatcher 및 PubCaseFinder에 의해 구동됩니다.",
+    "mondoAttribution": "이 제품에는 Mondo Disease Ontology (Mondo) international edition(<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>)이 포함되어 있습니다. Mondo의 라이선스는 <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>입니다.",
     "disclaimer": "NGPsuite는 <strong>연구 및 교육 목적</strong>으로만 사용됩니다."
   },
   "footer": {
@@ -86,5 +111,25 @@
     "clear": "결과 지우기",
     "reset": "기본값으로 재설정",
     "ok": "확인"
+  },
+  "galleryAddDialog": {
+    "title": "Gallery Add",
+    "subtitle": "Export feature vectors with hand-entered metadata (experimental).",
+    "experimentalNotice": "Experimental. For research use. Does not include face images. Schema may change.",
+    "metadataTitle": "Metadata",
+    "metadataDescription": "Enter optional metadata to include in the JSON export.",
+    "fields": {
+      "imageId": "Image ID",
+      "patientId": "Patient ID",
+      "disorderName": "Disorder name",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "Gene name",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "Notes"
+    },
+    "vectorsTitle": "Feature vectors",
+    "vectorsDescription": "Downloads a JSON file with model/gallery versions, metadata, and 512-dim vectors for models m0–m2.",
+    "button": "Download Gallery Add JSON"
   }
 }

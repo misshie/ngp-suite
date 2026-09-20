@@ -2,14 +2,18 @@
   "appTitle": "NGPsuite",
   "nav": {
     "analysis": "Analisi",
-    "export": "Esporta Risultati",
+    "export": "Esporta",
     "settings": "Impostazioni",
-    "about": "Informazioni"
+    "about": "Informazioni",
+    "galleryAdd": "Gallery Add"
   },
   "startPage": {
     "welcome": "Benvenuto a",
     "getStarted": "Inizia",
-    "pressAnalysis": "Premi il pulsante <strong>Analisi</strong> nella barra di navigazione a sinistra per iniziare."
+    "pressAnalysis": "Premi il pulsante <strong>Analisi</strong> nella barra di navigazione a sinistra per iniziare.",
+    "mondoResourceTitle": "Mondo Disease Ontology",
+    "mondoResourceSubtitle": "Edizione internazionale Mondo inclusa",
+    "mondoAttribution": "Questo prodotto include la Mondo Disease Ontology (Mondo) international edition (<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>). La licenza di Mondo è <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>."
   },
   "analysisDialog": {
     "title": "Carica File di Analisi",
@@ -26,6 +30,7 @@
   "resultsPage": {
     "title": "Risultato dell'Analisi",
     "queriedHpo": "HPO Interrogati",
+    "mondoVersion": "Versione Mondo",
     "modelVersion": "Versione Modello",
     "galleryVersion": "Versione Galleria",
     "tabs": {
@@ -38,6 +43,22 @@
       "syndromes": "Cerca Sindromi",
       "patients": "Cerca Pazienti"
     },
+    "columns": "Colonne",
+    "mondo": {
+      "geneDerived": "derivato dal gene",
+      "geneDerivedHint": "Malattia dedotta dal simbolo del gene, non da un ID OMIM",
+      "panelSearch": "Apri in PubCaseFinder PanelSearch",
+      "nanbyoData": "Apri {id} in NanbyoData",
+      "omimEntry": "Apri OMIM {id}"
+    },
+    "gene": {
+      "unresolved": "gene non determinato",
+      "unresolvedHint": "GMDB non registra un gene causale; viene mostrato il nome della malattia (etichetta MONDO)",
+      "subtypeUnresolved": "sottotipo non determinato",
+      "subtypeUnresolvedHint": "Sottotipo non determinato e nessun gene candidato compare in questo risultato",
+      "mondoSourced": "da MONDO",
+      "mondoSourcedHint": "Integrato da una relazione malattia–gene MONDO perché GMDB non ha un gene per questo caso"
+    },
     "noResults": "Nessun risultato da visualizzare."
   },
   "settingsDialog": {
@@ -48,10 +69,13 @@
     "port": "Porta",
     "auth": "Autenticazione",
     "user": "Nome utente",
-    "password": "Password"
+    "password": "Password",
+    "experimental": "Experimental",
+    "experimentalFunctions": "Experimental Functions",
+    "experimentalHint": "When enabled, additional experimental features appear in the navigation (e.g. Gallery Add)."
   },
   "exportDialog": {
-    "title": "Esporta Risultati",
+    "title": "Esporta",
     "subtitle": "Scegli il tuo formato di esportazione preferito.",
     "excel": {
       "title": "Formato Excel",
@@ -74,6 +98,7 @@
     "title": "Informazioni su NGPsuite",
     "programmedBy": "Programmato da",
     "poweredBy": "Questa applicazione è alimentata da GestaltMatcher e PubCaseFinder.",
+    "mondoAttribution": "Questo prodotto include la Mondo Disease Ontology (Mondo) international edition (<a href=\"https://mondo.monarchinitiative.org/\" rel=\"noopener noreferrer\" target=\"_blank\">mondo.monarchinitiative.org</a>). La licenza di Mondo è <a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"noopener noreferrer\" target=\"_blank\">CC BY 4.0</a>.",
     "disclaimer": "NGPsuite è destinato esclusivamente a scopi di <strong>ricerca e didattici.</strong>"
   },
   "footer": {
@@ -86,5 +111,25 @@
     "clear": "Cancella Risultato",
     "reset": "Ripristina ai valori predefiniti",
     "ok": "OK"
+  },
+  "galleryAddDialog": {
+    "title": "Gallery Add",
+    "subtitle": "Export feature vectors with hand-entered metadata (experimental).",
+    "experimentalNotice": "Experimental. For research use. Does not include face images. Schema may change.",
+    "metadataTitle": "Metadata",
+    "metadataDescription": "Enter optional metadata to include in the JSON export.",
+    "fields": {
+      "imageId": "Image ID",
+      "patientId": "Patient ID",
+      "disorderName": "Disorder name",
+      "omimId": "OMIM ID",
+      "mondoId": "MONDO ID",
+      "geneName": "Gene name",
+      "geneEntrezId": "Gene Entrez ID",
+      "notes": "Notes"
+    },
+    "vectorsTitle": "Feature vectors",
+    "vectorsDescription": "Downloads a JSON file with model/gallery versions, metadata, and 512-dim vectors for models m0–m2.",
+    "button": "Download Gallery Add JSON"
   }
 }

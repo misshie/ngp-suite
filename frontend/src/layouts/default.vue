@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref, shallowRef } from 'vue'
+  import { provide, ref, shallowRef } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { useRouter } from 'vue-router'
   import { useStore } from '@/stores/app'
@@ -24,6 +24,7 @@
   const isAnalysisOpen = ref(false)
   const isSettingsOpen = ref(false)
   const isExportOpen = ref(false)
+  const isGalleryAddOpen = ref(false)
   const drawer = shallowRef(true)
 
   const store = useStore()
@@ -41,6 +42,16 @@
     store.setLocale(newLocaleCode)
   }
 
+  function openAnalysis () {
+    isAnalysisOpen.value = true
+  }
+  provide('openAnalysis', openAnalysis)
+
+  function openExport () {
+    isExportOpen.value = true
+  }
+  provide('openExport', openExport)
+
 </script>
 
 <template>
@@ -49,6 +60,7 @@
     <Analysis v-model="isAnalysisOpen" />
     <About v-model="isAboutOpen" />
     <Export v-model="isExportOpen" />
+    <GalleryAdd v-model="isGalleryAddOpen" />
 
     <v-navigation-drawer v-model="drawer" permanent width="80">
       <div class="d-flex justify-center pa-4">
@@ -84,6 +96,19 @@
       >
         <v-icon>mdi-export</v-icon>
         <span class="text-caption">{{ t('nav.export') }}</span>
+      </v-btn>
+
+      <v-btn
+        v-if="store.experimentalFunctions && store.analysisResult"
+        class="text-none"
+        stacked
+        tile
+        variant="text"
+        width="80"
+        @click="isGalleryAddOpen = true"
+      >
+        <v-icon>mdi-image-plus</v-icon>
+        <span class="text-caption">{{ t('nav.galleryAdd') }}</span>
       </v-btn>
 
       <v-btn

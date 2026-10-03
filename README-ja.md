@@ -58,27 +58,34 @@
 倫理的な理由により、学習済みモデルは一般公開されていません。\
 [GestaltMatcher Database (GMDB)](https://db.gestaltmatcher.org/) へのアクセスが許可された後、学習済みモデルの重みとアノテーションもリクエストできます。
 
-必要なファイルを入手したら、次のとおり正しいディレクトリに配置してください。
+> **破壊的変更:** Docker イメージには GMDB のモデル・ギャラリーエンコーディング・メタデータを含まなくなりました。
+> これらはコンテナ起動時に、**お使いのマシン上のディレクトリから読み取り専用でマウント**されます。
+> 患者由来のデータがイメージに入ることはなく、データを変更してもイメージの再ビルドは不要です。
+
+GMDB のファイル用に、できればこのリポジトリの**外**（例: `~/ngpsuite-gmdb`）へ、`data/` と `saved_models/` の
+サブディレクトリを持つディレクトリを作成してください。その場所は環境変数 `NGPSUITE_GMDB_DIR` で指定します
+（手順 3 を参照）。必要なファイルを入手したら、次のとおり配置してください。
 
 1. 事前学習済み特徴抽出（エンコーダ）モデル
-次のファイルを `backend/saved_models/` ディレクトリに配置します:
+次のファイルを `$NGPSUITE_GMDB_DIR/saved_models/` に配置します:
 * `Resnet50_Final.pth`（顔アライメント用）
-* `glint360k_r50.onnx`（モデル a 用のベース事前学習モデル）
-* `glint360k_r100.onnx`（モデル b 用のベース事前学習モデル）
+* `glint360k_r100.onnx`（モデル b 用のベース事前学習モデル。3 番目のエンコーダとしても使用）
 
 2. 学習済み特徴空間モデル（ギャラリー）
-次のファイルを `backend/saved_models/` ディレクトリに配置します:
+次のファイルを `$NGPSUITE_GMDB_DIR/saved_models/` に配置します:
 * `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth`（モデル a）
 * `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth`（モデル b）
 
 3. ギャラリーエンコーディング用アノテーション
-次のファイルを `backend/data/gallery_encodings/` ディレクトリに配置します:
+次のファイルを `$NGPSUITE_GMDB_DIR/data/gallery_encodings/` に配置します:
 * `GMDB_gallery_encodings_23052026_v1.1.4_service.pkl`
 
 4. GestaltMatcher-Arc v1.1.4 用の追加データ
-次のファイルを `backend/data/` ディレクトリに配置します:
+次のファイルを `$NGPSUITE_GMDB_DIR/data/` に配置します:
 * `transformation_probabilities_07052025.csv`（PP4 用の症候群変換確率）
 * `patient_metadata_2026-05-23_mondo.p`（疾患／遺伝子メタデータ。疾患は MONDO ID でキー付け）
+
+上記 7 ファイルはすべて必須です。API は起動時にこれらを確認し、不足または読み取れないファイルがあれば、すべて列挙して直ちに停止します。
 
 5. MONDO オントロジー（リポジトリ同梱）
 次のファイルは `backend/mondo/` 配下で管理されており（患者データは含みません）、別途ダウンロードする必要はありません:
@@ -89,35 +96,63 @@
 最終的なファイル構成は次のようになります:
 
 ```
+~/ngpsuite-gmdb/                 # = $NGPSUITE_GMDB_DIR（リポジトリ外。読み取り専用でマウントされる）
+├── data/
+│   ├── gallery_encodings/
+│   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
+│   ├── transformation_probabilities_07052025.csv
+│   └── patient_metadata_2026-05-23_mondo.p
+└── saved_models/
+    ├── Resnet50_Final.pth
+    ├── glint360k_r100.onnx
+    ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
+    └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
+
 ngp-suite/
 └── backend/
-    ├── data/
-    │   ├── gallery_encodings/
-    │   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
-    │   ├── transformation_probabilities_07052025.csv
-    │   └── patient_metadata_2026-05-23_mondo.p
-    ├── mondo/
+    ├── mondo/                   # イメージに同梱
     │   └── mondo-international.obo.gz
-    ├── saved_models/
-    │   ├── Resnet50_Final.pth
-    │   ├── glint360k_r50.onnx
-    │   ├── glint360k_r100.onnx
-    │   ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
-    │   └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
     └── ... (その他のバックエンドファイル)
 ```
 
 ### **3. アプリケーションのビルドと実行**
 
-backend ディレクトリに移動し、Docker Compose でサービスをビルドして起動します。
+backend ディレクトリに移動し、GMDB ファイルの場所を Docker Compose に伝えてから、サービスをビルドして起動します。
 
 ```
-cd backend  
-sudo docker compose build  
-sudo docker compose up -d     # `-d` を付けなければ、コンソールでログを確認できます。
+cd backend
+cp .env.example .env          # .env を編集: NGPSUITE_GMDB_DIR=/absolute/path/to/ngpsuite-gmdb
+docker compose build          # コードのみのイメージをビルドします。GMDB データは含まれません
+docker compose up -d          # `-d` を付けなければ、コンソールでログを確認できます。
 ```
+
+（Linux で、ユーザーが `docker` グループに入っていない場合は、`docker` コマンドの前に `sudo` を付けてください。）
 
 初回起動時は、API サービスがモデルを読み込むため、約 90 秒かかることがあります。
+必須ファイルが不足している場合、`api` コンテナは直ちに終了し、不足しているファイルをすべて表示します
+（`docker compose logs api`）。
+
+モデルやデータを更新するときは、`$NGPSUITE_GMDB_DIR` 配下のファイルを差し替えて `docker compose restart api` を実行します。
+再ビルドは不要です。
+
+<details>
+<summary><strong>v0.2.0 以前（データをイメージに焼き込む方式）からの移行</strong></summary>
+
+以前のバージョンでは、ビルド時に `backend/data/` と `backend/saved_models/` が必要で、イメージにコピーされていました。
+次のいずれかを選んでください。
+
+* **推奨:** `backend/data/` と `backend/saved_models/` をリポジトリ外のディレクトリ（例: `~/ngpsuite-gmdb`）へ移し、`backend/.env` の `NGPSUITE_GMDB_DIR` にそのパスを設定します。
+* **現在の配置のまま使う:** ファイルを `backend/data/` と `backend/saved_models/` に置いたままにし、`backend/.env` は作成しません。`NGPSUITE_GMDB_DIR` の既定値は `backend/` になります。
+
+その後、一度だけ再ビルドしてください。古いイメージとビルドキャッシュには GMDB ファイルが残っているため、削除します。
+
+```
+docker compose down
+docker image rm backend-api:latest
+docker builder prune
+```
+
+</details>
 
 #### **GPU / CUDA に関する注意**
 
@@ -132,9 +167,9 @@ NGPsuite（Web API）の Docker デプロイは **CPU** 上で動作します。
 
 ```
 cd backend
-sudo docker compose build --build-arg USE_CUDA=1
+docker compose build --build-arg USE_CUDA=1
 # 任意: キャッシュなしで再ビルドする場合
-# sudo docker compose build --no-cache --build-arg USE_CUDA=1
+# docker compose build --no-cache --build-arg USE_CUDA=1
 ```
 
 注意事項:
@@ -174,7 +209,8 @@ Dockerfile は `torch==2.3.1` と `torchvision==0.18.1` を pip の constraints 
 ```
 
 2. バックエンドデータ:  
-   「エンドユーザー向け」節の手順 2 に従い、必要な学習済みモデルを backend ディレクトリに配置してください。
+   「エンドユーザー向け」節の手順 2・3 に従い、GMDB ファイルを任意のディレクトリに配置し、
+   `backend/.env` の `NGPSUITE_GMDB_DIR` にそのパスを設定してください。ファイルはコンテナにコピーされず、マウントされます。
 
 ### **開発モードでの実行**
 
@@ -188,7 +224,7 @@ Dockerfile は `torch==2.3.1` と `torchvision==0.18.1` を pip の constraints 
 ```
    別ターミナルで:  
    cd backend  
-   sudo docker compose up --build
+   docker compose up --build
 ```
 
    フロントエンドはホットリロード有効で `http://localhost:3000` から利用でき、

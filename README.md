@@ -56,27 +56,34 @@ Download latest release zip file and unzip.
 Due to ethical reasons the pretrained models are not made available publicly. \
 Once access has been granted to [GestaltMatcher Database (GMDB)](https://db.gestaltmatcher.org/), the pretrained model weights and annotations can be requested as well.
 
-After obtaining the necessary files, please place them into the correct directories as follows:
+> **Breaking change:** the Docker image no longer contains the GMDB models, gallery encodings, or metadata.
+> They are **mounted read-only from a directory on your machine** when the container starts, so patient-derived
+> data never enters the image. Changing the data does not require rebuilding the image.
+
+Create a directory for the GMDB files, preferably **outside** this repository (for example `~/ngpsuite-gmdb`),
+with `data/` and `saved_models/` subdirectories. Its location is given by the `NGPSUITE_GMDB_DIR` variable
+(see [step 3](#3-build-and-run-the-application)). After obtaining the necessary files, place them as follows:
 
 1. Pretrained Feature Extractor (Encoder) Models
-Place the following files in the `backend/saved_models/` directory:
+Place the following files in `$NGPSUITE_GMDB_DIR/saved_models/`:
 * `Resnet50_Final.pth` (for face alignment)
-* `glint360k_r50.onnx` (base pre-trained model for model a)
-* `glint360k_r100.onnx` (base pre-trained model for model b)
+* `glint360k_r100.onnx` (base pre-trained model for model b and the third encoder)
 
 2. Trained Feature Space Models (Gallery)
-Place the following files in the `backend/saved_models/` directory:
+Place the following files in `$NGPSUITE_GMDB_DIR/saved_models/`:
 * `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth` (model a)
 * `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth` (model b)
 
 3. Annotations for the Gallery Encodings
-Place the following file in the `backend/data/gallery_encodings/` directory:
+Place the following file in `$NGPSUITE_GMDB_DIR/data/gallery_encodings/`:
 * `GMDB_gallery_encodings_23052026_v1.1.4_service.pkl`
 
 4. Additional data for GestaltMatcher-Arc v1.1.4
-Place the following files in the `backend/data/` directory:
+Place the following files in `$NGPSUITE_GMDB_DIR/data/`:
 * `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
 * `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
+
+All seven files above are required. The API checks them at startup and stops immediately, listing every missing or unreadable file.
 
 5. MONDO ontology (shipped with the repository)
 The following file is tracked under `backend/mondo/` (no patient data) and does not need to be downloaded separately:
@@ -84,38 +91,66 @@ The following file is tracked under `backend/mondo/` (no patient data) and does 
 
 This product includes the Mondo Disease Ontology (Mondo) international edition ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See also [Acknowledgements](#acknowledgements).
 
-The final file tree should look like this:
+The final file trees should look like this:
 
 ```
+~/ngpsuite-gmdb/                 # = $NGPSUITE_GMDB_DIR (outside the repository, mounted read-only)
+├── data/
+│   ├── gallery_encodings/
+│   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
+│   ├── transformation_probabilities_07052025.csv
+│   └── patient_metadata_2026-05-23_mondo.p
+└── saved_models/
+    ├── Resnet50_Final.pth
+    ├── glint360k_r100.onnx
+    ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
+    └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
+
 ngp-suite/
 └── backend/
-    ├── data/
-    │   ├── gallery_encodings/
-    │   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
-    │   ├── transformation_probabilities_07052025.csv
-    │   └── patient_metadata_2026-05-23_mondo.p
-    ├── mondo/
+    ├── mondo/                   # shipped in the image
     │   └── mondo-international.obo.gz
-    ├── saved_models/
-    │   ├── Resnet50_Final.pth
-    │   ├── glint360k_r50.onnx
-    │   ├── glint360k_r100.onnx
-    │   ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
-    │   └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
     └── ... (other backend files)
 ```
 
 ### **3. Build and Run the Application**
 
-Navigate to the backend directory and use Docker Compose to build and start the services.
+Navigate to the backend directory, tell Docker Compose where your GMDB files are, then build and start the services.
 
 ```
-cd backend  
-sudo docker compose build  
-sudo docker compose up -d     # without `-d`, you can watch logs on console.
+cd backend
+cp .env.example .env          # then edit .env: NGPSUITE_GMDB_DIR=/absolute/path/to/ngpsuite-gmdb
+docker compose build          # builds the code image only; no GMDB data is included
+docker compose up -d          # without `-d`, you can watch logs on console.
 ```
+
+(On Linux, prefix the `docker` commands with `sudo` if your user is not in the `docker` group.)
 
 The initial startup may take about 90 seconds as the API service loads the models.
+If a required file is missing, the `api` container exits right away and prints every missing file
+(`docker compose logs api`).
+
+To update the models or data, replace the files under `$NGPSUITE_GMDB_DIR` and run `docker compose restart api`.
+No rebuild is needed.
+
+<details>
+<summary><strong>Upgrading from v0.2.0 or earlier (data baked into the image)</strong></summary>
+
+Earlier versions required `backend/data/` and `backend/saved_models/` at build time and copied them into the image.
+Choose one of the following:
+
+* **Recommended:** move `backend/data/` and `backend/saved_models/` to a directory outside the repository (for example `~/ngpsuite-gmdb`) and set `NGPSUITE_GMDB_DIR` to it in `backend/.env`.
+* **Keep the current layout:** leave the files in `backend/data/` and `backend/saved_models/` and do not create `backend/.env`. `NGPSUITE_GMDB_DIR` then defaults to `backend/`.
+
+Then rebuild once. The old image and its build cache still contain the GMDB files, so remove them:
+
+```
+docker compose down
+docker image rm backend-api:latest
+docker builder prune
+```
+
+</details>
 
 #### **GPU / CUDA note**
 
@@ -130,9 +165,9 @@ If you intentionally want a CUDA-enabled PyTorch install inside the image (for e
 
 ```
 cd backend
-sudo docker compose build --build-arg USE_CUDA=1
+docker compose build --build-arg USE_CUDA=1
 # optional: also rebuild without cache
-# sudo docker compose build --no-cache --build-arg USE_CUDA=1
+# docker compose build --no-cache --build-arg USE_CUDA=1
 ```
 
 Notes:
@@ -172,7 +207,8 @@ This section is for developers who wish to contribute to the project.
 ```
 
 2. Backend Data:  
-   Follow step 2 in the "For End-Users" section to place the required trained models in the backend directory.
+   Follow steps 2 and 3 in the "For End-Users" section: place the GMDB files in a directory of your own and
+   point `NGPSUITE_GMDB_DIR` (in `backend/.env`) to it. They are mounted into the container, not copied into it.
 
 ### **Running in Development Mode**
 
@@ -186,7 +222,7 @@ This section is for developers who wish to contribute to the project.
 ```
    In a separate terminal:  
    cd backend  
-   sudo docker compose up --build
+   docker compose up --build
 ```
 
    The frontend will now be available at `http://localhost:3000` with hot-reloading enabled,

@@ -10,6 +10,22 @@ services:
     container_name: ngpsuite-api
     expose:
       - "5000"
+    # GMDB models, gallery encodings and metadata are not part of the image.
+    # They are mounted read-only from $NGPSUITE_GMDB_DIR/{data,saved_models}
+    # (set it in backend/.env; defaults to this directory).
+    volumes:
+      - type: bind
+        source: ${NGPSUITE_GMDB_DIR:-.}/data
+        target: /app/data
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${NGPSUITE_GMDB_DIR:-.}/saved_models
+        target: /app/saved_models
+        read_only: true
+        bind:
+          create_host_path: false
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
       interval: 3m

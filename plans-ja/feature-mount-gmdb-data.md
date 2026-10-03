@@ -1,7 +1,7 @@
 # GMDB データの mount 化（イメージからの分離）
 
 作成日: 2026-10-03
-状態: 設計（未実装）
+状態: 実装済み・検証済み（2026-10-03）
 対象リポジトリ: `ngp-suite`
 作業ブランチ: `feat/mount-gmdb-data`（`main` = `ff5f994` / v0.2.0 から作成）
 
@@ -120,6 +120,25 @@ NGPSUITE_GMDB_DIR=/absolute/path/to/ngpsuite-gmdb
 - 一部のファイルが欠けると、api コンテナが欠落一覧を出して exit 1 になり、nginx は起動しない
 - 正しく mount すると `Load MONDO index: 58942 terms ...` が出て、`/api/status` と `/api/predict`（HPO の有無の両方）が v0.2.0 と同等に動く
 - コンテナ内で `/app/data` に書き込めない（`:ro`）
+
+## 検証結果（2026-10-03）
+
+リポジトリ外の `NGPSUITE_GMDB_DIR` を mount して実施した。
+
+| 項目 | 結果 |
+| --- | --- |
+| GMDB データ無しで `docker compose build` | 成功。`/app` に `data` と `saved_models` は無く、イメージ履歴にも痕跡なし |
+| 存在しない `NGPSUITE_GMDB_DIR` | `bind source path does not exist` で `up` が即座に失敗 |
+| 2 ファイル欠落（`glint360k_r100.onnx`、`transformation_probabilities_*.csv`） | api が欠落 2 件を列挙して exit 1。nginx は `Created` のまま起動せず |
+| 正しい mount | `GMDB files OK: 7 required files found.`、`/api/status` が `running` |
+| `/api/predict`（`cdls_demo.png`、HPO 無し／有り） | `mondo_id`・`ACMG_PP4`・`mondo_version` を含む。CdLS 系が上位。HPO 有りで `pubcasefinder_rank` が付く |
+| `/app/data`・`/app/saved_models` への書き込み | `Read-only file system` で失敗 |
+
+実装時の補足:
+
+- `.gitignore` の `.env` は全階層に効くため、`backend/.env` の追記は不要だった（`git check-ignore -v` で確認）。
+- 起動ログの MONDO 用語数は 58660。`gmdb-mondo` の OBO 総数 58942 との差は `lib/mondo.py` が `is_obsolete: true` の用語を読み飛ばす分で、今回の変更とは無関係。
+- 欠落テストは、シンボリックリンクがコンテナ内で解決できないため、同一ボリューム上のハードリンクで一時ディレクトリを作った（容量は増えず、終了後に削除済み）。
 
 ## 今回やらないこと
 

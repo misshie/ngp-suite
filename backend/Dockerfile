@@ -24,13 +24,9 @@ RUN printf 'torch==2.3.1\ntorchvision==0.18.1\n' > /tmp/torch-constraints.txt; \
         --extra-index-url https://download.pytorch.org/whl/cpu; \
     fi
 
-COPY saved_models/Resnet50_Final.pth ./saved_models/Resnet50_Final.pth
-COPY saved_models/glint360k_r100.onnx ./saved_models/glint360k_r100.onnx
-COPY saved_models/s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth ./saved_models/s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
-COPY saved_models/s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth ./saved_models/s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
-COPY data/gallery_encodings/GMDB_gallery_encodings_23052026_v1.1.4_service.pkl ./data/gallery_encodings/GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
-COPY data/transformation_probabilities_07052025.csv ./data/transformation_probabilities_07052025.csv
-COPY data/patient_metadata_2026-05-23_mondo.p ./data/patient_metadata_2026-05-23_mondo.p
+# GMDB models, gallery encodings and metadata contain patient-derived data and are NOT
+# baked into the image. compose.yml bind-mounts them read-only at /app/data and
+# /app/saved_models (host side: $NGPSUITE_GMDB_DIR/{data,saved_models}).
 # MONDO is CC BY 4.0 and contains no patient data, so it ships inside the image
 # (and is tracked in git under mondo/, unlike backend/data/).
 COPY mondo ./mondo
@@ -39,4 +35,5 @@ COPY config.json ./config.json
 COPY lib ./lib
 COPY static ./static
 
-CMD [ "uvicorn",  "main:app", "--host", "0.0.0.0", "--port", "5000", "--workers", "2"]
+# Fail fast with a full list of missing GMDB files before starting the workers.
+CMD ["sh", "-c", "python -m lib.runtime_files && exec uvicorn main:app --host 0.0.0.0 --port 5000 --workers 2"]

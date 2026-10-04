@@ -16,9 +16,7 @@
 
 - `box_utils.py` の `decode` には "Adapted from Hakuyume/chainer-ssd" とある。しかし chainer-ssd にはライセンス表記が無い。
 - このコードは ssd.pytorch（MIT）→ Pytorch_Retinaface（MIT）の経路で取り込まれたもの。数行の数式実装であり、NOTICES にこの事実を明記した。
-- 厳密を期す場合は、次のいずれかを検討する。
-  - `decode` を独自に書き直す。
-  - 作者に確認する。
+- 2026-10-04 決定: 書き直しや作者への確認は行わず、現状のまま残す（NOTICES に経緯を明記した状態を維持する）。
 
 ## 変更内容
 

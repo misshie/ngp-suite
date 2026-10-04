@@ -122,6 +122,7 @@ backend ディレクトリに移動し、GMDB ファイルの場所を Docker Co
 ```
 cd backend
 cp .env.example .env          # .env を編集: NGPSUITE_GMDB_DIR=/absolute/path/to/ngpsuite-gmdb
+                              # （認証情報と LAN 共有は任意。「5. 認証」を参照）
 docker compose build          # コードのみのイメージをビルドします。GMDB データは含まれません
 docker compose up -d          # `-d` を付けなければ、コンソールでログを確認できます。
 ```
@@ -195,6 +196,39 @@ Dockerfile は `torch==2.3.1` と `torchvision==0.18.1` を pip の constraints 
 #### **初回アクセス時のセキュリティ警告**
 
 *NGPsuite* に初めてアクセスすると、自己署名証明書の使用により、ブラウザがセキュリティ警告を表示することがあります。これは想定どおりの動作です。続行するには、「詳細設定」や「続行…」などのボタンをクリックし、証明書を受け入れてください。
+
+### **5. 認証**
+
+`POST /api/predict` は HTTP Basic 認証で保護されています。初期状態の認証情報はプレースホルダの
+`your_username` / `your_password` で、Web UI の既定値と同じため、設定なしで動作します。
+これらの値は公開されているので、**プレースホルダには実質的な保護効果はありません**。
+自分のマシンからしか届かない状態であれば問題ありません。既定ではポート 443 は `127.0.0.1` に公開されます。
+プレースホルダを使っている間は、起動時に `api` コンテナが注意を表示します（`docker compose logs api`）。
+
+本サービスは自分のマシンまたは信頼できる LAN 内での利用を想定しています。インターネットには公開しないでください。
+
+**認証情報の変更。** `backend/.env` に設定し、`docker compose up -d` で反映します。
+
+```
+NGPSUITE_USERNAME=your-name
+NGPSUITE_PASSWORD=a-long-password
+```
+
+Web UI の **Settings** にも同じ値を入力してください。認証情報は環境変数としてコンテナに渡され、イメージには保存されません。
+
+**LAN での共有。** `backend/.env` に `NGPSUITE_BIND=0.0.0.0` を設定し、`docker compose up -d` を実行します。
+`/api/predict` の応答には GMDB の患者に由来する情報が含まれるため、先に認証情報を変更してください。
+プレースホルダのまま共有すると、`api` のログに目立つ警告が出ます（サービスは起動します）。
+
+<details>
+<summary><strong>前のリリースからの移行（config.json、ポート 443）</strong></summary>
+
+* `backend/config.json` は使われなくなり、同梱もされません。値を変更していた場合は、`backend/.env` の
+  `NGPSUITE_USERNAME` / `NGPSUITE_PASSWORD` に移し、一度だけ再ビルドしてください（`docker compose build`）。
+* ポート 443 は `127.0.0.1` のみに公開されるようになりました。LAN 内の他のマシンから接続していた場合は、
+  `backend/.env` に `NGPSUITE_BIND=0.0.0.0` を設定してください。
+
+</details>
 
 ## **開発者向け**
 

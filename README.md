@@ -120,6 +120,7 @@ Navigate to the backend directory, tell Docker Compose where your GMDB files are
 ```
 cd backend
 cp .env.example .env          # then edit .env: NGPSUITE_GMDB_DIR=/absolute/path/to/ngpsuite-gmdb
+                              # (credentials and LAN sharing are optional, see "5. Authentication")
 docker compose build          # builds the code image only; no GMDB data is included
 docker compose up -d          # without `-d`, you can watch logs on console.
 ```
@@ -193,6 +194,41 @@ Once the startup process is complete, open your web browser and navigate to:
 #### **Security Warning on First Access**
 
 When you first access *NGPsuite*, your browser may show a potential security warning due to our use of a self-signed certificate. This is a normal and expected behavior. To proceed, please click on the button labeled "Advanced" or "Proceed to..." and accept the certificate.
+
+### **5. Authentication**
+
+`POST /api/predict` is protected by HTTP Basic authentication. Out of the box the credentials are the placeholders
+`your_username` / `your_password`, which are also the defaults of the web UI, so the application works without any setup.
+Because these values are public, **the placeholders provide no real protection**. That is acceptable while the service is
+reachable only from your own machine, which is the default: port 443 is published on `127.0.0.1`.
+At startup the `api` container prints a notice (`docker compose logs api`) while the placeholders are in use.
+
+The service is intended for your own machine or a trusted LAN. Do not expose it to the internet.
+
+**Changing the credentials.** Set them in `backend/.env`, then apply with `docker compose up -d`:
+
+```
+NGPSUITE_USERNAME=your-name
+NGPSUITE_PASSWORD=a-long-password
+```
+
+Enter the same values in the web UI under **Settings**. The credentials are passed to the container as environment
+variables; they are not stored in the image.
+
+**Sharing on your LAN.** Set `NGPSUITE_BIND=0.0.0.0` in `backend/.env` and run `docker compose up -d`.
+The response of `/api/predict` contains information derived from GMDB patients, so change the credentials first.
+If you share the service while the placeholders are still in use, the `api` log shows a prominent warning
+(the service still starts).
+
+<details>
+<summary><strong>Upgrading from the previous release (config.json, port 443)</strong></summary>
+
+* `backend/config.json` is no longer used or shipped. If you had changed its values, put them in `backend/.env` as
+  `NGPSUITE_USERNAME` / `NGPSUITE_PASSWORD` and rebuild once (`docker compose build`).
+* Port 443 is now published on `127.0.0.1` only. If other machines on your LAN connected to the service, set
+  `NGPSUITE_BIND=0.0.0.0` in `backend/.env`.
+
+</details>
 
 ## **For Developers**
 

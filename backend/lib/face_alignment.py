@@ -1,3 +1,7 @@
+# Face detection adapted from https://github.com/biubug6/Pytorch_Retinaface (MIT License, Copyright (c) 2019)
+# Face alignment adapted from https://github.com/deepinsight/insightface (MIT License)
+# See backend/THIRD_PARTY_NOTICES.md
+
 import os
 import cv2
 import time

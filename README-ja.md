@@ -307,11 +307,14 @@ Web UI の **Settings** にも同じ値を入力してください。認証情�
 本プロジェクトは **Creative Commons Attribution-NonCommercial 4.0 International License** の下で提供されています。
 詳細は [LICENSE.md](LICENSE.md) を参照してください。
 
+`backend/lib/` には第三者のコード（Pytorch_Retinaface、ssd.pytorch、object-detection.torch、Fast R-CNN、InsightFace）が含まれます。これらは CC BY-NC 4.0 ではなく、それぞれの元ライセンス（MIT または BSD-2-Clause）に従います。著作権表示とライセンス全文は [backend/THIRD_PARTY_NOTICES.md](backend/THIRD_PARTY_NOTICES.md) を参照してください（Docker イメージには `/app/THIRD_PARTY_NOTICES.md` として同梱されています）。
+
 ## **謝辞**
 
 本プロジェクトのバックエンドサービスは、
 [GestaltMatcher](https://www.gestaltmatcher.org/) およびその [リポジトリ](https://github.com/igsb/GestaltMatcher-Arc/) の成果に基づいています。
 バックエンドは PubCaseFinder の API も利用しています（[詳細](https://pubcasefinder.dbcls.jp/api)）。分野の基盤を築かれた皆様に感謝します。
+顔検出と顔の整列には [Pytorch_Retinaface](https://github.com/biubug6/Pytorch_Retinaface) と [InsightFace](https://github.com/deepinsight/insightface) のコードを利用しています。
 
 本製品には Mondo Disease Ontology (Mondo) の international edition
 （[mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)）が含まれます。Mondo のライセンスは

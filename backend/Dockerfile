@@ -1,5 +1,7 @@
 FROM python:3.10
 
+LABEL org.opencontainers.image.licenses="CC-BY-NC-4.0"
+
 WORKDIR /app
 
 # Default: CPU-only PyTorch. Set USE_CUDA=1 to install CUDA-enabled PyTorch instead.
@@ -33,6 +35,7 @@ COPY mondo ./mondo
 COPY main.py ./main.py
 COPY lib ./lib
 COPY static ./static
+COPY THIRD_PARTY_NOTICES.md ./THIRD_PARTY_NOTICES.md
 
 # Credentials are not part of the image: NGPSUITE_USERNAME / NGPSUITE_PASSWORD come from compose.
 # Fail fast with a full list of missing GMDB files, print any default-credential warning once,

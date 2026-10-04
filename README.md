@@ -307,11 +307,14 @@ run the provided script from the project root:
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License**.
 See the [LICENSE.md](LICENSE.md) file for full details.
 
+`backend/lib/` includes third-party code (Pytorch_Retinaface, ssd.pytorch, object-detection.torch, Fast R-CNN, InsightFace). That code is not covered by CC BY-NC 4.0 and remains under its original license (MIT or BSD-2-Clause). See [backend/THIRD_PARTY_NOTICES.md](backend/THIRD_PARTY_NOTICES.md) for copyright notices and full license texts; the Docker image ships it as `/app/THIRD_PARTY_NOTICES.md`.
+
 ## **Acknowledgements**
 
 The backend service of this project is based on the work of
 [GestaltMatcher](https://www.gestaltmatcher.org/) with their [repository](https://github.com/igsb/GestaltMatcher-Arc/).
 The backend service utilizes the API of PubCaseFinder; see [detailed description](https://pubcasefinder.dbcls.jp/api). The author is grateful for their foundational contributions to the field.
+Face detection and alignment use code from [Pytorch_Retinaface](https://github.com/biubug6/Pytorch_Retinaface) and [InsightFace](https://github.com/deepinsight/insightface).
 
 This product includes the Mondo Disease Ontology (Mondo) international edition
 ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is

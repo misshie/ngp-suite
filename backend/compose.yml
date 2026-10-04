@@ -46,9 +46,13 @@ services:
     build:
       context: ./nginx
     container_name: ngpsuite-proxy
-    # Published on this machine only by default. Set NGPSUITE_BIND=0.0.0.0 in backend/.env to share on your LAN.
+    # Published on this machine only (127.0.0.1) at port 443 by default. In backend/.env:
+    #   NGPSUITE_BIND=0.0.0.0   share on your LAN
+    #   NGPSUITE_PORT=8443      use another host port (e.g. when macOS Docker Desktop has no privileged-port helper)
     ports:
-      - "${NGPSUITE_BIND:-127.0.0.1}:443:443"
+      - "${NGPSUITE_BIND:-127.0.0.1}:${NGPSUITE_PORT:-443}:443"
+    environment:
+      NGPSUITE_PORT: ${NGPSUITE_PORT:-443}   # only used for the startup banner
     volumes:
       - nginx_certs:/etc/ssl
     depends_on:

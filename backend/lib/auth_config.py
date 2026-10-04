@@ -50,7 +50,7 @@ def build_message(env=None):
             "only from this machine. To change them, see 'Authentication' in README.md."
         )
     return (
-        f"WARNING: default credentials (your_username / your_password) are in use while port 443 "
+        f"WARNING: default credentials (your_username / your_password) are in use while the service "
         f"is published on {bind}. Anyone who can reach this machine on the network can call "
         "/api/predict, and the response contains information derived from GMDB patients. "
         "Set NGPSUITE_USERNAME and NGPSUITE_PASSWORD in backend/.env (and enter the same values "

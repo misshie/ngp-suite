@@ -31,9 +31,10 @@ RUN printf 'torch==2.3.1\ntorchvision==0.18.1\n' > /tmp/torch-constraints.txt; \
 # (and is tracked in git under mondo/, unlike backend/data/).
 COPY mondo ./mondo
 COPY main.py ./main.py
-COPY config.json ./config.json
 COPY lib ./lib
 COPY static ./static
 
-# Fail fast with a full list of missing GMDB files before starting the workers.
-CMD ["sh", "-c", "python -m lib.runtime_files && exec uvicorn main:app --host 0.0.0.0 --port 5000 --workers 2"]
+# Credentials are not part of the image: NGPSUITE_USERNAME / NGPSUITE_PASSWORD come from compose.
+# Fail fast with a full list of missing GMDB files, print any default-credential warning once,
+# then start the workers.
+CMD ["sh", "-c", "python -m lib.runtime_files && python -m lib.auth_config && exec uvicorn main:app --host 0.0.0.0 --port 5000 --workers 2"]

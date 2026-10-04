@@ -15,6 +15,7 @@ from lib.utils_functions import readb64, encodeb64
 from datetime import datetime
 from lib.pubcasefinder import query_pubcasefinder
 from lib.integrator import integrate_json
+from lib.auth_config import load_credentials
 from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map
 
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
@@ -30,11 +31,8 @@ security = HTTPBasic()
 # Loaded at startup: syndrome name -> {"(Intercept)": str, "syn_scores": str}
 _synds_probabilities_dict = {}
 
-with open('config.json', 'r') as config_file:
-    config = json.load(config_file)
-
-USERNAME = config.get('username')
-PASSWORD = config.get('password')
+# Basic-auth credentials come from NGPSUITE_USERNAME / NGPSUITE_PASSWORD (see lib/auth_config.py).
+USERNAME, PASSWORD = load_credentials()
 
 def get_current_username(
         credentials: Annotated[HTTPBasicCredentials, Depends(security)]

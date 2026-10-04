@@ -10,6 +10,13 @@ services:
     container_name: ngpsuite-api
     expose:
       - "5000"
+    # Basic-auth credentials for /api/predict (set in backend/.env; empty = placeholder
+    # your_username / your_password). NGPSUITE_BIND is only used to pick the startup warning text;
+    # the published address is set on the nginx service below.
+    environment:
+      NGPSUITE_USERNAME: ${NGPSUITE_USERNAME:-}
+      NGPSUITE_PASSWORD: ${NGPSUITE_PASSWORD:-}
+      NGPSUITE_BIND: ${NGPSUITE_BIND:-127.0.0.1}
     # GMDB models, gallery encodings and metadata are not part of the image.
     # They are mounted read-only from $NGPSUITE_GMDB_DIR/{data,saved_models}
     # (set it in backend/.env; defaults to this directory).
@@ -39,8 +46,9 @@ services:
     build:
       context: ./nginx
     container_name: ngpsuite-proxy
+    # Published on this machine only by default. Set NGPSUITE_BIND=0.0.0.0 in backend/.env to share on your LAN.
     ports:
-      - "443:443"
+      - "${NGPSUITE_BIND:-127.0.0.1}:443:443"
     volumes:
       - nginx_certs:/etc/ssl
     depends_on:

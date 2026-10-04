@@ -8,6 +8,9 @@ echo "==========================================================="
 echo " API service is healthy. Nginx is starting."
 echo " "
 echo " Application should now be ready at: https://localhost"
+echo " "
+echo " If you have not changed the default credentials, see the"
+echo " 'Authentication' section of README.md (see also: docker compose logs api)."
 echo "==========================================================="
 
 # This script will exit, and the main Nginx entrypoint will continue.

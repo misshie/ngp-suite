@@ -192,6 +192,20 @@ Dockerfile は `torch==2.3.1` と `torchvision==0.18.1` を pip の constraints 
 
 起動が完了したら、Web ブラウザで次の URL を開いてください:  
 `https://localhost`
+（`backend/.env` でポートを変更した場合は `https://localhost:<NGPSUITE_PORT>`）
+
+#### **macOS: ポート 443 と Docker Desktop**
+
+macOS で `127.0.0.1:443` を公開するには、Docker Desktop の特権ヘルパーが必要です。
+**Settings > Advanced > Allow privileged port mapping** を有効にして、Docker Desktop を再起動してください。
+有効でないと、`nginx` が `failed to connect to /var/run/com.docker.vmnetd.sock` で起動に失敗します。
+有効にできない場合は、`backend/.env` に特権の要らないポートを設定し、`https://localhost:8443` を開いてください。
+
+```
+NGPSUITE_PORT=8443
+```
+
+Linux と Windows では不要です。
 
 #### **初回アクセス時のセキュリティ警告**
 
@@ -202,7 +216,7 @@ Dockerfile は `torch==2.3.1` と `torchvision==0.18.1` を pip の constraints 
 `POST /api/predict` は HTTP Basic 認証で保護されています。初期状態の認証情報はプレースホルダの
 `your_username` / `your_password` で、Web UI の既定値と同じため、設定なしで動作します。
 これらの値は公開されているので、**プレースホルダには実質的な保護効果はありません**。
-自分のマシンからしか届かない状態であれば問題ありません。既定ではポート 443 は `127.0.0.1` に公開されます。
+自分のマシンからしか届かない状態であれば問題ありません。既定ではサービスは `127.0.0.1`（ポート 443、または `NGPSUITE_PORT`）に公開されます。
 プレースホルダを使っている間は、起動時に `api` コンテナが注意を表示します（`docker compose logs api`）。
 
 本サービスは自分のマシンまたは信頼できる LAN 内での利用を想定しています。インターネットには公開しないでください。
@@ -226,7 +240,7 @@ Web UI の **Settings** にも同じ値を入力してください。認証情�
 * `backend/config.json` は使われなくなり、同梱もされません。値を変更していた場合は、`backend/.env` の
   `NGPSUITE_USERNAME` / `NGPSUITE_PASSWORD` に移し、一度だけ再ビルドしてください（`docker compose build`）。
 * ポート 443 は `127.0.0.1` のみに公開されるようになりました。LAN 内の他のマシンから接続していた場合は、
-  `backend/.env` に `NGPSUITE_BIND=0.0.0.0` を設定してください。
+  `backend/.env` に `NGPSUITE_BIND=0.0.0.0` を設定してください。公開するホスト側ポートは `NGPSUITE_PORT` で変更できます（上の macOS の注記を参照）。
 
 </details>
 

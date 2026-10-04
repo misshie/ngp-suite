@@ -190,6 +190,20 @@ The Dockerfile pins `torch==2.3.1` and `torchvision==0.18.1` with a pip constrai
 
 Once the startup process is complete, open your web browser and navigate to:  
 `https://localhost`
+(or `https://localhost:<NGPSUITE_PORT>` if you changed the port in `backend/.env`).
+
+#### **macOS: port 443 and Docker Desktop**
+
+Publishing `127.0.0.1:443` on macOS requires Docker Desktop's privileged helper. Enable
+**Settings > Advanced > Allow privileged port mapping** and restart Docker Desktop. Without it, `nginx` fails to start with
+`failed to connect to /var/run/com.docker.vmnetd.sock`. If you cannot enable it, set an unprivileged port in `backend/.env`
+and open `https://localhost:8443`:
+
+```
+NGPSUITE_PORT=8443
+```
+
+Linux and Windows do not need this.
 
 #### **Security Warning on First Access**
 
@@ -200,7 +214,7 @@ When you first access *NGPsuite*, your browser may show a potential security war
 `POST /api/predict` is protected by HTTP Basic authentication. Out of the box the credentials are the placeholders
 `your_username` / `your_password`, which are also the defaults of the web UI, so the application works without any setup.
 Because these values are public, **the placeholders provide no real protection**. That is acceptable while the service is
-reachable only from your own machine, which is the default: port 443 is published on `127.0.0.1`.
+reachable only from your own machine, which is the default: the service is published on `127.0.0.1` (port 443, or `NGPSUITE_PORT`).
 At startup the `api` container prints a notice (`docker compose logs api`) while the placeholders are in use.
 
 The service is intended for your own machine or a trusted LAN. Do not expose it to the internet.
@@ -226,7 +240,7 @@ If you share the service while the placeholders are still in use, the `api` log 
 * `backend/config.json` is no longer used or shipped. If you had changed its values, put them in `backend/.env` as
   `NGPSUITE_USERNAME` / `NGPSUITE_PASSWORD` and rebuild once (`docker compose build`).
 * Port 443 is now published on `127.0.0.1` only. If other machines on your LAN connected to the service, set
-  `NGPSUITE_BIND=0.0.0.0` in `backend/.env`.
+  `NGPSUITE_BIND=0.0.0.0` in `backend/.env`. The host port can be changed with `NGPSUITE_PORT` (see the macOS note above).
 
 </details>
 

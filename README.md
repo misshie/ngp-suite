@@ -81,7 +81,7 @@ Place the following file in `$NGPSUITE_GMDB_DIR/data/gallery_encodings/`:
 4. Additional data for GestaltMatcher-Arc v1.1.4
 Place the following files in `$NGPSUITE_GMDB_DIR/data/`:
 * `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
-* `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
+* `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID). The scripts that build it from a GMDB metadata export are in [`tools/gmdb-mondo/`](tools/gmdb-mondo/README.md) (for GMDB maintainers).
 
 All seven files above are required. The API checks them at startup and stops immediately, listing every missing or unreadable file.
 

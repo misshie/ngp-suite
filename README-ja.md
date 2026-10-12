@@ -83,7 +83,7 @@ GMDB のファイル用に、できればこのリポジトリの**外**（例: 
 4. GestaltMatcher-Arc v1.1.4 用の追加データ
 次のファイルを `$NGPSUITE_GMDB_DIR/data/` に配置します:
 * `transformation_probabilities_07052025.csv`（PP4 用の症候群変換確率）
-* `patient_metadata_2026-05-23_mondo.p`（疾患／遺伝子メタデータ。疾患は MONDO ID でキー付け）
+* `patient_metadata_2026-05-23_mondo.p`（疾患／遺伝子メタデータ。疾患は MONDO ID でキー付け）。GMDB のメタデータからこれを作るスクリプトは [`tools/gmdb-mondo/`](tools/gmdb-mondo/README-ja.md) にあります（GMDB 運営者向け）。
 
 上記 7 ファイルはすべて必須です。API は起動時にこれらを確認し、不足または読み取れないファイルがあれば、すべて列挙して直ちに停止します。
 

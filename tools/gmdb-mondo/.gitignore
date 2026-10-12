@@ -1,0 +1,10 @@
+# GMDB data may contain personal information; ontologies are fetched or bundled elsewhere.
+*.p
+*.tsv
+*.csv
+*.err.txt
+*.owl
+*.owl.gz
+*.obo
+*.obo.gz
+.tmp-mondo-international.*

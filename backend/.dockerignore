@@ -1,0 +1,4 @@
+# GMDB data is mounted at run time (see compose.yml); never send it to the build context.
+data/
+saved_models/
+.env

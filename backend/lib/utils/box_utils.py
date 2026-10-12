@@ -1,3 +1,7 @@
+# Adapted from https://github.com/biubug6/Pytorch_Retinaface (MIT License, Copyright (c) 2019)
+# which builds on https://github.com/amdegroot/ssd.pytorch (MIT License, Copyright (c) 2017 Max deGroot, Ellis Brown)
+# See backend/THIRD_PARTY_NOTICES.md
+
 import torch
 import numpy as np
 

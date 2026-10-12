@@ -56,27 +56,37 @@ Download latest release zip file and unzip.
 Due to ethical reasons the pretrained models are not made available publicly. \
 Once access has been granted to [GestaltMatcher Database (GMDB)](https://db.gestaltmatcher.org/), the pretrained model weights and annotations can be requested as well.
 
-After obtaining the necessary files, please place them into the correct directories as follows:
+> **Breaking change:** the Docker image no longer contains the GMDB models, gallery encodings, or metadata.
+> They are **mounted read-only from a directory on your machine** when the container starts, so patient-derived
+> data never enters the image. Changing the data does not require rebuilding the image.
 
-1. Pretrained Feature Extractor (Encoder) Models
-Place the following files in the `backend/saved_models/` directory:
-* `Resnet50_Final.pth` (for face alignment)
-* `glint360k_r50.onnx` (base pre-trained model for model a)
-* `glint360k_r100.onnx` (base pre-trained model for model b)
+Create a directory for the GMDB files, preferably **outside** this repository (for example `~/ngpsuite-gmdb`),
+with `data/` and `saved_models/` subdirectories. Its location is given by the `NGPSUITE_GMDB_DIR` variable
+(see [step 3](#3-build-and-run-the-application)). After obtaining the necessary files, place them as follows:
 
-2. Trained Feature Space Models (Gallery)
-Place the following files in the `backend/saved_models/` directory:
-* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth` (model a)
-* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth` (model b)
+1. Face Detection Model
+Place the following file in `$NGPSUITE_GMDB_DIR/saved_models/`:
+* `Resnet50_Final.pth` (RetinaFace, for face detection and alignment)
 
-3. Annotations for the Gallery Encodings
-Place the following file in the `backend/data/gallery_encodings/` directory:
+2. Feature Extractor (Encoder) Models
+Place the following files in `$NGPSUITE_GMDB_DIR/saved_models/`. The three models are used together as an ensemble
+(reported as `m0`, `m1` and `m2` in exported feature vectors):
+* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth` (Model 1)
+* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth` (Model 2)
+* `glint360k_r100.onnx` (Model 3)
+
+3. Gallery Encodings
+Place the following file in `$NGPSUITE_GMDB_DIR/data/gallery_encodings/`:
 * `GMDB_gallery_encodings_23052026_v1.1.4_service.pkl`
 
-4. Additional data for GestaltMatcher-Arc v1.1.4
-Place the following files in the `backend/data/` directory:
+4. Gallery Metadata and PP4 Parameters
+Place the following files in `$NGPSUITE_GMDB_DIR/data/`:
+* `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID). The scripts that build it from a GMDB metadata export are in [`tools/gmdb-mondo/`](tools/gmdb-mondo/README.md) (for GMDB maintainers).
 * `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
-* `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID)
+
+> **Note:** ACMG PP4 is not available in this version. The CSV is still required at startup and is kept for a future PP4 redesign.
+
+All seven files above are required. The API checks them at startup and stops immediately, listing every missing or unreadable file.
 
 5. MONDO ontology (shipped with the repository)
 The following file is tracked under `backend/mondo/` (no patient data) and does not need to be downloaded separately:
@@ -84,38 +94,67 @@ The following file is tracked under `backend/mondo/` (no patient data) and does 
 
 This product includes the Mondo Disease Ontology (Mondo) international edition ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See also [Acknowledgements](#acknowledgements).
 
-The final file tree should look like this:
+The final file trees should look like this:
 
 ```
+~/ngpsuite-gmdb/                 # = $NGPSUITE_GMDB_DIR (outside the repository, mounted read-only)
+├── data/
+│   ├── gallery_encodings/
+│   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
+│   ├── transformation_probabilities_07052025.csv
+│   └── patient_metadata_2026-05-23_mondo.p
+└── saved_models/
+    ├── Resnet50_Final.pth
+    ├── glint360k_r100.onnx
+    ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
+    └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
+
 ngp-suite/
 └── backend/
-    ├── data/
-    │   ├── gallery_encodings/
-    │   │   └── GMDB_gallery_encodings_23052026_v1.1.4_service.pkl
-    │   ├── transformation_probabilities_07052025.csv
-    │   └── patient_metadata_2026-05-23_mondo.p
-    ├── mondo/
+    ├── mondo/                   # shipped in the image
     │   └── mondo-international.obo.gz
-    ├── saved_models/
-    │   ├── Resnet50_Final.pth
-    │   ├── glint360k_r50.onnx
-    │   ├── glint360k_r100.onnx
-    │   ├── s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth
-    │   └── s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth
     └── ... (other backend files)
 ```
 
 ### **3. Build and Run the Application**
 
-Navigate to the backend directory and use Docker Compose to build and start the services.
+Navigate to the backend directory, tell Docker Compose where your GMDB files are, then build and start the services.
 
 ```
-cd backend  
-sudo docker compose build  
-sudo docker compose up -d     # without `-d`, you can watch logs on console.
+cd backend
+cp .env.example .env          # then edit .env: NGPSUITE_GMDB_DIR=/absolute/path/to/ngpsuite-gmdb
+                              # (credentials and LAN sharing are optional, see "5. Authentication")
+docker compose build          # builds the code image only; no GMDB data is included
+docker compose up -d          # without `-d`, you can watch logs on console.
 ```
+
+(On Linux, prefix the `docker` commands with `sudo` if your user is not in the `docker` group.)
 
 The initial startup may take about 90 seconds as the API service loads the models.
+If a required file is missing, the `api` container exits right away and prints every missing file
+(`docker compose logs api`).
+
+To update the models or data, replace the files under `$NGPSUITE_GMDB_DIR` and run `docker compose restart api`.
+No rebuild is needed.
+
+<details>
+<summary><strong>Upgrading from v0.2.0 or earlier (data baked into the image)</strong></summary>
+
+Earlier versions required `backend/data/` and `backend/saved_models/` at build time and copied them into the image.
+Choose one of the following:
+
+* **Recommended:** move `backend/data/` and `backend/saved_models/` to a directory outside the repository (for example `~/ngpsuite-gmdb`) and set `NGPSUITE_GMDB_DIR` to it in `backend/.env`.
+* **Keep the current layout:** leave the files in `backend/data/` and `backend/saved_models/` and do not create `backend/.env`. `NGPSUITE_GMDB_DIR` then defaults to `backend/`.
+
+Then rebuild once. The old image and its build cache still contain the GMDB files, so remove them:
+
+```
+docker compose down
+docker image rm backend-api:latest
+docker builder prune
+```
+
+</details>
 
 #### **GPU / CUDA note**
 
@@ -130,9 +169,9 @@ If you intentionally want a CUDA-enabled PyTorch install inside the image (for e
 
 ```
 cd backend
-sudo docker compose build --build-arg USE_CUDA=1
+docker compose build --build-arg USE_CUDA=1
 # optional: also rebuild without cache
-# sudo docker compose build --no-cache --build-arg USE_CUDA=1
+# docker compose build --no-cache --build-arg USE_CUDA=1
 ```
 
 Notes:
@@ -154,10 +193,59 @@ The Dockerfile pins `torch==2.3.1` and `torchvision==0.18.1` with a pip constrai
 
 Once the startup process is complete, open your web browser and navigate to:  
 `https://localhost`
+(or `https://localhost:<NGPSUITE_PORT>` if you changed the port in `backend/.env`).
+
+#### **macOS: port 443 and Docker Desktop**
+
+Publishing `127.0.0.1:443` on macOS requires Docker Desktop's privileged helper. Enable
+**Settings > Advanced > Allow privileged port mapping** and restart Docker Desktop. Without it, `nginx` fails to start with
+`failed to connect to /var/run/com.docker.vmnetd.sock`. If you cannot enable it, set an unprivileged port in `backend/.env`
+and open `https://localhost:8443`:
+
+```
+NGPSUITE_PORT=8443
+```
+
+Linux and Windows do not need this.
 
 #### **Security Warning on First Access**
 
 When you first access *NGPsuite*, your browser may show a potential security warning due to our use of a self-signed certificate. This is a normal and expected behavior. To proceed, please click on the button labeled "Advanced" or "Proceed to..." and accept the certificate.
+
+### **5. Authentication**
+
+`POST /api/predict` is protected by HTTP Basic authentication. Out of the box the credentials are the placeholders
+`your_username` / `your_password`, which are also the defaults of the web UI, so the application works without any setup.
+Because these values are public, **the placeholders provide no real protection**. That is acceptable while the service is
+reachable only from your own machine, which is the default: the service is published on `127.0.0.1` (port 443, or `NGPSUITE_PORT`).
+At startup the `api` container prints a notice (`docker compose logs api`) while the placeholders are in use.
+
+The service is intended for your own machine or a trusted LAN. Do not expose it to the internet.
+
+**Changing the credentials.** Set them in `backend/.env`, then apply with `docker compose up -d`:
+
+```
+NGPSUITE_USERNAME=your-name
+NGPSUITE_PASSWORD=a-long-password
+```
+
+Enter the same values in the web UI under **Settings**. The credentials are passed to the container as environment
+variables; they are not stored in the image.
+
+**Sharing on your LAN.** Set `NGPSUITE_BIND=0.0.0.0` in `backend/.env` and run `docker compose up -d`.
+The response of `/api/predict` contains information derived from GMDB patients, so change the credentials first.
+If you share the service while the placeholders are still in use, the `api` log shows a prominent warning
+(the service still starts).
+
+<details>
+<summary><strong>Upgrading from the previous release (config.json, port 443)</strong></summary>
+
+* `backend/config.json` is no longer used or shipped. If you had changed its values, put them in `backend/.env` as
+  `NGPSUITE_USERNAME` / `NGPSUITE_PASSWORD` and rebuild once (`docker compose build`).
+* Port 443 is now published on `127.0.0.1` only. If other machines on your LAN connected to the service, set
+  `NGPSUITE_BIND=0.0.0.0` in `backend/.env`. The host port can be changed with `NGPSUITE_PORT` (see the macOS note above).
+
+</details>
 
 ## **For Developers**
 
@@ -172,7 +260,8 @@ This section is for developers who wish to contribute to the project.
 ```
 
 2. Backend Data:  
-   Follow step 2 in the "For End-Users" section to place the required trained models in the backend directory.
+   Follow steps 2 and 3 in the "For End-Users" section: place the GMDB files in a directory of your own and
+   point `NGPSUITE_GMDB_DIR` (in `backend/.env`) to it. They are mounted into the container, not copied into it.
 
 ### **Running in Development Mode**
 
@@ -186,7 +275,7 @@ This section is for developers who wish to contribute to the project.
 ```
    In a separate terminal:  
    cd backend  
-   sudo docker compose up --build
+   docker compose up --build
 ```
 
    The frontend will now be available at `http://localhost:3000` with hot-reloading enabled,
@@ -221,11 +310,14 @@ run the provided script from the project root:
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License**.
 See the [LICENSE.md](LICENSE.md) file for full details.
 
+`backend/lib/` includes third-party code (Pytorch_Retinaface, ssd.pytorch, object-detection.torch, Fast R-CNN, InsightFace). That code is not covered by CC BY-NC 4.0 and remains under its original license (MIT or BSD-2-Clause). See [backend/THIRD_PARTY_NOTICES.md](backend/THIRD_PARTY_NOTICES.md) for copyright notices and full license texts; the Docker image ships it as `/app/THIRD_PARTY_NOTICES.md`.
+
 ## **Acknowledgements**
 
 The backend service of this project is based on the work of
 [GestaltMatcher](https://www.gestaltmatcher.org/) with their [repository](https://github.com/igsb/GestaltMatcher-Arc/).
 The backend service utilizes the API of PubCaseFinder; see [detailed description](https://pubcasefinder.dbcls.jp/api). The author is grateful for their foundational contributions to the field.
+Face detection and alignment use code from [Pytorch_Retinaface](https://github.com/biubug6/Pytorch_Retinaface) and [InsightFace](https://github.com/deepinsight/insightface).
 
 This product includes the Mondo Disease Ontology (Mondo) international edition
 ([mondo.monarchinitiative.org](https://mondo.monarchinitiative.org/)). Mondo's license is

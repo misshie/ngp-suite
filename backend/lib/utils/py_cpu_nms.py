@@ -2,6 +2,7 @@
 # Fast R-CNN
 # Copyright (c) 2015 Microsoft
 # Licensed under The MIT License [see LICENSE for details]
+# License text: backend/THIRD_PARTY_NOTICES.md
 # Written by Ross Girshick
 # --------------------------------------------------------
 

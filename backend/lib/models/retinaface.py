@@ -1,3 +1,6 @@
+# Adapted from https://github.com/biubug6/Pytorch_Retinaface (MIT License, Copyright (c) 2019)
+# See backend/THIRD_PARTY_NOTICES.md
+
 import os
 from collections import OrderedDict
 

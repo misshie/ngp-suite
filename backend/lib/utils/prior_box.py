@@ -1,3 +1,6 @@
+# Adapted from https://github.com/biubug6/Pytorch_Retinaface (MIT License, Copyright (c) 2019)
+# See backend/THIRD_PARTY_NOTICES.md
+
 import torch
 from itertools import product as product
 import numpy as np

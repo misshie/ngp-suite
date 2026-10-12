@@ -16,9 +16,9 @@ from datetime import datetime
 from lib.pubcasefinder import query_pubcasefinder
 from lib.integrator import integrate_json
 from lib.auth_config import load_credentials
-from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map
+from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map, mondo_distance
 
-from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
+from fastapi import Depends, FastAPI, HTTPException, Query, status, APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
@@ -87,6 +87,7 @@ async def lifespan(app: FastAPI):
     global _synd_entries_dict
     global _synd_key_metadata
     global _synds_probabilities_dict
+    global _mondo_index
     global _mondo_version
     global _mondo_nando
     global _mondo_omim
@@ -99,12 +100,12 @@ async def lifespan(app: FastAPI):
     _images_synds_dict = data["disorder_level_metadata"]
     _images_genes_dict = data["gene_level_metadata"]
     _genes_metadata_dict = data["gene_metadata"]
-    mondo_index, _mondo_version = load_mondo_index(os.path.join("mondo", "mondo-international.obo.gz"))
-    _mondo_nando = build_nando_map(mondo_index)
-    _mondo_omim = build_omim_map(mondo_index)
-    _synd_entries_dict, _synd_key_metadata = build_syndrome_index(data, mondo_index)
+    _mondo_index, _mondo_version = load_mondo_index(os.path.join("mondo", "mondo-international.obo.gz"))
+    _mondo_nando = build_nando_map(_mondo_index)
+    _mondo_omim = build_omim_map(_mondo_index)
+    _synd_entries_dict, _synd_key_metadata = build_syndrome_index(data, _mondo_index)
     print("Load MONDO index: {} terms, {} syndrome keys, version={}, nando_mapped={}, omim_mapped={}".format(
-        len(mondo_index), len(_synd_key_metadata), _mondo_version, len(_mondo_nando), len(_mondo_omim)))
+        len(_mondo_index), len(_synd_key_metadata), _mondo_version, len(_mondo_nando), len(_mondo_omim)))
     _gallery_df = get_gallery_encodings_set(_images_synds_dict)
     yield
 
@@ -128,6 +129,8 @@ api_router = APIRouter(prefix="/api")
 # --- Pydantic Models for API Requests ---
 class ImageRequest(BaseModel):
     img: str
+
+MONDO_ID_PATTERN = r"^MONDO:\d{7}$"
 
 class PredictRequest(BaseModel):
     img: str
@@ -235,6 +238,26 @@ async def crop_endpoint(image: ImageRequest):
     aligned_img = face_align_crop(_cropper_model, img, _device)
     img_en = cv2.imencode(".png", aligned_img)
     return {"crop": base64.b64encode(img_en[1])}
+
+
+@api_router.get("/mondo/distance")
+async def mondo_distance_endpoint(
+        username: Annotated[str, Depends(get_current_username)],
+        id1: Annotated[str, Query(pattern=MONDO_ID_PATTERN)],
+        id2: Annotated[str, Query(pattern=MONDO_ID_PATTERN)],
+    ):
+    missing = [mondo_id for mondo_id in (id1, id2) if mondo_id not in _mondo_index]
+    if missing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Unknown or obsolete MONDO ID: {}".format(", ".join(missing)),
+        )
+    return {
+        "mondo_id_1": id1,
+        "mondo_id_2": id2,
+        "mondo_version": _mondo_version,
+        **mondo_distance(_mondo_index, id1, id2),
+    }
 
 
 @api_router.get("/status")

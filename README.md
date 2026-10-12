@@ -214,7 +214,7 @@ When you first access *NGPsuite*, your browser may show a potential security war
 
 ### **5. Authentication**
 
-`POST /api/predict` is protected by HTTP Basic authentication. Out of the box the credentials are the placeholders
+`POST /api/predict` and `GET /api/mondo/distance` are protected by HTTP Basic authentication. Out of the box the credentials are the placeholders
 `your_username` / `your_password`, which are also the defaults of the web UI, so the application works without any setup.
 Because these values are public, **the placeholders provide no real protection**. That is acceptable while the service is
 reachable only from your own machine, which is the default: the service is published on `127.0.0.1` (port 443, or `NGPSUITE_PORT`).

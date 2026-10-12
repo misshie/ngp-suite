@@ -216,7 +216,7 @@ Linux と Windows では不要です。
 
 ### **5. 認証**
 
-`POST /api/predict` は HTTP Basic 認証で保護されています。初期状態の認証情報はプレースホルダの
+`POST /api/predict` と `GET /api/mondo/distance` は HTTP Basic 認証で保護されています。初期状態の認証情報はプレースホルダの
 `your_username` / `your_password` で、Web UI の既定値と同じため、設定なしで動作します。
 これらの値は公開されているので、**プレースホルダには実質的な保護効果はありません**。
 自分のマシンからしか届かない状態であれば問題ありません。既定ではサービスは `127.0.0.1`（ポート 443、または `NGPSUITE_PORT`）に公開されます。

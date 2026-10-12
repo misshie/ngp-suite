@@ -7,7 +7,8 @@ are resolved here at startup from the OBO release shipped in ``mondo/``.
 import gzip
 import io
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from collections import Counter
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 MondoIndex = Dict[str, Dict[str, Any]]
 
@@ -186,6 +187,75 @@ def resolve(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:
         "labels": dict(entry.get("labels") or {}),
         "parents": _terms(index, parents),
         "grandparents": _terms(index, grandparents),
+    }
+
+
+def _ancestors(index: MondoIndex, mondo_id: str) -> Set[str]:
+    """All is_a ancestors of ``mondo_id``, including the term itself."""
+    seen = {mondo_id}
+    stack = [mondo_id]
+    while stack:
+        for parent in index.get(stack.pop(), {}).get("parents", []):
+            if parent not in seen:
+                seen.add(parent)
+                stack.append(parent)
+    return seen
+
+
+def _lowest_common_ancestors(index: MondoIndex, a: str, b: str) -> List[str]:
+    """Common ancestors that are not an ancestor of another common ancestor."""
+    common = _ancestors(index, a) & _ancestors(index, b)
+    above = set()
+    for term in common:
+        above.update(_ancestors(index, term) - {term})
+    return sorted(common - above)
+
+
+def _path_lengths_up(index: MondoIndex, start: str, ancestor: str,
+                     memo: Dict[str, Counter]) -> Counter:
+    """Count the is_a paths from ``start`` up to ``ancestor`` by edge count.
+
+    Paths are counted rather than listed, so heavy multiple inheritance cannot
+    blow up memory. ``memo`` is keyed by term and is only valid for one ancestor.
+    """
+    if start in memo:
+        return memo[start]
+    lengths: Counter = Counter()
+    if start == ancestor:
+        lengths[0] = 1
+    else:
+        for parent in index.get(start, {}).get("parents", []):
+            for length, count in _path_lengths_up(index, parent, ancestor, memo).items():
+                lengths[length + 1] += count
+    memo[start] = lengths
+    return lengths
+
+
+def mondo_distance(index: MondoIndex, a: str, b: str) -> Dict[str, Any]:
+    """Edge counts of every is_a path joining ``a`` and ``b`` through their lowest common ancestors.
+
+    Each path climbs from ``a`` to a lowest common ancestor and descends to ``b``;
+    distinct paths of equal length are listed separately. When one term is an
+    ancestor of the other, that ancestor is the only lowest common ancestor.
+    ``distance`` is empty and ``minimum`` is ``None`` when the terms share no ancestor.
+    """
+    total: Counter = Counter()
+    common_ancestors = []
+    for ancestor in _lowest_common_ancestors(index, a, b):
+        from_a = _path_lengths_up(index, a, ancestor, {})
+        from_b = _path_lengths_up(index, b, ancestor, {})
+        lengths: Counter = Counter()
+        for length_a, count_a in from_a.items():
+            for length_b, count_b in from_b.items():
+                lengths[length_a + length_b] += count_a * count_b
+        total.update(lengths)
+        common_ancestors.append(dict(_term(index, ancestor), distance=sorted(lengths.elements())))
+
+    distance = sorted(total.elements())
+    return {
+        "distance": distance,
+        "minimum": distance[0] if distance else None,
+        "common_ancestors": common_ancestors,
     }
 
 

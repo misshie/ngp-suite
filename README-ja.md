@@ -66,24 +66,29 @@ GMDB のファイル用に、できればこのリポジトリの**外**（例: 
 サブディレクトリを持つディレクトリを作成してください。その場所は環境変数 `NGPSUITE_GMDB_DIR` で指定します
 （手順 3 を参照）。必要なファイルを入手したら、次のとおり配置してください。
 
-1. 事前学習済み特徴抽出（エンコーダ）モデル
+1. 顔検出モデル
 次のファイルを `$NGPSUITE_GMDB_DIR/saved_models/` に配置します:
-* `Resnet50_Final.pth`（顔アライメント用）
-* `glint360k_r100.onnx`（モデル b 用のベース事前学習モデル。3 番目のエンコーダとしても使用）
+* `Resnet50_Final.pth`（RetinaFace。顔の検出と位置合わせ用）
 
-2. 学習済み特徴空間モデル（ギャラリー）
-次のファイルを `$NGPSUITE_GMDB_DIR/saved_models/` に配置します:
-* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth`（モデル a）
-* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth`（モデル b）
+2. 特徴抽出（エンコーダ）モデル
+次のファイルを `$NGPSUITE_GMDB_DIR/saved_models/` に配置します。3 つのモデルはアンサンブルとして一緒に使います
+（エクスポートした特徴ベクトルでは `m0`、`m1`、`m2` と表記されます）:
+* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth`（Model 1）
+* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth`（Model 2）
+* `glint360k_r100.onnx`（Model 3）
 
-3. ギャラリーエンコーディング用アノテーション
+3. ギャラリーエンコーディング
 次のファイルを `$NGPSUITE_GMDB_DIR/data/gallery_encodings/` に配置します:
 * `GMDB_gallery_encodings_23052026_v1.1.4_service.pkl`
 
-4. GestaltMatcher-Arc v1.1.4 用の追加データ
+4. ギャラリーメタデータと PP4 パラメータ
 次のファイルを `$NGPSUITE_GMDB_DIR/data/` に配置します:
-* `transformation_probabilities_07052025.csv`（PP4 用の症候群変換確率）
 * `patient_metadata_2026-05-23_mondo.p`（疾患／遺伝子メタデータ。疾患は MONDO ID でキー付け）。GMDB のメタデータからこれを作るスクリプトは [`tools/gmdb-mondo/`](tools/gmdb-mondo/README-ja.md) にあります（GMDB 運営者向け）。
+* `transformation_probabilities_07052025.csv`（PP4 用の症候群変換確率）
+
+> **注:** この版では ACMG PP4 は利用できません。MONDO でキー付けしたメタデータには、まだ PP4 の閾値がありません。
+> そのため全症候群が "Not available yet" となり、ACMG PP4 列は既定で非表示です（Columns メニューから表示できます）。
+> CSV は起動時の必須ファイルとして残しており、今後の PP4 再設計で使う予定です。
 
 上記 7 ファイルはすべて必須です。API は起動時にこれらを確認し、不足または読み取れないファイルがあれば、すべて列挙して直ちに停止します。
 

@@ -64,24 +64,29 @@ Create a directory for the GMDB files, preferably **outside** this repository (f
 with `data/` and `saved_models/` subdirectories. Its location is given by the `NGPSUITE_GMDB_DIR` variable
 (see [step 3](#3-build-and-run-the-application)). After obtaining the necessary files, place them as follows:
 
-1. Pretrained Feature Extractor (Encoder) Models
-Place the following files in `$NGPSUITE_GMDB_DIR/saved_models/`:
-* `Resnet50_Final.pth` (for face alignment)
-* `glint360k_r100.onnx` (base pre-trained model for model b and the third encoder)
+1. Face Detection Model
+Place the following file in `$NGPSUITE_GMDB_DIR/saved_models/`:
+* `Resnet50_Final.pth` (RetinaFace, for face detection and alignment)
 
-2. Trained Feature Space Models (Gallery)
-Place the following files in `$NGPSUITE_GMDB_DIR/saved_models/`:
-* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth` (model a)
-* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth` (model b)
+2. Feature Extractor (Encoder) Models
+Place the following files in `$NGPSUITE_GMDB_DIR/saved_models/`. The three models are used together as an ensemble
+(reported as `m0`, `m1` and `m2` in exported feature vectors):
+* `s1_glint360k_r50_512d_gmdb__v1.1.4_bs64_size112_channels3_last_model.pth` (Model 1)
+* `s2_glint360k_r100_512d_gmdb__v1.1.4_bs128_size112_channels3_last_model.pth` (Model 2)
+* `glint360k_r100.onnx` (Model 3)
 
-3. Annotations for the Gallery Encodings
+3. Gallery Encodings
 Place the following file in `$NGPSUITE_GMDB_DIR/data/gallery_encodings/`:
 * `GMDB_gallery_encodings_23052026_v1.1.4_service.pkl`
 
-4. Additional data for GestaltMatcher-Arc v1.1.4
+4. Gallery Metadata and PP4 Parameters
 Place the following files in `$NGPSUITE_GMDB_DIR/data/`:
-* `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
 * `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID). The scripts that build it from a GMDB metadata export are in [`tools/gmdb-mondo/`](tools/gmdb-mondo/README.md) (for GMDB maintainers).
+* `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
+
+> **Note:** ACMG PP4 is not available in this version. The MONDO-keyed metadata does not yet carry PP4 thresholds,
+> so every syndrome is reported as "Not available yet", and the ACMG PP4 column is hidden by default
+> (it can be shown from the Columns menu). The CSV is still required at startup and is kept for a future PP4 redesign.
 
 All seven files above are required. The API checks them at startup and stops immediately, listing every missing or unreadable file.
 

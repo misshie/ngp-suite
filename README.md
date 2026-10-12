@@ -84,9 +84,7 @@ Place the following files in `$NGPSUITE_GMDB_DIR/data/`:
 * `patient_metadata_2026-05-23_mondo.p` (disorder/gene metadata, disorders keyed by MONDO ID). The scripts that build it from a GMDB metadata export are in [`tools/gmdb-mondo/`](tools/gmdb-mondo/README.md) (for GMDB maintainers).
 * `transformation_probabilities_07052025.csv` (syndrome transformation probabilities for PP4)
 
-> **Note:** ACMG PP4 is not available in this version. The MONDO-keyed metadata does not yet carry PP4 thresholds,
-> so every syndrome is reported as "Not available yet", and the ACMG PP4 column is hidden by default
-> (it can be shown from the Columns menu). The CSV is still required at startup and is kept for a future PP4 redesign.
+> **Note:** ACMG PP4 is not available in this version. The CSV is still required at startup and is kept for a future PP4 redesign.
 
 All seven files above are required. The API checks them at startup and stops immediately, listing every missing or unreadable file.
 

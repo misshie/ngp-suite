@@ -247,6 +247,35 @@ Web UI の **Settings** にも同じ値を入力してください。認証情�
 
 </details>
 
+### **6. MONDO の距離と類似度の API**
+
+`GET /api/mondo/distance?id1=MONDO:0016512&id2=MONDO:0007843` は、同梱のオントロジー上で 2 つの MONDO 用語を比べます
+（上記の Basic 認証が必要です）。ID の形式が不正なら `422`、OBO にない ID（廃止済みを含む）なら `404` を返します。
+
+**経路長。** `distance` は、2 つの用語を最も近い共通祖先経由で結ぶ全ての `is_a` 経路のエッジ数です。
+`minimum` はその最小値で、`common_ancestors` は最も近い共通祖先ごとの内訳です。
+
+**情報量（IC）に基づく類似度。** 応答には、intrinsic IC から求めた Resnik と Lin の類似度も含まれます。
+
+* 範囲: `is_a` エッジのみを使い、範囲のルート（既定は `MONDO:0700096` *human disease*、自身を含む）の子孫に限ります。
+  廃止済みの用語は除き、多重継承はそのまま扱います（DAG）。
+* `N` = 範囲内の用語数、`desc(c)` = 範囲内での `c` の子孫数（`c` 自身は含まない）。
+* IC、`ic_method=descendants`（既定）: `IC(c) = -ln((desc(c) + 1) / N)`。ルートで 0、葉で `ln N`。
+* IC、`ic_method=seco`: `IC(c) = 1 - ln(desc(c) + 1) / ln(N)`。ルートで 0、葉で 1。既定の IC を `ln N` で割ったものなので、
+  Lin はどちらの方法でも同じで、Resnik だけが縮尺を変えます。
+* 共通祖先: 用語自身を含めたそれぞれの祖先集合の積集合。このため、一方が他方の祖先であれば、その祖先自身が MICA になります。
+* MICA（most informative common ancestor）: IC が最大の共通祖先。`mica_ties` は同じ IC を持つ共通祖先を全て（ID 順で）
+  並べたもので、`mica` はその先頭です。
+* `resnik = IC(MICA)`
+* `lin = 2 · IC(MICA) / (IC(a) + IC(b))`。`a` と `b` が同じ用語なら `lin = 1`。異なる用語で分母が 0 の場合は `null` です
+  （上の定義では起こりません）。
+* どちらかの用語が範囲外（例: `MONDO:0000001` *disease* や、ヒト以外の疾患）なら、`mica`、`resnik`、`lin` は `null`、
+  `mica_ties` は空になります。経路長はそのまま返します。
+
+`common_ancestors` の各項目には `ic` が加わり（範囲外なら `null`）、`ic_params` には `method`、`scope_root`、`n_terms`、
+`mondo_version` が入ります。任意のクエリパラメータは `ic_method`（`descendants` または `seco`）と `ic_root`（別の範囲のルート）です。
+子孫数は、読み込んだ MONDO の版について、範囲のルートごとに 1 回だけメモリ上で計算します。
+
 ## **開発者向け**
 
 この節は、プロジェクトへの貢献を希望する開発者向けです。

@@ -26,6 +26,12 @@ v0.2.0 で、ギャラリーの疾患の同一性を OMIM から MONDO に移し
   - LCA ごとの内訳を `common_ancestors` で返す
 - 実装は `backend/lib/mondo.py` の `mondo_distance()`。`main.py` は MONDO の索引を `_mondo_index` としてグローバルに保持するようになった
 - README と README-ja の認証の節に、このエンドポイントを書き加えた
+- 同じエンドポイントに、intrinsic IC による Resnik / Lin 類似度を追加した（[feature-mondo-ic-similarity.md](feature-mondo-ic-similarity.md)）
+  - 範囲は human disease（MONDO:0700096）の子孫。`ic_method`（`descendants` | `seco`）と `ic_root` で変えられる
+  - `mica`、`mica_ties`、`resnik`、`lin`、`ic_params`、`common_ancestors[*].ic` を足した。既存のフィールドはそのまま
+  - 子孫数はメモリにだけキャッシュする
+  - README と README-ja に「6. MONDO の距離と類似度の API」の節を設けた
+  - 単体テストは `backend/tests/`（unittest）。Docker での動作確認は済んでいる
 - PR は未作成。マージするときは、CLAUDE.md の規約どおりマージコミットで取り込み、ブランチを残す
 
 ## 2. 残作業（推奨順）
@@ -58,7 +64,7 @@ v0.2.0 で、ギャラリーの疾患の同一性を OMIM から MONDO に移し
 - **複数 MONDO の意味は 2 種類:** 重複診断（GMDB に複数の OMIM）と、遺伝子由来の多義性。`mondo_source` で区別する
 - **is_a の source 注記は別経路ではない:** OBO の 1 本の is_a に `source=` が複数付くことがある（例: MONDO:0007336 → MONDO:0016064）。エッジは 1 本として数える
 - **`ngpsuite-backend-scheme.json` は `/api/predict` 専用:** 応答のスキーマはこのエンドポイントのものだけ。`/api/mondo/distance` の応答の形は設計メモに書いてある
-- **ローカルでは `main.py` を import できない:** ホストの Python には FastAPI や torch がない。`lib/mondo.py` の関数は `python3 -I` で同梱の OBO を読んで試せるが、エンドポイントは Docker で確認する
+- **ローカルでは `main.py` を import できない:** ホストの Python には FastAPI や torch がない。`lib/mondo.py` の関数は `python3 -I` で同梱の OBO を読んで試せるが、エンドポイントは Docker で確認する。`backend/tests/` の単体テストは `lib/mondo.py` だけを import するので、ホストで実行できる
 
 ## 4. 主要ファイル
 

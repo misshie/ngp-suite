@@ -16,7 +16,8 @@ from datetime import datetime
 from lib.pubcasefinder import query_pubcasefinder
 from lib.integrator import integrate_json
 from lib.auth_config import load_credentials
-from lib.mondo import load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map, mondo_distance
+from lib.mondo import (load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map, mondo_distance,
+                       build_ic_table, information_content, mondo_similarity, DEFAULT_IC_ROOT)
 
 from fastapi import Depends, FastAPI, HTTPException, Query, status, APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -30,6 +31,20 @@ security = HTTPBasic()
 
 # Loaded at startup: syndrome name -> {"(Intercept)": str, "syn_scores": str}
 _synds_probabilities_dict = {}
+
+# IC descendant counts per scope root for the loaded MONDO release, oldest first.
+_mondo_ic = {}
+MONDO_IC_CACHE_SIZE = 8
+
+
+def _get_ic_table(root: str):
+    table = _mondo_ic.pop(root, None)
+    if table is None:
+        table = build_ic_table(_mondo_index, root)
+    _mondo_ic[root] = table
+    while len(_mondo_ic) > MONDO_IC_CACHE_SIZE:
+        del _mondo_ic[next(iter(_mondo_ic))]
+    return table
 
 # Basic-auth credentials come from NGPSUITE_USERNAME / NGPSUITE_PASSWORD (see lib/auth_config.py).
 USERNAME, PASSWORD = load_credentials()
@@ -106,6 +121,9 @@ async def lifespan(app: FastAPI):
     _synd_entries_dict, _synd_key_metadata = build_syndrome_index(data, _mondo_index)
     print("Load MONDO index: {} terms, {} syndrome keys, version={}, nando_mapped={}, omim_mapped={}".format(
         len(_mondo_index), len(_synd_key_metadata), _mondo_version, len(_mondo_nando), len(_mondo_omim)))
+    _mondo_ic.clear()
+    print("Load MONDO IC table: root={}, n_terms={}".format(
+        DEFAULT_IC_ROOT, _get_ic_table(DEFAULT_IC_ROOT)["n_terms"]))
     _gallery_df = get_gallery_encodings_set(_images_synds_dict)
     yield
 
@@ -245,18 +263,33 @@ async def mondo_distance_endpoint(
         username: Annotated[str, Depends(get_current_username)],
         id1: Annotated[str, Query(pattern=MONDO_ID_PATTERN)],
         id2: Annotated[str, Query(pattern=MONDO_ID_PATTERN)],
+        ic_method: Annotated[str, Query(pattern=r"^(descendants|seco)$")] = "descendants",
+        ic_root: Annotated[str, Query(pattern=MONDO_ID_PATTERN)] = DEFAULT_IC_ROOT,
     ):
     missing = [mondo_id for mondo_id in (id1, id2) if mondo_id not in _mondo_index]
+    if ic_root not in _mondo_index and ic_root not in missing:
+        missing.append(ic_root)
     if missing:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Unknown or obsolete MONDO ID: {}".format(", ".join(missing)),
         )
+    table = _get_ic_table(ic_root)
+    result = mondo_distance(_mondo_index, id1, id2)
+    for ancestor in result["common_ancestors"]:
+        ancestor["ic"] = information_content(table, ancestor["id"], ic_method)
     return {
         "mondo_id_1": id1,
         "mondo_id_2": id2,
         "mondo_version": _mondo_version,
-        **mondo_distance(_mondo_index, id1, id2),
+        **result,
+        **mondo_similarity(_mondo_index, table, id1, id2, ic_method),
+        "ic_params": {
+            "method": ic_method,
+            "scope_root": ic_root,
+            "n_terms": table["n_terms"],
+            "mondo_version": _mondo_version,
+        },
     }
 
 

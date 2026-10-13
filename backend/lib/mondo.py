@@ -6,6 +6,7 @@ are resolved here at startup from the OBO release shipped in ``mondo/``.
 
 import gzip
 import io
+import math
 import re
 from collections import Counter
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -257,6 +258,114 @@ def mondo_distance(index: MondoIndex, a: str, b: str) -> Dict[str, Any]:
         "minimum": distance[0] if distance else None,
         "common_ancestors": common_ancestors,
     }
+
+
+DEFAULT_IC_ROOT = "MONDO:0700096"  # human disease
+IC_METHODS = ("descendants", "seco")
+
+IcTable = Dict[str, Any]
+
+
+def build_ic_table(index: MondoIndex, root: str = DEFAULT_IC_ROOT) -> IcTable:
+    """Count the is_a descendants of every term under ``root`` (the root included).
+
+    Only terms under ``root`` and the is_a edges between them are used, so the
+    counts do not depend on the rest of MONDO. Descendant sets are int bitsets
+    so that shared subtrees under multiple inheritance are counted once.
+
+    Returns:
+        ``{"root", "n_terms", "descendants": {mondo_id: count}}`` where a count
+        excludes the term itself.
+    """
+    children: Dict[str, List[str]] = {}
+    for mondo_id, entry in index.items():
+        for parent in entry["parents"]:
+            children.setdefault(parent, []).append(mondo_id)
+
+    scope = {root}
+    stack = [root]
+    while stack:
+        for child in children.get(stack.pop(), []):
+            if child not in scope:
+                scope.add(child)
+                stack.append(child)
+
+    bit = {mondo_id: 1 << i for i, mondo_id in enumerate(sorted(scope))}
+    below: Dict[str, int] = {}
+    # Iterative post-order: a term's set is the union of its children and their sets.
+    for start in scope:
+        stack = [(start, False)]
+        while stack:
+            term, expanded = stack.pop()
+            if term in below:
+                continue
+            if expanded:
+                bits = 0
+                for child in children.get(term, []):
+                    bits |= bit[child] | below[child]
+                below[term] = bits
+            else:
+                stack.append((term, True))
+                stack.extend((child, False) for child in children.get(term, []) if child not in below)
+
+    return {
+        "root": root,
+        "n_terms": len(scope),
+        "descendants": {mondo_id: bin(bits).count("1") for mondo_id, bits in below.items()},
+    }
+
+
+def information_content(table: IcTable, mondo_id: str, method: str = "descendants") -> Optional[float]:
+    """Intrinsic IC of ``mondo_id``, or ``None`` outside the table's scope.
+
+    ``descendants``: ``-ln((desc + 1) / N)``, 0 at the root and ``ln N`` at a leaf.
+    ``seco``: ``1 - ln(desc + 1) / ln(N)``, 0 at the root and 1 at a leaf.
+    """
+    desc = table["descendants"].get(mondo_id)
+    if desc is None:
+        return None
+    n = table["n_terms"]
+    if method == "seco":
+        return 1.0 - math.log(desc + 1) / math.log(n) if n > 1 else 0.0
+    if method == "descendants":
+        # max() keeps the root at 0.0 rather than -0.0.
+        return max(0.0, -math.log((desc + 1) / n))
+    raise ValueError("Unknown IC method: {}".format(method))
+
+
+def mondo_similarity(index: MondoIndex, table: IcTable, a: str, b: str,
+                     method: str = "descendants") -> Dict[str, Any]:
+    """Resnik and Lin similarity of ``a`` and ``b`` from intrinsic IC.
+
+    Common ancestors are the intersection of the two ancestor sets, each including
+    the term itself, so when one term is an ancestor of the other it is the MICA.
+    ``mica_ties`` lists every common ancestor sharing the highest IC (ID order) and
+    ``mica`` is its first item. Lin is 1 for the same term and ``None`` when
+    ``IC(a) + IC(b)`` is 0. All of these are ``None`` when either term is outside
+    the table's scope.
+    """
+    ic_a = information_content(table, a, method)
+    ic_b = information_content(table, b, method)
+    result: Dict[str, Any] = {"mica": None, "mica_ties": [], "resnik": None, "lin": None}
+    if ic_a is None or ic_b is None:
+        return result
+
+    scored = [
+        (information_content(table, term, method), term)
+        for term in _ancestors(index, a) & _ancestors(index, b)
+        if term in table["descendants"]
+    ]
+    resnik = max(ic for ic, _ in scored)
+    ties = [dict(_term(index, term), ic=ic) for ic, term in sorted(scored, key=lambda x: x[1]) if ic == resnik]
+
+    if a == b:
+        lin: Optional[float] = 1.0
+    elif ic_a + ic_b > 0:
+        lin = 2 * resnik / (ic_a + ic_b)
+    else:
+        lin = None
+    result.update(mica=ties[0], mica_ties=ties, resnik=resnik, lin=lin)
+    return result
 
 
 def build_syndrome_index(metadata, mondo_index: MondoIndex):

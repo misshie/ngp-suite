@@ -8,7 +8,6 @@ import gzip
 import io
 import math
 import re
-from collections import Counter
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 MondoIndex = Dict[str, Dict[str, Any]]
@@ -191,77 +190,31 @@ def resolve(index: MondoIndex, mondo_id: str) -> Dict[str, Any]:
     }
 
 
-def _ancestors(index: MondoIndex, mondo_id: str) -> Set[str]:
-    """All is_a ancestors of ``mondo_id``, including the term itself."""
-    seen = {mondo_id}
-    stack = [mondo_id]
-    while stack:
-        for parent in index.get(stack.pop(), {}).get("parents", []):
-            if parent not in seen:
-                seen.add(parent)
-                stack.append(parent)
-    return seen
+def _hops_up(index: MondoIndex, mondo_id: str) -> Dict[str, int]:
+    """Shortest is_a edge count from ``mondo_id`` to each ancestor, the term itself at 0."""
+    hops = {mondo_id: 0}
+    frontier = [mondo_id]
+    while frontier:
+        next_frontier = []
+        for term in frontier:
+            for parent in index.get(term, {}).get("parents", []):
+                if parent not in hops:
+                    hops[parent] = hops[term] + 1
+                    next_frontier.append(parent)
+        frontier = next_frontier
+    return hops
 
 
-def _lowest_common_ancestors(index: MondoIndex, a: str, b: str) -> List[str]:
+def _lowest_common_ancestors(index: MondoIndex, common: Set[str]) -> List[str]:
     """Common ancestors that are not an ancestor of another common ancestor."""
-    common = _ancestors(index, a) & _ancestors(index, b)
     above = set()
     for term in common:
-        above.update(_ancestors(index, term) - {term})
+        above.update(set(_hops_up(index, term)) - {term})
     return sorted(common - above)
 
 
-def _path_lengths_up(index: MondoIndex, start: str, ancestor: str,
-                     memo: Dict[str, Counter]) -> Counter:
-    """Count the is_a paths from ``start`` up to ``ancestor`` by edge count.
-
-    Paths are counted rather than listed, so heavy multiple inheritance cannot
-    blow up memory. ``memo`` is keyed by term and is only valid for one ancestor.
-    """
-    if start in memo:
-        return memo[start]
-    lengths: Counter = Counter()
-    if start == ancestor:
-        lengths[0] = 1
-    else:
-        for parent in index.get(start, {}).get("parents", []):
-            for length, count in _path_lengths_up(index, parent, ancestor, memo).items():
-                lengths[length + 1] += count
-    memo[start] = lengths
-    return lengths
-
-
-def mondo_distance(index: MondoIndex, a: str, b: str) -> Dict[str, Any]:
-    """Edge counts of every is_a path joining ``a`` and ``b`` through their lowest common ancestors.
-
-    Each path climbs from ``a`` to a lowest common ancestor and descends to ``b``;
-    distinct paths of equal length are listed separately. When one term is an
-    ancestor of the other, that ancestor is the only lowest common ancestor.
-    ``distance`` is empty and ``minimum`` is ``None`` when the terms share no ancestor.
-    """
-    total: Counter = Counter()
-    common_ancestors = []
-    for ancestor in _lowest_common_ancestors(index, a, b):
-        from_a = _path_lengths_up(index, a, ancestor, {})
-        from_b = _path_lengths_up(index, b, ancestor, {})
-        lengths: Counter = Counter()
-        for length_a, count_a in from_a.items():
-            for length_b, count_b in from_b.items():
-                lengths[length_a + length_b] += count_a * count_b
-        total.update(lengths)
-        common_ancestors.append(dict(_term(index, ancestor), distance=sorted(lengths.elements())))
-
-    distance = sorted(total.elements())
-    return {
-        "distance": distance,
-        "minimum": distance[0] if distance else None,
-        "common_ancestors": common_ancestors,
-    }
-
-
 DEFAULT_IC_ROOT = "MONDO:0700096"  # human disease
-IC_METHODS = ("descendants", "seco")
+IC_METHODS = ("seco", "descendants")
 
 IcTable = Dict[str, Any]
 
@@ -315,11 +268,11 @@ def build_ic_table(index: MondoIndex, root: str = DEFAULT_IC_ROOT) -> IcTable:
     }
 
 
-def information_content(table: IcTable, mondo_id: str, method: str = "descendants") -> Optional[float]:
+def information_content(table: IcTable, mondo_id: str, method: str = "seco") -> Optional[float]:
     """Intrinsic IC of ``mondo_id``, or ``None`` outside the table's scope.
 
-    ``descendants``: ``-ln((desc + 1) / N)``, 0 at the root and ``ln N`` at a leaf.
     ``seco``: ``1 - ln(desc + 1) / ln(N)``, 0 at the root and 1 at a leaf.
+    ``descendants``: ``-ln((desc + 1) / N)``, 0 at the root and ``ln N`` at a leaf.
     """
     desc = table["descendants"].get(mondo_id)
     if desc is None:
@@ -334,29 +287,42 @@ def information_content(table: IcTable, mondo_id: str, method: str = "descendant
 
 
 def mondo_similarity(index: MondoIndex, table: IcTable, a: str, b: str,
-                     method: str = "descendants") -> Dict[str, Any]:
-    """Resnik and Lin similarity of ``a`` and ``b`` from intrinsic IC.
+                     method: str = "seco") -> Dict[str, Any]:
+    """Compare ``a`` and ``b`` by intrinsic IC and by is_a hops to their MICA.
 
     Common ancestors are the intersection of the two ancestor sets, each including
     the term itself, so when one term is an ancestor of the other it is the MICA.
+    ``hops`` is ``[from a, from b]``, the shortest is_a edge counts to that ancestor.
+    ``common_ancestors`` lists the lowest common ancestors (ID order) with their IC
+    and hops; the MICA is always one of them because IC falls towards the root.
     ``mica_ties`` lists every common ancestor sharing the highest IC (ID order) and
     ``mica`` is its first item. Lin is 1 for the same term and ``None`` when
-    ``IC(a) + IC(b)`` is 0. All of these are ``None`` when either term is outside
-    the table's scope.
+    ``IC(a) + IC(b)`` is 0. ``mica``, ``resnik`` and ``lin`` are ``None`` when
+    either term is outside the table's scope.
     """
+    hops_a = _hops_up(index, a)
+    hops_b = _hops_up(index, b)
+    common = set(hops_a) & set(hops_b)
+
+    def describe(term: str) -> Dict[str, Any]:
+        return dict(_term(index, term), ic=information_content(table, term, method),
+                    hops=[hops_a[term], hops_b[term]])
+
+    result: Dict[str, Any] = {
+        "common_ancestors": [describe(term) for term in _lowest_common_ancestors(index, common)],
+        "mica": None,
+        "mica_ties": [],
+        "resnik": None,
+        "lin": None,
+    }
     ic_a = information_content(table, a, method)
     ic_b = information_content(table, b, method)
-    result: Dict[str, Any] = {"mica": None, "mica_ties": [], "resnik": None, "lin": None}
     if ic_a is None or ic_b is None:
         return result
 
-    scored = [
-        (information_content(table, term, method), term)
-        for term in _ancestors(index, a) & _ancestors(index, b)
-        if term in table["descendants"]
-    ]
-    resnik = max(ic for ic, _ in scored)
-    ties = [dict(_term(index, term), ic=ic) for ic, term in sorted(scored, key=lambda x: x[1]) if ic == resnik]
+    scored = [describe(term) for term in sorted(common) if term in table["descendants"]]
+    resnik = max(item["ic"] for item in scored)
+    ties = [item for item in scored if item["ic"] == resnik]
 
     if a == b:
         lin: Optional[float] = 1.0

@@ -16,8 +16,8 @@ from datetime import datetime
 from lib.pubcasefinder import query_pubcasefinder
 from lib.integrator import integrate_json
 from lib.auth_config import load_credentials
-from lib.mondo import (load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map, mondo_distance,
-                       build_ic_table, information_content, mondo_similarity, DEFAULT_IC_ROOT)
+from lib.mondo import (load_mondo_index, build_syndrome_index, build_nando_map, build_omim_map,
+                       build_ic_table, mondo_similarity, DEFAULT_IC_ROOT)
 
 from fastapi import Depends, FastAPI, HTTPException, Query, status, APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -263,7 +263,7 @@ async def mondo_distance_endpoint(
         username: Annotated[str, Depends(get_current_username)],
         id1: Annotated[str, Query(pattern=MONDO_ID_PATTERN)],
         id2: Annotated[str, Query(pattern=MONDO_ID_PATTERN)],
-        ic_method: Annotated[str, Query(pattern=r"^(descendants|seco)$")] = "descendants",
+        ic_method: Annotated[str, Query(pattern=r"^(seco|descendants)$")] = "seco",
         ic_root: Annotated[str, Query(pattern=MONDO_ID_PATTERN)] = DEFAULT_IC_ROOT,
     ):
     missing = [mondo_id for mondo_id in (id1, id2) if mondo_id not in _mondo_index]
@@ -275,14 +275,10 @@ async def mondo_distance_endpoint(
             detail="Unknown or obsolete MONDO ID: {}".format(", ".join(missing)),
         )
     table = _get_ic_table(ic_root)
-    result = mondo_distance(_mondo_index, id1, id2)
-    for ancestor in result["common_ancestors"]:
-        ancestor["ic"] = information_content(table, ancestor["id"], ic_method)
     return {
         "mondo_id_1": id1,
         "mondo_id_2": id2,
         "mondo_version": _mondo_version,
-        **result,
         **mondo_similarity(_mondo_index, table, id1, id2, ic_method),
         "ic_params": {
             "method": ic_method,

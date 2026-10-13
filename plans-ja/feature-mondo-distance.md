@@ -1,7 +1,7 @@
 # MONDO ID 間の距離を返す API
 
 作成日: 2026-10-12
-状態: 実装済み・検証済み（2026-10-12）
+状態: 実装済み・検証済み（2026-10-12）。2026-10-13 に、経路長の出力（`distance`、`minimum`、LCA ごとの経路長）を MICA までのホップ数に置き換えた。現在の仕様は [feature-mondo-ic-similarity.md](feature-mondo-ic-similarity.md) を参照
 対象リポジトリ: `ngp-suite`
 作業ブランチ: `feat/mondo-distance-api`（`main` から作成）
 

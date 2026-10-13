@@ -249,35 +249,39 @@ If you share the service while the placeholders are still in use, the `api` log 
 
 ### **6. MONDO Distance and Similarity API**
 
-`GET /api/mondo/distance?id1=MONDO:0016512&id2=MONDO:0007843` compares two MONDO terms in the bundled ontology
+`GET /api/mondo/distance?id1=MONDO:0007843&id2=MONDO:0010465` compares two MONDO terms in the bundled ontology
 (Basic authentication as above). It returns `422` for a malformed ID and `404` for an ID that is not in the OBO
 (including obsolete terms).
 
-**Path length.** `distance` lists the edge count of every `is_a` path that joins the two terms through a lowest
-common ancestor, `minimum` is the shortest, and `common_ancestors` breaks the paths down by lowest common ancestor.
-
-**Information content (IC) similarity.** The response also carries Resnik and Lin similarity from intrinsic IC:
+**Similarity from information content (IC).** The response carries Resnik and Lin similarity from intrinsic IC:
 
 * Scope: `is_a` edges only, restricted to the descendants of the scope root (default `MONDO:0700096` *human disease*,
   itself included). Obsolete terms are excluded; multiple inheritance is kept (the graph is a DAG).
 * `N` = number of terms in scope; `desc(c)` = number of descendants of `c` in scope, `c` itself excluded.
-* IC, `ic_method=descendants` (default): `IC(c) = -ln((desc(c) + 1) / N)` — 0 at the root, `ln N` at a leaf.
-* IC, `ic_method=seco`: `IC(c) = 1 - ln(desc(c) + 1) / ln(N)` — 0 at the root, 1 at a leaf. This is the default IC
-  divided by `ln N`, so Lin is the same under both methods and only Resnik is rescaled.
+* IC, `ic_method=seco` (default, Seco et al.): `IC(c) = 1 - ln(desc(c) + 1) / ln(N)` — 0 at the root, 1 at a leaf.
+* IC, `ic_method=descendants`: `IC(c) = -ln((desc(c) + 1) / N)` — 0 at the root, `ln N` at a leaf. This equals the
+  Seco IC multiplied by `ln N`, so Lin is the same under both methods and only Resnik is rescaled.
 * Common ancestors: the intersection of the two ancestor sets, each including the term itself, so when one term is
   an ancestor of the other it is its own MICA.
 * MICA (most informative common ancestor): the common ancestor with the highest IC. `mica_ties` lists every
   common ancestor sharing that IC (in ID order) and `mica` is the first of them.
-* `resnik = IC(MICA)`
+* `resnik = IC(MICA)`, between 0 and 1 with the Seco IC.
 * `lin = 2 · IC(MICA) / (IC(a) + IC(b))`, and `lin = 1` when `a` and `b` are the same term. If the denominator is
   0 for different terms, `lin` is `null` (with the definitions above this cannot happen).
 * If either term is outside the scope (for example `MONDO:0000001` *disease*, or a non-human disease),
-  `mica`, `resnik` and `lin` are `null` and `mica_ties` is empty. The path lengths are still returned.
+  `mica`, `resnik` and `lin` are `null` and `mica_ties` is empty.
 
-Each item of `common_ancestors` gains `ic` (`null` outside the scope), and `ic_params` reports
-`method`, `scope_root`, `n_terms` and `mondo_version`. Optional query parameters: `ic_method` (`descendants` or `seco`)
-and `ic_root` (another scope root). Descendant counts are computed in memory, once per scope root, for the loaded
-MONDO release.
+**Hops to the MICA.** `mica.hops` is `[from id1, from id2]`: the number of `is_a` edges from each term up to the MICA,
+along the shortest path when multiple inheritance gives several. It tells which side is more specific and by how much,
+which the symmetric IC measures do not. For example, Kabuki syndrome 1 (`MONDO:0007843`) against Kabuki syndrome
+(`MONDO:0016512`) gives `[1, 0]`, and Kabuki syndrome 1 against Kabuki syndrome 2 (`MONDO:0010465`) gives `[1, 1]`:
+two subtypes one level below a shared umbrella term.
+
+`common_ancestors` lists the lowest common ancestors (common ancestors that are not above another one, in ID order),
+each with `ic` (`null` outside the scope) and `hops`. The MICA is always one of them, because IC decreases towards the
+root. `ic_params` reports `method`, `scope_root`, `n_terms` and `mondo_version`. Optional query parameters:
+`ic_method` (`seco` or `descendants`) and `ic_root` (another scope root). Descendant counts are computed in memory,
+once per scope root, for the loaded MONDO release.
 
 ## **For Developers**
 

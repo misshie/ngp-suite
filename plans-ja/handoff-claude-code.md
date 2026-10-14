@@ -18,7 +18,7 @@ v0.2.0 で、ギャラリーの疾患の同一性を OMIM から MONDO に移し
 ### 作業中: `feat/mondo-distance-api`（push 済み、`main` へのマージは保留）
 
 2 つの MONDO ID を比べる API を追加した。バックエンドだけの変更で、Docker での動作確認は済んでいる。
-設計メモは [feature-mondo-distance.md](feature-mondo-distance.md)（最初の版）と [feature-mondo-ic-similarity.md](feature-mondo-ic-similarity.md)（現在の仕様）。
+設計メモは [feature-mondo-distance.md](feature-mondo-distance.md)（最初の版）、[feature-mondo-ic-similarity.md](feature-mondo-ic-similarity.md)（現在の仕様）、[feature-mondo-match-level.md](feature-mondo-match-level.md)（一致度の判定。設計中）。
 
 - `GET /api/mondo/distance?id1=…&id2=…` を `/api/predict` と同じ Basic 認証で保護する
   - ID の形式が不正なら 422、OBO にない ID（廃止済みを含む）なら 404 を返す
@@ -36,10 +36,11 @@ v0.2.0 で、ギャラリーの疾患の同一性を OMIM から MONDO に移し
 
 #### コミットの状況（2026-10-14 時点）
 
-- `35f1617` まで push 済みで、未コミットの変更はない
+- この引き継ぎメモの更新まで push 済みで、未コミットの変更はない
 - 経緯
   - `eb6067d`: IC 類似度の最初の版。既定は `descendants` で、`distance` と `minimum` を残していた
   - `35f1617`: Seco の IC を既定にし、ホップ数を `mica.hops` に置き換えた。README、設計メモ、テストも更新した
+  - `69d1250`: 疾患単位による一致度の判定の設計メモを追加した（コードの変更はない）
 
 #### 検証用の値（Seco、範囲 MONDO:0700096、同梱 OBO 2026-09-01）
 
@@ -56,31 +57,37 @@ v0.2.0 で、ギャラリーの疾患の同一性を OMIM から MONDO に移し
 - NS3 と NS6 は、KS1 と KS2 と同じく総称の 1 段下の病型どうしだが、Lin は 0.7306 と 0.8907 で違う。Noonan syndrome の総称は病型が多く、IC が低いため
 - Kabuki と Noonan の組では、MICA（2 段上の MONDO:0019042）が最短ホップの LCA（1 段上の syndromic disease）と一致しない
 
-#### 検討中: 「おおむね正解」の判定（id1 = 診断候補、id2 = 正しい診断）
+#### 設計中: 疾患単位による一致度の判定（未実装、臨床医の判定待ち）
 
-Lin の閾値に定説はない。固定閾値（例: Lin ≥ 0.8）には次の弱点がある。
-- 総称の広さで値が変わる。Lin ≥ 0.8 では、NS3 と NS6 の組だけが外れる
-- MONDO の版や範囲のルートで値が変わる
-- Lin は対称なので、粗い候補と隣の病型とを区別できない
+設計メモは [feature-mondo-match-level.md](feature-mondo-match-level.md)。Lin の固定閾値には定説がなく、総称の広さや MONDO の版で値が変わるため、構造で判定する。Lin は連続値の副次指標として報告する。
 
-代わりの案として、構造で判定することを提案した（メンテナの判断待ち）。
-1. 完全一致: id1 = id2
-2. おおむね正解: MICA が臨床的な疾患単位で、かつ hops がいずれも 1 以下（上限は要決定）
-   - 臨床的な疾患単位とは、`xref: OMIMPS:…`（equivalentTo）か、`subset: ordo_disorder` を持つ用語
-   - 例: Kabuki syndrome は OMIMPS:147920 と Orphanet:2322、Noonan syndrome は OMIMPS:163950 と Orphanet:648
-3. 不正解: MICA が分類用の用語（`subset: disease_grouping` や `ordo_group_of_disorders`）。例: MONDO:0019042
-
-- Lin は合否の判定に使わず、連続値の副次指標として報告する
-- Lin の閾値がどうしても要る場合は、臨床医が判定した組の集合から ROC 曲線などで決め、MONDO の版と範囲のルートとあわせて報告する
-
-実装するなら、次の 2 点が必要になる。
-- `load_mondo_index` で OMIMPS の xref と `subset` を読む
-- API で、MICA が臨床的な単位かどうかに印を付ける
+- 疾患単位: `xref: OMIMPS:…`（equivalentTo）か `subset: ordo_disorder` を持ち、`disease_grouping` と `ordo_group_of_disorders` を持たない用語
+  - 各用語は、自分自身を含めて最も近い疾患単位に引き上げる（病型 → 総称）
+- 判定（4 段階、API は対称な判定だけを返す）
+  1. 完全一致
+  2. 同一疾患単位。包含（総称と病型）と隣の病型を区別しない。ギャラリーには総称までしか診断のない古い症例があるため（メンテナの判断）
+  3. 関連疾患群。疾患単位どうしの MICA までの hops がいずれも 1 以下で、かつ MICA が許可リストにある（案 B'）
+  4. 不正解
+- 生の hops では判定できない。NS3 と CFC1、Kabuki と Noonan は、どちらも [2, 2]。疾患単位にそろえると、前者は [1, 1]、後者は [2, 2] になる
+- 許可リスト（案 B'、メンテナが選択）
+  - hops だけでは 3 が広すぎる（Kabuki と Williams も [1, 1]）。子孫数の上限だけでは閾値がもろい（MONDO:0020297 は 29、RASopathy は 37）
+  - 子孫数 50 以下の候補を臨床医が判定する。候補は現行の定義で 94 個、改訂案で 104 個
+  - 判定基準（基準 1）: 「この群に属する疾患は、顔貌を含む臨床像が互いに似ていて、互いに鑑別診断に挙がるか」
+  - 候補の一覧（TSV と CSV）、生成スクリプト、判定の手引きは、ギャラリー由来の情報を含むので、リポジトリの外に置いた。リポジトリには入れない
+- 未決定の点
+  - 子孫数 50 以上の疾患単位を単位とみなさないこと（intellectual disability, autosomal dominant などに 63 用語が集まるため）
+  - 疾患単位の祖先がない用語（ギャラリーの約 22%）を、自分自身の単位とみなすこと
+- ギャラリーの集計は、v1.1.4 の pickle の OMIM ID を Stage 2 の関数で MONDO に写した近似（1,091 疾患のうち 899 疾患）
+  - MONDO 版 pickle は `NGPSUITE_GMDB_DIR` になかった
+  - ホストに numpy がないので、pickle は numpy の型を代用品に置き換えて読んだ
 
 ## 2. 残作業（推奨順）
 
-1. `feat/mondo-distance-api` の作業の続き（メンテナの判断待ち）
-   - 「おおむね正解」の構造的な判定を実装するかどうかを決める（上記の検討中の節）
+1. `feat/mondo-distance-api` の作業の続き
+   - 臨床医による許可リストの判定を待つ（上記の設計中の節）
+   - 未決定の 2 点（広すぎる疾患単位、疾患単位のない用語）を決める
+   - 疾患単位による判定を実装する。`load_mondo_index` で OMIMPS と `subset` を読み、許可リストは `backend/mondo/` に置く
+   - MONDO 版 pickle が手に入ったら、ギャラリーの集計と候補の一覧を作り直す
    - PR を作成し、`main` へマージする
 2. 再生成した pickle（非ヒト MONDO 用語を除外した版）を読み込んだ状態で、実機確認する
    - 解析を 1 件実行し、SYNDROMES / GENES / PATIENTS の各タブと外部リンクを確認する
